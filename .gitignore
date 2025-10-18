@@ -1,0 +1,21 @@
+# Temporary analysis files
+column_names.txt
+Audit_Report_Data_Dictionary_FINAL.txt
+
+# MacOS
+.DS_Store
+
+# R
+.Rhistory
+.RData
+.Rproj.user
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
