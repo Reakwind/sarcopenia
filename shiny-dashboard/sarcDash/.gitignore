@@ -1,0 +1,47 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# renv
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# Shiny
+rsconnect/
+.secrets/
+
+# Data (should come from parent project)
+data/*.rds
+data/*.csv
+*.rds
+*.csv
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Tests
+tests/testthat/_snaps/
+
+# Build
+.Rbuildignore
