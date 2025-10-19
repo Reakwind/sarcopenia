@@ -1,6 +1,7 @@
 # Sarcopenia Study - Data Dictionary (Cleaned)
 ## Audit Report Dataset - Longitudinal Diabetes Study
 
+**Version:** 2.1
 **Last Updated:** October 18, 2025
 **Dataset:** Audit report.csv
 
@@ -198,7 +199,8 @@ The following validated assessment tools were administered:
 | Test | Full Name | Measures |
 |------|-----------|----------|
 | **Verbal Fluency** | Phonemic and Semantic Fluency Tests | Language and executive function |
-| **DSST** | Digit Symbol Substitution Test | Processing speed |
+| **DSST (Digital)** | Digit Symbol Substitution Test - Digital Version | Processing speed (smartphone-based) |
+| **DSST (Paper)** | Digit Symbol Substitution Test - WAIS-4 | Processing speed (120-second version) |
 | **MoCA** | Montreal Cognitive Assessment | Global cognitive function |
 | **SAGE** | Standardized Assessment of Global Activities in the Elderly | ADL and IADL function |
 | **PHQ-9** | Patient Health Questionnaire-9 | Depression screening |
@@ -209,26 +211,35 @@ The following validated assessment tools were administered:
 ### Digit Symbol Substitution Test (DSST)
 
 **Purpose:** Measures processing speed and working memory
-**Administration:** Paper and/or digital format
 
-#### DSST Scores in Dataset
+This study administered **TWO different versions** of the DSST:
 
-The dataset contains **multiple DSST-related columns** that may represent different test administrations or score types:
+#### 1. Digital DSST (Smartphone-Based)
+- **Platform:** Smartphone application developed by study team
+- **Columns:** 6-7 (top-level in CSV)
 
 | Variable Name | Location in CSV | Description | Data Type | Missingness |
 |--------------|----------------|-------------|-----------|-------------|
-| **Raw DSS Score** | Column 6 (top-level) | Raw score from test (format: "correct/total") | Text | 0% |
-| **DSST Score** | Column 7 (top-level) | Processed/standardized score | Numeric | 0% |
-| **43. DSST - Total Score - 179** | Cognitive section | Total score from cognitive battery | Numeric | Variable |
-| **44. Standardized Score - 180** | Cognitive section | Standardized/percentile score (follows DSST) | Numeric | Variable |
+| **Raw DSS Score** | Column 6 (top-level) | Raw score from digital DSST | Text | 0% |
+| **DSST Score** | Column 7 (top-level) | Standardized score from digital DSST | Numeric | 0% |
 
-#### Important Notes on DSST Scores:
-1. **Multiple Score Formats:** The "Raw DSS Score" appears to be in format like "36/41" (items correct/items attempted)
-2. **Top-level vs Section Scores:** Early columns (6-7) may represent screening scores, while cognitive section scores (179-180) may represent full battery administration
-3. **Digital vs Paper:** The original dictionary mentions "Digital & Paper" DSST but doesn't clearly distinguish which columns represent which modality
-4. **Standardized Scores:** Column 180 "Standardized Score" appears immediately after DSST Total Score and likely represents age/education-adjusted scores
+#### 2. Pen and Paper DSST (WAIS-4)
+- **Test:** WAIS-4 Digit Symbol Substitution Test
+- **Duration:** 120 seconds
+- **Columns:** Cognitive section (179-180)
 
-**Recommendation for Analysis:** Determine which DSST score is most appropriate for your analysis based on test administration protocol. Consult study documentation to clarify test modality and scoring procedures.
+| Variable Name | Location in CSV | Description | Data Type | Missingness |
+|--------------|----------------|-------------|-----------|-------------|
+| **43. DSST - Total Score - 179** | Cognitive section | Raw score from pen and paper DSST (WAIS-4, 120 sec) | Numeric | Variable |
+| **44. Standardized Score - 180** | Cognitive section | Standardized score from pen and paper DSST | Numeric | Variable |
+
+#### Important Notes:
+1. **Two Independent Tests:** Digital and pen-and-paper versions are separate assessments and should not be combined
+2. **Raw Score Format:** Digital DSST raw score may appear as "correct/attempted" format (e.g., "36/41")
+3. **Standardized Scores:** Both versions include standardized scores for age/education adjustment
+4. **Test Selection:** For analysis, choose the appropriate version based on your research question:
+   - Digital DSST: May capture different aspects of processing speed (smartphone-based assessment)
+   - Pen and Paper DSST: Standard WAIS-4 administration, 120-second version
 
 ---
 
@@ -1008,11 +1019,20 @@ Exclude these 100% missing columns:
 - Choose one "Date of birth" field (or use calculated Age)
 - Choose one BMI field (preferably from body composition section if available)
 
-### 3. Clarify DSST Scores
-Determine which DSST score to use based on study protocol:
-- Use "Raw DSS Score" (col 6) if raw performance is needed
-- Use "DSST Score" (col 7) or "Standardized Score" (col 180) if age-adjusted scores are needed
-- Document which test administration (screening vs. full battery) each score represents
+### 3. DSST Score Selection
+Choose the appropriate DSST version based on your research question:
+
+**Digital DSST (smartphone-based):**
+- Raw score: "Raw DSS Score" (col 6)
+- Standardized score: "DSST Score" (col 7)
+- Use for: Smartphone-based cognitive assessment, digital health metrics
+
+**Pen and Paper DSST (WAIS-4, 120 sec):**
+- Raw score: "43. DSST - Total Score - 179"
+- Standardized score: "44. Standardized Score - 180"
+- Use for: Traditional neuropsychological assessment, comparison with WAIS-4 norms
+
+**Important:** Do not combine or average scores from both versions as they are independent tests
 
 ### 4. Handle Multi-Visit Data
 For longitudinal analysis:
@@ -1058,12 +1078,19 @@ Example: `"29. Right Hand - 0. Test 1 - 391"`
 
 For questions about this data dictionary or to report errors, please contact the study team.
 
-**Version:** 2.0 (Cleaned)
+**Version:** 2.1 (Cleaned)
 **Date:** October 18, 2025
 **Changes from v1.0:**
 - Removed excessive subsection codes (A1, C1, D2-D14, etc.)
-- Added comprehensive DSST score documentation
+- Added comprehensive DSST score documentation (clarified digital vs. pen-and-paper versions)
 - Documented section marker columns as data artifacts
 - Expanded adverse events documentation with all event types
 - Added data cleaning recommendations
 - Improved table formatting and navigation
+
+**Changes in v2.1 (October 18, 2025):**
+- Clarified that two independent DSST tests are administered:
+  - Digital DSST (smartphone-based, study-developed): Columns 6-7
+  - Pen and Paper DSST (WAIS-4, 120 sec): Columns 179-180
+- Updated DSST documentation to distinguish between test versions
+- Added guidance on selecting appropriate DSST version for analysis
