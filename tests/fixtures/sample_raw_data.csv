@@ -1,0 +1,6 @@
+Org ID,Client ID,Client Name,Gender,Age,Raw DSS Score,DSST Score,Visit Date,Visit Type,Visit No,Visit Tag,Submission Tag,Personal Information FINAL,1. Participants study number - 8,2. Date of birth - 392,15. Number of education years - 230,22. Dominant hand - 237,11. Marital status - 226,Physician evaluation FINAL,7. Diabetes mellitus type - 255,102. Systolic - 371,103. Diastolic - 370,Cognitive Health Agility- Final,43. DSST - Total Score - 179,Physical Health Agility FINAL,Adverse events FINAL,2. Free text - 441
+004,004-00001,004-001,Female,70,36/41,85,2025-04-20,scheduled,1,Visit 1,SUB001,,P001,1955-03-15,16,0,Married,,2,140,85,,45,,,
+004,004-00001,004-001,Female,70,,,2025-05-20,scheduled,2,Visit 2,SUB002,,,,,,,,,,,,,47,,,
+004,004-00002,004-002,Male,75,38/42,90,2025-04-21,scheduled,1,Visit 1,SUB003,,P002,1950-02-10,18,0,Single,,1,130,80,,50,,,
+004,004-00003,004-003,Female,68,,,2025-04-22,scheduled,1,Visit 1,SUB004,,P003,1957-08-25,12,1,Married,,2,145,90,,42,,,Fall reported
+004,004-00003,004-003,Female,68,40/45,88,2025-06-22,scheduled,2,Visit 2,SUB005,,,,,,,,,,,,,48,,,

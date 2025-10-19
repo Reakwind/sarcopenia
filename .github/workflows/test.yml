@@ -1,0 +1,238 @@
+name: R-CMD-check and Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (R-${{ matrix.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        r: ['4.3.0', 'release']
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - name: Setup R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::testthat
+            any::covr
+            any::lintr
+            any::here
+            any::tidyverse
+
+      - name: Check R version
+        run: |
+          Rscript -e 'R.version.string'
+          Rscript -e 'sessionInfo()'
+
+      - name: Lint code
+        run: |
+          Rscript -e '
+            library(lintr)
+            lint_results <- lint_dir("scripts", linters = linters_with_defaults(
+              line_length_linter(120),
+              object_name_linter = NULL
+            ))
+            print(lint_results)
+            if (length(lint_results) > 0) {
+              quit(status = 1)
+            }
+          '
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: |
+          Rscript -e '
+            library(testthat)
+            library(tidyverse)
+            library(here)
+
+            # Run tests
+            test_results <- test_dir("tests/testthat", reporter = "summary")
+
+            # Check if tests passed
+            if (any(as.data.frame(test_results)$failed > 0)) {
+              quit(status = 1)
+            }
+          '
+
+      - name: Calculate code coverage
+        if: matrix.r == 'release'
+        run: |
+          Rscript -e '
+            library(covr)
+            cov <- package_coverage(
+              type = "none",
+              code = "testthat::test_dir(\"tests/testthat\")"
+            )
+            print(cov)
+
+            # Get coverage percentage
+            pct <- percent_coverage(cov)
+            cat(sprintf("Coverage: %.1f%%\n", pct))
+
+            # Fail if coverage < 80%
+            if (pct < 80) {
+              cat("ERROR: Coverage below 80% threshold\n")
+              quit(status = 1)
+            }
+          '
+
+      - name: Upload coverage to Codecov
+        if: matrix.r == 'release'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Security audit
+        if: matrix.r == 'release'
+        run: |
+          Rscript -e '
+            if (!requireNamespace("oysteR", quietly = TRUE)) {
+              install.packages("oysteR")
+            }
+            library(oysteR)
+
+            # Audit installed packages
+            audit_results <- audit_installed_r_pkgs()
+
+            if (!is.null(audit_results) && nrow(audit_results) > 0) {
+              cat("WARNING: Security vulnerabilities found:\n")
+              print(audit_results)
+              # Don"t fail build, just warn
+            } else {
+              cat("No security vulnerabilities found\n")
+            }
+          '
+        continue-on-error: true
+
+      - name: Check for PHI in output
+        run: |
+          # Check that no patient IDs are in console output or logs
+          # This is a simple check - enhance as needed
+          if grep -r "004-[0-9]" tests/ --exclude-dir=fixtures; then
+            echo "ERROR: Potential PHI found in test output"
+            exit 1
+          fi
+        continue-on-error: true
+
+      - name: Session info
+        run: |
+          Rscript -e 'sessionInfo()'
+
+  style-check:
+    runs-on: ubuntu-latest
+    name: Code Style Check
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install styler
+        run: |
+          Rscript -e 'install.packages("styler")'
+
+      - name: Check code style
+        run: |
+          Rscript -e '
+            library(styler)
+
+            # Check if code is styled correctly
+            styled_files <- style_dir("scripts", dry = "on")
+
+            if (length(styled_files) > 0) {
+              cat("The following files need styling:\n")
+              print(styled_files)
+              cat("\nRun styler::style_dir(\"scripts\") to fix\n")
+              quit(status = 1)
+            }
+          '
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    name: Documentation Check
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check required documentation exists
+        run: |
+          # Check that all required docs exist
+          required_docs=(
+            "docs/security_review.md"
+            "docs/code_review_checklist.md"
+            "docs/testing_guide.md"
+            "docs/cleaning_report.md"
+            "README.md"
+          )
+
+          missing=0
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "ERROR: Missing required documentation: $doc"
+              missing=1
+            fi
+          done
+
+          exit $missing
+
+      - name: Check README has testing section
+        run: |
+          if ! grep -q "Testing" README.md; then
+            echo "ERROR: README.md missing Testing section"
+            exit 1
+          fi
+
+  notification:
+    needs: [test, style-check, documentation-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check job status
+        run: |
+          if [ "${{ needs.test.result }}" == "failure" ] || \
+             [ "${{ needs.style-check.result }}" == "failure" ] || \
+             [ "${{ needs.documentation-check.result }}" == "failure" ]; then
+            echo "❌ CI Failed"
+            exit 1
+          else
+            echo "✅ All checks passed"
+          fi
