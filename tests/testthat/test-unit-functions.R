@@ -5,10 +5,11 @@
 
 library(testthat)
 library(tidyverse)
+library(here)
 
 # Source the functions from the cleaning script
 # (In production, these should be in separate R files)
-source("scripts/01_data_cleaning.R", local = TRUE)
+source(here::here("scripts/01_data_cleaning.R"), local = TRUE)
 
 # ==============================================================================
 # Tests for clean_var_name()

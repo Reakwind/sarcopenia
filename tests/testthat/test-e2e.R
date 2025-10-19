@@ -5,6 +5,7 @@
 
 library(testthat)
 library(tidyverse)
+library(here)
 
 # Skip E2E tests if sample data not available
 skip_if_no_sample_data <- function() {
@@ -39,10 +40,10 @@ test_that("E2E: Output files are created", {
 
   # After running cleaning script, check outputs exist
   output_files <- c(
-    "data/visits_data.rds",
-    "data/adverse_events_data.rds",
-    "data/data_dictionary_cleaned.csv",
-    "data/summary_statistics.rds"
+    here::here("data/visits_data.rds"),
+    here::here("data/adverse_events_data.rds"),
+    here::here("data/data_dictionary_cleaned.csv"),
+    here::here("data/summary_statistics.rds")
   )
 
   # Check if files exist (they should from previous run)
@@ -56,7 +57,7 @@ test_that("E2E: Output files are created", {
 
 test_that("E2E: Output data has correct structure", {
   # Load visits data
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Check basic structure
   expect_true(is.data.frame(visits))
@@ -76,7 +77,7 @@ test_that("E2E: Output data has correct structure", {
 })
 
 test_that("E2E: Data types are correct after conversion", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Check date columns are Date type
   expect_true(inherits(visits$id_visit_date, "Date"))
@@ -91,7 +92,7 @@ test_that("E2E: Data types are correct after conversion", {
 })
 
 test_that("E2E: Patient-level filling was applied", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # For patients with multiple visits, check that time-invariant
   # variables are consistent across visits
@@ -113,7 +114,7 @@ test_that("E2E: Patient-level filling was applied", {
 })
 
 test_that("E2E: No data loss during processing", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Check that we have expected number of observations
   # (This would need to be adjusted based on actual data)
@@ -130,11 +131,11 @@ test_that("E2E: No data loss during processing", {
 })
 
 test_that("E2E: Adverse events properly separated", {
-  ae <- readRDS("data/adverse_events_data.rds")
+  ae <- readRDS(here::here("data/adverse_events_data.rds"))
 
   # Check AE data exists and has structure
   expect_true(is.data.frame(ae))
-  expect_equal(nrow(ae), nrow(readRDS("data/visits_data.rds")))
+  expect_equal(nrow(ae), nrow(readRDS(here::here("data/visits_data.rds"))))
 
   # Check AE columns present
   ae_cols <- names(ae)[str_starts(names(ae), "ae_")]
@@ -146,7 +147,7 @@ test_that("E2E: Adverse events properly separated", {
 })
 
 test_that("E2E: Variable mapping is complete", {
-  var_map <- read_csv("data/data_dictionary_cleaned.csv", show_col_types = FALSE)
+  var_map <- read_csv(here::here("data/data_dictionary_cleaned.csv"), show_col_types = FALSE)
 
   # Check structure
   expect_true("original_name" %in% names(var_map))
@@ -161,7 +162,7 @@ test_that("E2E: Variable mapping is complete", {
 })
 
 test_that("E2E: Summary statistics are reasonable", {
-  stats <- readRDS("data/summary_statistics.rds")
+  stats <- readRDS(here::here("data/summary_statistics.rds"))
 
   # Check it's a list
   expect_true(is.list(stats))
@@ -176,7 +177,7 @@ test_that("E2E: Summary statistics are reasonable", {
 })
 
 test_that("E2E: No section markers in output", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Section markers should have been removed
   section_markers <- c(
@@ -193,17 +194,17 @@ test_that("E2E: No section markers in output", {
     cleaned_marker <- tolower(str_replace_all(marker, "[^a-z0-9]+", "_"))
     matching_cols <- names(visits)[str_detect(tolower(names(visits)), cleaned_marker)]
     expect_length(matching_cols, 0,
-                  info = paste("Section marker should be removed:", marker))
+                  label = paste("Section marker should be removed:", marker))
   }
 })
 
 test_that("E2E: DSST scores are properly classified", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Digital DSST should be in cognitive domain
   digital_dsst_vars <- names(visits)[str_detect(names(visits), "cog.*raw.*dss|cog.*dsst.*score")]
   expect_gt(length(digital_dsst_vars), 0,
-            info = "Digital DSST variables should be classified as cognitive")
+            label = "Digital DSST variables should be classified as cognitive")
 
   # Paper DSST should also be in cognitive domain
   paper_dsst_vars <- names(visits)[str_detect(names(visits), "cog.*dsst.*total")]
@@ -211,7 +212,7 @@ test_that("E2E: DSST scores are properly classified", {
 })
 
 test_that("E2E: Quality checks pass", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Age range is reasonable
   if ("id_age" %in% names(visits)) {
@@ -242,7 +243,7 @@ test_that("E2E: Quality checks pass", {
 })
 
 test_that("E2E: Domain prefixes are consistently applied", {
-  visits <- readRDS("data/visits_data.rds")
+  visits <- readRDS(here::here("data/visits_data.rds"))
 
   # Define expected domain prefixes
   expected_prefixes <- c("id", "demo", "cog", "med", "phys", "adh")
@@ -275,7 +276,7 @@ test_that("E2E: Regression test - known good output matches", {
   # Useful for catching unintended changes
 
   # Load current output
-  current <- readRDS("data/visits_data.rds")
+  current <- readRDS(here::here("data/visits_data.rds"))
 
   # Would load baseline here and compare key metrics
   # expect_equal(nrow(current), nrow(baseline))

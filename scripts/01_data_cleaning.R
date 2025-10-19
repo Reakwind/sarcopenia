@@ -9,13 +9,30 @@
 # ==============================================================================
 
 library(tidyverse)
+library(here)
 
 # ==============================================================================
 # STEP 1: Import Raw Data
 # ==============================================================================
 
+# Input file validation
+input_file <- here::here("Audit report.csv")
+
+if (!file.exists(input_file)) {
+  stop("Input file not found: ", input_file)
+}
+
+file_size <- file.info(input_file)$size
+max_size <- 100 * 1024^2  # 100 MB
+if (file_size > max_size) {
+  stop("Input file too large: ", round(file_size / 1024^2, 1), " MB (max ", max_size / 1024^2, " MB)")
+}
+
+cat("Reading input file:", input_file, "\n")
+cat("File size:", round(file_size / 1024, 1), "KB\n\n")
+
 # Read data with all columns as character initially for safety
-raw <- read_csv("Audit report.csv", col_types = cols(.default = "c"))
+raw <- read_csv(input_file, col_types = cols(.default = "c"))
 
 cat("Raw data dimensions:", nrow(raw), "rows x", ncol(raw), "columns\n")
 
@@ -43,6 +60,68 @@ cat("After removing section markers:", ncol(data_no_markers), "columns\n")
 # STEP 3: Create Variable Mapping
 # ==============================================================================
 
+# Define domain classification patterns (broken up for readability)
+demo_pattern <- paste(
+  "study number", "Date of birth", "study.*part of", "Location of visit",
+  "Visit number", "Consent", "Health maintenance", "Address", "Phone",
+  "Marital", "Lives with", "Living facilities", "drive", "education",
+  "Degree", "Profession", "work", "hand", "Study group",
+  sep = "|"
+)
+
+cog_pattern <- paste(
+  "Verbal", "VF ", "DSST", "MoCA", "Moca", "SAGE", "PHQ", "WHO-5",
+  "Visuospatial", "Cube", "Clock", "Naming", "Memory", "digit", "Letter",
+  "Subtraction", "Language", "Fluency", "Abstraction", "recall", "Orientation",
+  "Attention", "Concentration", "Multitask", "Navigation", "Planning", "Finance",
+  "Medication Management", "Meal", "Transportation", "Stair", "Walking", "Dressing",
+  "Chair Transfer", "Bathing", "Toileting", "activities of daily", "Score - 178",
+  "cheerful", "calm", "relaxed", "active", "vigorous", "fresh", "rested",
+  "interest", "pleasure", "down.*depressed", "Trouble falling", "tired.*energy",
+  "appetite", "bad about yourself", "concentrating", "Moving.*speaking",
+  "better off dead", "difficult.*problems",
+  sep = "|"
+)
+
+med_pattern <- paste(
+  "Primary care", "Hospitalization in the past year", "Medical history",
+  "Medication \\(ATC", "Diabetes", "diagnosis", "blood pressure", "Cholesterol",
+  "LDL", "HDL", "Triglyceride", "Smoker", "Smoked", "sensor", "glucometer",
+  "Glucose", "HbA1c", "insulin", "pump", "Metformin", "Sulphonylurea", "Glinide",
+  "Acarbose", "DPP-4", "Pioglitazone", "GLP", "SGLT-2", "ACE inhibitor", "AT-2",
+  "Statin", "Aspirin", "hypoglycemia", "Hypoglycemia", "DKA", "Heart attack",
+  "Stroke", "blood supply.*legs", "Cardiac catheterization", "Ischemic",
+  "Cerebrovascular", "Foot ulcer", "Amputation", "PVD", "Retinopathy",
+  "Nephropathy", "Albuminuria", "Microalbumin", "Creatinine", "Neuropathy",
+  "sensation.*limb", "Limb pain", "Liver", "AST ", "ALT ", "GGT ", "Bilirubin",
+  "Alkaline Phosphatase", "Albumin value", "LDH ", "Systolic", "Diastolic", "Pulse",
+  sep = "|"
+)
+
+ae_pattern <- paste(
+  "Free text - 441", "AE - 523", "Serious adverse", "Severe hypoglycemia",
+  "Did you fall\\?", "Fracture", "ER admission", "Hospitalization - 109",
+  "Institutionalization", "New Disability", "Death", "Other - 113",
+  "Gastrointestinal AE", "Endocrine.*AE", "Cardiovascular AE", "Neurological AE",
+  "Dermatological.*AE", "Pancreatitis", "Musculoskeletal injur",
+  "Exercise related fall",
+  sep = "|"
+)
+
+phys_pattern <- paste(
+  "Do you exercise", "Physical activity.*fitness", "Unintentional weight loss",
+  "Fatigue.*Exhaustion", "Physical activity questionnaire", "Slow walk",
+  "Muscle weakness", "Frailty", "fall.*past", "Symptoms before falling",
+  "hospitalization.*424", "feel tired", "walking up 10 stairs", "walking.*blocks",
+  "doctor.*illness", "Loss of weight.*447", "Frail Scale", "Categorization - 449",
+  "lifting.*carrying", "walking across", "transferring", "climbing.*flight",
+  "fallen.*past year", "SARC-F", "Fat mass", "Fat free", "SMM", "VAT", "Visceral",
+  "Waist.*hip", "Calf", "Body Mass Index", "Right Hand", "Left Hand",
+  "times reached.*standing", "Distance - 401", "Time to pass", "Speed",
+  "Time up.*go", "FSST", "Balance", "SPPB", "affect the results",
+  sep = "|"
+)
+
 # Create a data frame to track variable transformations
 var_map <- tibble(
   original_name = names(data_no_markers),
@@ -58,22 +137,23 @@ var_map <- tibble(
       position <= 12 ~ "identifier",
 
       # Personal/demographic information
-      str_detect(original_name, "study number|Date of birth|study.*part of|Location of visit|Visit number|Consent|Health maintenance|Address|Phone|Marital|Lives with|Living facilities|drive|education|Degree|Profession|work|hand|Study group") ~ "demographic",
+      str_detect(original_name, demo_pattern) ~ "demographic",
 
       # Study administration & adherence
-      str_detect(original_name, "Drug Injection|Week \\d|exercise sessions|Exercise Session") ~ "adherence",
+      str_detect(original_name, "Drug Injection|Week \\d|exercise sessions|Exercise Session") ~
+        "adherence",
 
       # Cognitive assessments
-      str_detect(original_name, "Verbal|VF |DSST|MoCA|Moca|SAGE|PHQ|WHO-5|Visuospatial|Cube|Clock|Naming|Memory|digit|Letter|Subtraction|Language|Fluency|Abstraction|recall|Orientation|Attention|Concentration|Multitask|Navigation|Planning|Finance|Medication Management|Meal|Transportation|Stair|Walking|Dressing|Chair Transfer|Bathing|Toileting|activities of daily|Score - 178|cheerful|calm|relaxed|active|vigorous|fresh|rested|interest|pleasure|down.*depressed|Trouble falling|tired.*energy|appetite|bad about yourself|concentrating|Moving.*speaking|better off dead|difficult.*problems") ~ "cognitive",
+      str_detect(original_name, cog_pattern) ~ "cognitive",
 
       # Medical information
-      str_detect(original_name, "Primary care|Hospitalization in the past year|Medical history|Medication \\(ATC|Diabetes|diagnosis|blood pressure|Cholesterol|LDL|HDL|Triglyceride|Smoker|Smoked|sensor|glucometer|Glucose|HbA1c|insulin|pump|Metformin|Sulphonylurea|Glinide|Acarbose|DPP-4|Pioglitazone|GLP|SGLT-2|ACE inhibitor|AT-2|Statin|Aspirin|hypoglycemia|Hypoglycemia|DKA|Heart attack|Stroke|blood supply.*legs|Cardiac catheterization|Ischemic|Cerebrovascular|Foot ulcer|Amputation|PVD|Retinopathy|Nephropathy|Albuminuria|Microalbumin|Creatinine|Neuropathy|sensation.*limb|Limb pain|Liver|AST |ALT |GGT |Bilirubin|Alkaline Phosphatase|Albumin value|LDH |Systolic|Diastolic|Pulse") ~ "medical",
+      str_detect(original_name, med_pattern) ~ "medical",
 
       # Adverse events
-      str_detect(original_name, "Free text - 441|AE - 523|Serious adverse|Severe hypoglycemia|Did you fall\\?|Fracture|ER admission|Hospitalization - 109|Institutionalization|New Disability|Death|Other - 113|Gastrointestinal AE|Endocrine.*AE|Cardiovascular AE|Neurological AE|Dermatological.*AE|Pancreatitis|Musculoskeletal injur|Exercise related fall") ~ "adverse_events",
+      str_detect(original_name, ae_pattern) ~ "adverse_events",
 
       # Physical health & function
-      str_detect(original_name, "Do you exercise|Physical activity.*fitness|Unintentional weight loss|Fatigue.*Exhaustion|Physical activity questionnaire|Slow walk|Muscle weakness|Frailty|fall.*past|Symptoms before falling|hospitalization.*424|feel tired|walking up 10 stairs|walking.*blocks|doctor.*illness|Loss of weight.*447|Frail Scale|Categorization - 449|lifting.*carrying|walking across|transferring|climbing.*flight|fallen.*past year|SARC-F|Fat mass|Fat free|SMM|VAT|Visceral|Waist.*hip|Calf|Body Mass Index|Right Hand|Left Hand|times reached.*standing|Distance - 401|Time to pass|Speed|Time up.*go|FSST|Balance|SPPB|affect the results") ~ "physical",
+      str_detect(original_name, phys_pattern) ~ "physical",
 
       # Default to medical if still unclear
       TRUE ~ "medical"
@@ -86,6 +166,11 @@ var_map <- tibble(
 
 # Function to clean variable names
 clean_var_name <- function(name) {
+  # Input validation
+  if (is.null(name)) {
+    stop("Input cannot be NULL")
+  }
+
   name %>%
     # Remove trailing reference numbers like " - 392"
     str_remove(" - \\d+$") %>%
@@ -93,16 +178,18 @@ clean_var_name <- function(name) {
     str_remove("^\\d+\\.\\s+") %>%
     # Remove newlines
     str_replace_all("\\n", " ") %>%
-    # Remove sub-field numbers like " - 0. " or " - 1. "
-    str_remove(" - \\d+\\.\\s*") %>%
+    # Remove sub-field numbers like " - 0." or " - 1." (preserve trailing space)
+    str_remove(" - \\d+\\.") %>%
     # Clean up whitespace
     str_squish() %>%
     # Convert to lowercase
     str_to_lower() %>%
     # Replace non-alphanumeric with underscore
     str_replace_all("[^a-z0-9]+", "_") %>%
-    # Remove leading/trailing underscores
-    str_remove("^_+|_+$") %>%
+    # Remove leading underscores
+    str_remove("^_+") %>%
+    # Remove trailing underscores
+    str_remove("_+$") %>%
     # Collapse multiple underscores
     str_replace_all("_{2,}", "_")
 }
@@ -216,6 +303,11 @@ cat("Adverse events data:", ncol(adverse_events), "columns\n")
 
 # Function to safely convert to numeric
 safe_numeric <- function(x) {
+  # Input validation
+  if (is.null(x)) {
+    stop("Input cannot be NULL")
+  }
+
   # Extract numeric values, handling formats like "36/41"
   x_clean <- str_extract(x, "^[0-9]+\\.?[0-9]*")
   as.numeric(x_clean)
@@ -223,14 +315,25 @@ safe_numeric <- function(x) {
 
 # Function to safely convert to date
 safe_date <- function(x) {
-  # Try multiple date formats
+  # Input validation
+  if (is.null(x)) {
+    stop("Input cannot be NULL")
+  }
+
+  # Vectorized date conversion with multiple format attempts
   result <- suppressWarnings(as.Date(x, format = "%Y-%m-%d"))
-  if (all(is.na(result))) {
-    result <- suppressWarnings(as.Date(x, format = "%d/%m/%Y"))
+
+  # For elements that are still NA, try other formats
+  still_na <- is.na(result) & !is.na(x)
+  if (any(still_na)) {
+    result[still_na] <- suppressWarnings(as.Date(x[still_na], format = "%d/%m/%Y"))
   }
-  if (all(is.na(result))) {
-    result <- suppressWarnings(as.Date(x, format = "%m/%d/%Y"))
+
+  still_na <- is.na(result) & !is.na(x)
+  if (any(still_na)) {
+    result[still_na] <- suppressWarnings(as.Date(x[still_na], format = "%m/%d/%Y"))
   }
+
   result
 }
 
@@ -415,7 +518,10 @@ print(visits_data %>% count(id_client_id) %>% count(n, name = "n_patients"))
 # Check 3: DSST scores (check both versions are present)
 cat("\n3. DSST SCORES:\n")
 # Find digital DSST variables (columns 6-7 from original data: "Raw DSS Score" and "DSST Score")
-digital_dsst_vars <- names(visits_data)[str_detect(names(visits_data), "cog.*raw.*dss|cog.*dsst.*score") & !str_detect(names(visits_data), "total")]
+digital_dsst_vars <- names(visits_data)[
+  str_detect(names(visits_data), "cog.*raw.*dss|cog.*dsst.*score") &
+  !str_detect(names(visits_data), "total")
+]
 if (length(digital_dsst_vars) > 0) {
   cat("   Digital DSST variables found:", length(digital_dsst_vars), "\n")
   for (var in digital_dsst_vars) {
@@ -424,7 +530,9 @@ if (length(digital_dsst_vars) > 0) {
 }
 
 # Check if paper DSST exists (look for variables with "dsst.*total" pattern)
-paper_dsst_vars <- names(visits_data)[str_detect(names(visits_data), "cog.*dsst.*total|cog.*standardized_score")]
+paper_dsst_vars <- names(visits_data)[
+  str_detect(names(visits_data), "cog.*dsst.*total|cog.*standardized_score")
+]
 if (length(paper_dsst_vars) > 0) {
   cat("   Paper DSST variables found:", paste(paper_dsst_vars, collapse = ", "), "\n")
   for (var in paper_dsst_vars) {
@@ -479,16 +587,22 @@ if (!dir.exists("data")) {
 }
 
 # Save visits data
-saveRDS(visits_data, "data/visits_data.rds")
-cat("\n✓ Saved: data/visits_data.rds\n")
+visits_file <- here::here("data/visits_data.rds")
+saveRDS(visits_data, visits_file)
+Sys.chmod(visits_file, mode = "0600")  # Owner read/write only
+cat("\n✓ Saved: data/visits_data.rds (permissions: 0600)\n")
 
 # Save adverse events data
-saveRDS(adverse_events, "data/adverse_events_data.rds")
-cat("✓ Saved: data/adverse_events_data.rds\n")
+ae_file <- here::here("data/adverse_events_data.rds")
+saveRDS(adverse_events, ae_file)
+Sys.chmod(ae_file, mode = "0600")  # Owner read/write only
+cat("✓ Saved: data/adverse_events_data.rds (permissions: 0600)\n")
 
 # Save variable mapping
-write_csv(var_map, "data/data_dictionary_cleaned.csv")
-cat("✓ Saved: data/data_dictionary_cleaned.csv\n")
+dict_file <- here::here("data/data_dictionary_cleaned.csv")
+write_csv(var_map, dict_file)
+Sys.chmod(dict_file, mode = "0600")  # Owner read/write only
+cat("✓ Saved: data/data_dictionary_cleaned.csv (permissions: 0600)\n")
 
 # ==============================================================================
 # STEP 12: Create Summary Statistics
@@ -511,8 +625,10 @@ summary_stats <- list(
 )
 
 # Save summary statistics
-saveRDS(summary_stats, "data/summary_statistics.rds")
-cat("✓ Saved: data/summary_statistics.rds\n")
+stats_file <- here::here("data/summary_statistics.rds")
+saveRDS(summary_stats, stats_file)
+Sys.chmod(stats_file, mode = "0600")  # Owner read/write only
+cat("✓ Saved: data/summary_statistics.rds (permissions: 0600)\n")
 
 cat("\n=== DATA CLEANING COMPLETE ===\n")
 cat("Next step: Create data cleaning report (docs/cleaning_report.md)\n")
