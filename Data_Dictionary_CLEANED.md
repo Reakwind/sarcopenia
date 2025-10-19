@@ -1,7 +1,7 @@
 # Sarcopenia Study - Data Dictionary (Cleaned)
 ## Audit Report Dataset - Longitudinal Diabetes Study
 
-**Version:** 2.1
+**Version:** 2.2
 **Last Updated:** October 18, 2025
 **Dataset:** Audit report.csv
 
@@ -26,16 +26,6 @@
 ### Longitudinal Data Structure
 This is a **longitudinal dataset** with multiple visits per patient. Each row represents a single visit, and patients may have 1-3 visits recorded.
 
-### Patient-Level Missingness
-All missingness calculations are performed at the **PATIENT LEVEL**:
-- A patient is "missing" for a variable only if ALL their observations are missing across ALL visits
-- If a patient has data for a variable in any visit, they are counted as "having data"
-
-### Missingness Categories
-- **Low Missingness:** < 25% of patients missing
-- **Moderate Missingness:** 25-50% of patients missing
-- **High Missingness:** > 50% of patients missing
-
 ### Test Scoring
 Most cognitive and physical tests include:
 1. Individual item scores
@@ -43,7 +33,7 @@ Most cognitive and physical tests include:
 3. Standardized/percentile scores (when available)
 
 ### Section Markers (Data Export Artifacts)
-The CSV contains several columns that serve as section markers from the data collection platform. These columns have **100% missing data** and should be **excluded from analysis**:
+The CSV contains several columns that serve as section markers from the data collection platform. These columns should be **excluded from analysis**:
 - "Personal Information FINAL"
 - "Physician evaluation FINAL"
 - "Physical Health Agility FINAL"
@@ -118,15 +108,15 @@ These are structural artifacts from the data export and contain no actual data.
 ## 1. Core Identifiers & Visit Information
 
 ### Patient Identification
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | Org ID | Organization identifier | Categorical | 0% |
 | Client ID | Unique patient identifier | Text | 0% |
 | Client Name | Patient code/name | Text | 0% |
 
 ### Visit Tracking
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | Visit Date | Date of visit | Date | 0% |
 | Visit Type | Type of visit (e.g., scheduled) | Categorical | 0% |
 | Visit No | Visit number (1, 2, 3, etc.) | Numeric | 0% |
@@ -134,8 +124,8 @@ These are structural artifacts from the data export and contain no actual data.
 | Submission Tag | Data submission tag | Text | 10% |
 
 ### Basic Demographics
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | Gender | Patient gender | Categorical (Male/Female) | 0% |
 | Age | Patient age at visit | Numeric (years) | 0% |
 
@@ -144,8 +134,8 @@ These are structural artifacts from the data export and contain no actual data.
 ## 2. Personal & Demographic Information
 
 ### Demographics
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | 1. Participants study number - 8* | Study participant number (multiple columns) | Text | 0% |
 | 3. Which study is the participant part of? - 780 in elderly | Part of 780 elderly study | Binary | 0% |
 | 3. Which study is the participant part of? - BIRAX | Part of BIRAX study | Binary | 0% |
@@ -155,15 +145,15 @@ These are structural artifacts from the data export and contain no actual data.
 *Note: Multiple "Participants study number" columns exist (8, 8.1, 8.2, 8.3, 8.4, 8.5) representing the field across different sections
 
 ### Study Administration
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | 4. Location of visit - 220 | Visit location | Categorical | 0% |
 | 5. Visit number - 221 | Visit number | Numeric | 0% |
 | 6. Consent form signed - 222 | Consent status | Binary | 0% |
 
 ### Living Situation & Contact
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | 7. Health maintenance organization - 223 | HMO provider | Categorical | 0% |
 | 8. Address - 224 | Patient address | Text | 5% |
 | 9. Phone type - Phone type | Phone type (smartphone/other) | Binary | 5% |
@@ -178,8 +168,8 @@ These are structural artifacts from the data export and contain no actual data.
 | 14. Do you drive - 229 | Drives | Binary | 0% |
 
 ### Education & Employment
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
 | 15. Number of education years - 230 | Years of education | Numeric | 10% |
 | 16. Educational Degree - 231 | Educational level | Categorical | 0% |
 | 17. Profession - 232 | Professional category | Categorical | 5% |
@@ -218,20 +208,20 @@ This study administered **TWO different versions** of the DSST:
 - **Platform:** Smartphone application developed by study team
 - **Columns:** 6-7 (top-level in CSV)
 
-| Variable Name | Location in CSV | Description | Data Type | Missingness |
-|--------------|----------------|-------------|-----------|-------------|
-| **Raw DSS Score** | Column 6 (top-level) | Raw score from digital DSST | Text | 0% |
-| **DSST Score** | Column 7 (top-level) | Standardized score from digital DSST | Numeric | 0% |
+| Variable Name | Location in CSV | Description | Data Type |
+|--------------|----------------|-------------|-----------|
+| **Raw DSS Score** | Column 6 (top-level) | Raw score from digital DSST | Text |
+| **DSST Score** | Column 7 (top-level) | Standardized score from digital DSST | Numeric |
 
 #### 2. Pen and Paper DSST (WAIS-4)
 - **Test:** WAIS-4 Digit Symbol Substitution Test
 - **Duration:** 120 seconds
 - **Columns:** Cognitive section (179-180)
 
-| Variable Name | Location in CSV | Description | Data Type | Missingness |
-|--------------|----------------|-------------|-----------|-------------|
-| **43. DSST - Total Score - 179** | Cognitive section | Raw score from pen and paper DSST (WAIS-4, 120 sec) | Numeric | Variable |
-| **44. Standardized Score - 180** | Cognitive section | Standardized score from pen and paper DSST | Numeric | Variable |
+| Variable Name | Location in CSV | Description | Data Type |
+|--------------|----------------|-------------|-----------|
+| **43. DSST - Total Score - 179** | Cognitive section | Raw score from pen and paper DSST (WAIS-4, 120 sec) | Numeric |
+| **44. Standardized Score - 180** | Cognitive section | Standardized score from pen and paper DSST | Numeric |
 
 #### Important Notes:
 1. **Two Independent Tests:** Digital and pen-and-paper versions are separate assessments and should not be combined
@@ -269,9 +259,9 @@ This study administered **TWO different versions** of the DSST:
 
 #### MoCA Total Score
 
-| Variable Name | Description | Score Range | Missingness |
-|--------------|-------------|-------------|-------------|
-| **59. Moca - Total Score - 195** | Total MoCA score | 0-30 | 5% |
+| Variable Name | Description | Score Range |
+|--------------|-------------|
+| **59. Moca - Total Score - 195** | Total MoCA score | 0-30 |
 
 ---
 
@@ -279,12 +269,12 @@ This study administered **TWO different versions** of the DSST:
 
 **Purpose:** Measure language production and executive function
 
-| Variable Name | Description | Data Type | Missingness |
-|--------------|-------------|-----------|-------------|
-| 60. VF phonemic - Total Score - 196 | Phonemic fluency total (e.g., words starting with F, A, S) | Numeric | Variable |
-| 61. Standardized Score - 197 | Phonemic fluency standardized score | Numeric | Variable |
-| 62. VF semantic - Total Score - 198 | Semantic fluency total (e.g., animals, foods) | Numeric | Variable |
-| 63. Standardized Score - 199 | Semantic fluency standardized score | Numeric | Variable |
+| Variable Name | Description | Data Type |
+|--------------|-------------|-----------|
+| 60. VF phonemic - Total Score - 196 | Phonemic fluency total (e.g., words starting with F, A, S) | Numeric |
+| 61. Standardized Score - 197 | Phonemic fluency standardized score | Numeric |
+| 62. VF semantic - Total Score - 198 | Semantic fluency total (e.g., animals, foods) | Numeric |
+| 63. Standardized Score - 199 | Semantic fluency standardized score | Numeric |
 
 ---
 
@@ -349,7 +339,7 @@ This study administered **TWO different versions** of the DSST:
 #### PHQ-9 Total & Functional Impairment
 
 | Variable Name | Description | Score Range |
-|--------------|-------------|-------------|
+|--------------|-------------|
 | **12. PHQ9 - Total Score - 128** | Total depression score | 0-27 |
 | 13. How difficult have these problems made it - 129 | Functional impairment | Categorical |
 
@@ -373,7 +363,7 @@ This study administered **TWO different versions** of the DSST:
 #### WHO-5 Total Score
 
 | Variable Name | Description | Score Range |
-|--------------|-------------|-------------|
+|--------------|-------------|
 | **19. WHO-5 - Total Score - 135** | Total well-being score | 0-25 (raw) or 0-100 (transformed) |
 
 ---
@@ -381,14 +371,14 @@ This study administered **TWO different versions** of the DSST:
 ## 4. Medical Information
 
 ### Healthcare Provider
-| Variable Name | Description | Missingness |
-|--------------|-------------|-------------|
-| 3. Primary care doctor - 250 | Primary care physician | Variable |
+| Variable Name | Description |
+|--------------|-------------|
+| 3. Primary care doctor - 250 | Primary care physician |
 
 ### Hospitalizations
-| Variable Name | Description | Missingness |
-|--------------|-------------|-------------|
-| 4. Hospitalization in the past year? - 442 | Any hospitalization in past year | 0% |
+| Variable Name | Description |
+|--------------|-------------|
+| 4. Hospitalization in the past year? - 442 | Any hospitalization in past year |
 
 ---
 
@@ -453,8 +443,8 @@ This study administered **TWO different versions** of the DSST:
 | 8. Year of diagnosis - 256 | Year diagnosed with diabetes | Numeric (year) |
 
 #### Glycemic Monitoring
-| Variable Name | Description | Unit | Missingness |
-|--------------|-------------|------|-------------|
+| Variable Name | Description | Unit |
+|--------------|-------------|------|
 | 21. Use of sensor - 269 | Uses continuous glucose monitor | Binary | Variable |
 | 22. Sensor type - 270 | CGM type | Categorical | Variable |
 | 23. Use of glucometer - 277 | Uses blood glucose meter | Binary | Variable |
@@ -525,8 +515,8 @@ This study administered **TWO different versions** of the DSST:
 
 ### Lipid Profile & Cardiovascular Risk
 
-| Variable Name | Description | Unit | Missingness |
-|--------------|-------------|------|-------------|
+| Variable Name | Description | Unit |
+|--------------|-------------|------|
 | 9. High blood pressure - 258 | Hypertension diagnosis | Binary | 0% |
 | 10. Hypercholesterolemia - 259 | High cholesterol diagnosis | Binary | Variable |
 | 11. Cholestrol value - 532 | Total cholesterol | mg/dL or mmol/L | Variable |
@@ -603,8 +593,8 @@ Each test includes value, unit, and date fields.
 ### Vital Signs & Anthropometrics
 
 #### Blood Pressure & Heart Rate
-| Variable Name | Description | Unit | Missingness |
-|--------------|-------------|------|-------------|
+| Variable Name | Description | Unit |
+|--------------|-------------|------|
 | 102. Systolic - 371 | Systolic BP | mmHg | Variable |
 | 103. Diastolic - 370 | Diastolic BP | mmHg | Variable |
 | 104. Pulse - 369 | Heart rate | bpm | Variable |
@@ -758,8 +748,8 @@ Each test includes value, unit, and date fields.
 ### Anthropometric Measurements
 
 #### Body Mass Index
-| Variable Name | Description | Unit | Missingness |
-|--------------|-------------|------|-------------|
+| Variable Name | Description | Unit |
+|--------------|-------------|------|
 | 101. Body Mass Index - Height | Height | meters | Variable |
 | 101. Body Mass Index - Weight | Weight | kilograms | Variable |
 | 101. Body Mass Index - BMI | BMI | kg/m² | Variable |
@@ -947,7 +937,7 @@ Each test includes value, unit, and date fields.
 **Score Range:** 0-12 points
 
 | Variable Name | Description | Score Range |
-|--------------|-------------|-------------|
+|--------------|-------------|
 | 49. Balance test score - 430 | Balance component | 0-4 |
 | 50. Gait speed test score - 431 | Gait speed component | 0-4 |
 | 51. Chair stand test score - 432 | Chair stand component | 0-4 |
@@ -978,21 +968,6 @@ Each test includes value, unit, and date fields.
 ---
 
 ## Data Quality Notes
-
-### High Missingness Variables (>50%)
-Many variables have high missingness, particularly:
-- Medical history details
-- Medication specifics
-- Lab values
-- Adverse event details
-- Phone model information
-
-### Variables with Complete Data (0% missing)
-- Core identifiers (Client ID, Org ID)
-- Visit information (Date, Type, Number)
-- Basic demographics (Age, Gender)
-- Most living situation variables
-- Study participation flags
 
 ### Duplicate/Related Fields
 Some variables appear multiple times across sections:
@@ -1078,8 +1053,9 @@ Example: `"29. Right Hand - 0. Test 1 - 391"`
 
 For questions about this data dictionary or to report errors, please contact the study team.
 
-**Version:** 2.1 (Cleaned)
+**Version:** 2.2 (Cleaned)
 **Date:** October 18, 2025
+
 **Changes from v1.0:**
 - Removed excessive subsection codes (A1, C1, D2-D14, etc.)
 - Added comprehensive DSST score documentation (clarified digital vs. pen-and-paper versions)
@@ -1094,3 +1070,10 @@ For questions about this data dictionary or to report errors, please contact the
   - Pen and Paper DSST (WAIS-4, 120 sec): Columns 179-180
 - Updated DSST documentation to distinguish between test versions
 - Added guidance on selecting appropriate DSST version for analysis
+
+**Changes in v2.2 (October 18, 2025):**
+- Removed all missingness analysis sections
+- Removed missingness columns from all variable tables
+- Removed "Patient-Level Missingness" and "Missingness Categories" sections
+- Removed "High Missingness Variables" and "Variables with Complete Data" sections
+- Dictionary now focuses on data structure, variable types, measurements, and study design
