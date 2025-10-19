@@ -193,8 +193,7 @@ test_that("E2E: No section markers in output", {
   for (marker in section_markers) {
     cleaned_marker <- tolower(str_replace_all(marker, "[^a-z0-9]+", "_"))
     matching_cols <- names(visits)[str_detect(tolower(names(visits)), cleaned_marker)]
-    expect_length(matching_cols, 0,
-                  label = paste("Section marker should be removed:", marker))
+    expect_length(matching_cols, 0)
   }
 })
 
@@ -203,8 +202,7 @@ test_that("E2E: DSST scores are properly classified", {
 
   # Digital DSST should be in cognitive domain
   digital_dsst_vars <- names(visits)[str_detect(names(visits), "cog.*raw.*dss|cog.*dsst.*score")]
-  expect_gt(length(digital_dsst_vars), 0,
-            label = "Digital DSST variables should be classified as cognitive")
+  expect_gt(length(digital_dsst_vars), 0)
 
   # Paper DSST should also be in cognitive domain
   paper_dsst_vars <- names(visits)[str_detect(names(visits), "cog.*dsst.*total")]

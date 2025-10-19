@@ -2,6 +2,10 @@
 column_names.txt
 Audit_Report_Data_Dictionary_FINAL.txt
 
+# Generated data outputs (pipeline results)
+data/*.rds
+data/*.csv
+
 # MacOS
 .DS_Store
 
