@@ -8,72 +8,206 @@ app_ui <- function(request) {
   # Initialize translator
   i18n <- init_i18n()
 
+  # Define custom theme
+  theme <- bslib::bs_theme(
+    version = 5,
+    primary = "#2C3E50",
+    secondary = "#3498DB",
+    success = "#27AE60",
+    info = "#17A2B8",
+    warning = "#F39C12",
+    danger = "#E74C3C",
+    base_font = bslib::font_google("Roboto"),
+    heading_font = bslib::font_google("Roboto Slab"),
+    font_scale = 1.0,
+    spacer = "1rem"
+  )
+
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
 
     # Your application UI logic
-    fluidPage(
-      # Language and theme controls in navbar
-      div(
-        id = "top-controls",
-        class = "d-flex justify-content-end p-2",
-        style = "background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;",
+    bslib::page_navbar(
+      title = i18n$t("Sarcopenia Study Dashboard"),
+      id = "main_navbar",
+      theme = theme,
+      lang = "en",
 
-        # Language selector
-        div(
-          class = "me-3",
-          language_selector_ui("language", selected = "en", i18n = i18n)
-        )
+      # Language selector in navbar
+      nav_spacer(),
+      nav_item(
+        language_selector_ui("language", selected = "en", i18n = i18n)
       ),
 
       # Skip links for accessibility
-      tags$a(
-        href = "#main-content",
-        class = "skip-link visually-hidden-focusable",
-        i18n$t("Skip to content")
+      header = tagList(
+        tags$a(
+          href = "#main-content",
+          class = "skip-link visually-hidden-focusable",
+          i18n$t("Skip to content")
+        ),
+        tags$a(
+          href = "#filters",
+          class = "skip-link visually-hidden-focusable",
+          i18n$t("Skip to filters")
+        )
       ),
 
-      # Main content area (placeholder for now)
-      div(
-        id = "main-content",
-        class = "container-fluid mt-3",
+      # Home tab
+      nav_panel(
+        title = i18n$t("Home"),
+        value = "home",
+        icon = icon("home"),
 
-        h1(
-          id = "app-title",
-          class = "text-center mb-4",
-          i18n$t("Sarcopenia Study Dashboard")
-        ),
-
-        # PHI Warning banner
         div(
-          class = "alert alert-warning alert-dismissible fade show",
-          role = "alert",
-          tags$strong(i18n$t("PHI Warning")),
-          " ",
-          i18n$t("This dashboard contains protected health information. Do not share screenshots or exports."),
-          tags$button(
-            type = "button",
-            class = "btn-close",
-            `data-bs-dismiss` = "alert",
-            `aria-label` = i18n$t("Close")
-          )
-        ),
+          id = "main-content",
+          class = "container-fluid mt-3",
 
-        # Placeholder content
-        div(
-          class = "card",
+          # PHI Warning banner
+          uiOutput("phi_banner"),
+
+          # Placeholder for home content
           div(
-            class = "card-body",
-            h5(class = "card-title", "Welcome to sarcDash"),
-            p(class = "card-text", "Dashboard content will be added in upcoming prompts."),
-            tags$ul(
-              tags$li("Prompt 3: App shell with navigation"),
-              tags$li("Prompt 4: Home page with dataset health"),
-              tags$li("Prompt 5: Data dictionary viewer"),
-              tags$li("Prompt 6: Cohort builder")
+            class = "card mt-3",
+            div(
+              class = "card-body",
+              h5(class = "card-title", i18n$t("Welcome")),
+              p(class = "card-text", i18n$t("Home page content coming in Prompt 4"))
             )
           )
+        )
+      ),
+
+      # Data Dictionary tab
+      nav_panel(
+        title = i18n$t("Data Dictionary"),
+        value = "dictionary",
+        icon = icon("book"),
+
+        div(
+          class = "container-fluid mt-3",
+          h3(i18n$t("Data Dictionary")),
+          p(i18n$t("Content coming in Prompt 5"))
+        )
+      ),
+
+      # Cohort Builder tab
+      nav_panel(
+        title = i18n$t("Cohort Builder"),
+        value = "cohort",
+        icon = icon("filter"),
+
+        div(
+          id = "filters",
+          class = "container-fluid mt-3",
+          h3(i18n$t("Cohort Builder")),
+          p(i18n$t("Content coming in Prompt 6"))
+        )
+      ),
+
+      # Domains menu
+      nav_menu(
+        title = i18n$t("Domains"),
+        icon = icon("chart-line"),
+
+        nav_panel(
+          title = i18n$t("Demographics"),
+          value = "demographics",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Demographics")),
+            p(i18n$t("Content coming in Prompt 7"))
+          )
+        ),
+
+        nav_panel(
+          title = i18n$t("Cognitive"),
+          value = "cognitive",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Cognitive")),
+            p(i18n$t("Content coming in Prompt 8"))
+          )
+        ),
+
+        nav_panel(
+          title = i18n$t("Medical"),
+          value = "medical",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Medical")),
+            p(i18n$t("Content coming in Prompt 9"))
+          )
+        ),
+
+        nav_panel(
+          title = i18n$t("Physical"),
+          value = "physical",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Physical")),
+            p(i18n$t("Content coming in Prompt 10"))
+          )
+        ),
+
+        nav_panel(
+          title = i18n$t("Adherence"),
+          value = "adherence",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Adherence")),
+            p(i18n$t("Content coming in Prompt 11"))
+          )
+        ),
+
+        nav_panel(
+          title = i18n$t("Adverse Events"),
+          value = "adverse_events",
+          div(
+            class = "container-fluid mt-3",
+            h3(i18n$t("Adverse Events")),
+            p(i18n$t("Content coming in Prompt 12"))
+          )
+        )
+      ),
+
+      # Longitudinal tab
+      nav_panel(
+        title = i18n$t("Longitudinal"),
+        value = "longitudinal",
+        icon = icon("chart-area"),
+
+        div(
+          class = "container-fluid mt-3",
+          h3(i18n$t("Longitudinal")),
+          p(i18n$t("Content coming in Prompt 13"))
+        )
+      ),
+
+      # QC/Missingness tab
+      nav_panel(
+        title = i18n$t("Quality Checks"),
+        value = "qc",
+        icon = icon("check-circle"),
+
+        div(
+          class = "container-fluid mt-3",
+          h3(i18n$t("Quality Checks")),
+          p(i18n$t("Content coming in Prompt 14"))
+        )
+      ),
+
+      # Settings tab
+      nav_panel(
+        title = i18n$t("Settings"),
+        value = "settings",
+        icon = icon("cog"),
+
+        div(
+          class = "container-fluid mt-3",
+          h3(i18n$t("Settings")),
+          p(i18n$t("Content coming in Prompt 17"))
         )
       )
     )
