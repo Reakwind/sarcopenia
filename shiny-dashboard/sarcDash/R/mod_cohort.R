@@ -41,16 +41,17 @@ mod_cohort_ui <- function(id, i18n = NULL) {
         min = 0, max = 100, value = c(0, 100), step = 1
       ),
 
-      # Visit number
-      radioButtons(
+      # Visit number (supports 0-3)
+      checkboxGroupInput(
         ns("visit_number"),
         label = if (!is.null(i18n)) i18n$t("Visit Number") else "Visit Number",
         choices = list(
-          "Both" = "both",
+          "Visit 0" = "0",
           "Visit 1" = "1",
-          "Visit 2" = "2"
+          "Visit 2" = "2",
+          "Visit 3" = "3"
         ),
-        selected = "both"
+        selected = c("0", "1", "2", "3")
       ),
 
       # Retention filter
@@ -145,14 +146,30 @@ mod_cohort_ui <- function(id, i18n = NULL) {
 #'
 #' @param id Module namespace ID
 #' @param i18n Reactive translator object
+#' @param uploaded_data Reactive uploaded CSV data (optional)
 #' @return Reactive filtered data
 #' @noRd
-mod_cohort_server <- function(id, i18n = NULL) {
+mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Load data
+    # Load data (prioritize uploaded data if available)
     data <- reactive({
+      # Check for uploaded data first
+      if (!is.null(uploaded_data) && is.reactive(uploaded_data)) {
+        uploaded <- uploaded_data()
+        if (!is.null(uploaded)) {
+          # Return uploaded data in standard format
+          return(list(
+            visits = uploaded,
+            ae = NULL,
+            dict = NULL,
+            summary = NULL
+          ))
+        }
+      }
+
+      # Fall back to default data directory
       tryCatch({
         data_dir <- here::here("data")
         ds_connect(data_dir)
@@ -161,35 +178,64 @@ mod_cohort_server <- function(id, i18n = NULL) {
       })
     })
 
-    # Filtered data based on current filters
+    # Debounced slider inputs (500ms delay for performance)
+    age_range_debounced <- reactive(input$age_range) %>% debounce(500)
+    moca_range_debounced <- reactive(input$moca_range) %>% debounce(500)
+    dsst_range_debounced <- reactive(input$dsst_range) %>% debounce(500)
+
+    # Filtered data based on current filters (dplyr optimized)
     filtered_data <- reactive({
       d <- data()
       if (is.null(d) || is.null(d$visits)) return(NULL)
 
       visits <- d$visits
 
-      # Age filter
-      if (!is.null(input$age_range)) {
-        visits <- visits[visits$id_age >= input$age_range[1] &
-                          visits$id_age <= input$age_range[2], ]
+      # Age filter (debounced)
+      if (!is.null(age_range_debounced())) {
+        visits <- visits %>%
+          dplyr::filter(id_age >= age_range_debounced()[1],
+                        id_age <= age_range_debounced()[2])
       }
 
       # Gender filter
       if (!is.null(input$gender) && length(input$gender) > 0) {
-        visits <- visits[tolower(visits$id_gender) %in% input$gender, ]
+        visits <- visits %>%
+          dplyr::filter(tolower(id_gender) %in% input$gender)
       }
 
-      # Visit number filter
-      if (!is.null(input$visit_number) && input$visit_number != "both") {
-        visits <- visits[visits$id_visit_no == as.numeric(input$visit_number), ]
+      # MoCA filter (debounced)
+      if (!is.null(moca_range_debounced())) {
+        visits <- visits %>%
+          dplyr::filter(!is.na(cog_moca_total),
+                        cog_moca_total >= moca_range_debounced()[1],
+                        cog_moca_total <= moca_range_debounced()[2])
       }
 
-      # Retention filter
+      # DSST filter (debounced)
+      if (!is.null(dsst_range_debounced())) {
+        visits <- visits %>%
+          dplyr::filter(!is.na(cog_dsst_score),
+                        cog_dsst_score >= dsst_range_debounced()[1],
+                        cog_dsst_score <= dsst_range_debounced()[2])
+      }
+
+      # Visit number filter (supports multiple selections 0-3)
+      if (!is.null(input$visit_number) && length(input$visit_number) > 0) {
+        visit_nums <- as.numeric(input$visit_number)
+        visits <- visits %>%
+          dplyr::filter(id_visit_no %in% visit_nums)
+      }
+
+      # Retention filter (dplyr optimized)
       if (!is.null(input$retention_only) && input$retention_only) {
-        # Get patients with both visits
-        patient_counts <- table(visits$id_client_id)
-        retained_patients <- names(patient_counts[patient_counts >= 2])
-        visits <- visits[visits$id_client_id %in% retained_patients, ]
+        # Get patients with at least 2 visits
+        retained_patients <- visits %>%
+          dplyr::count(id_client_id) %>%
+          dplyr::filter(n >= 2) %>%
+          dplyr::pull(id_client_id)
+
+        visits <- visits %>%
+          dplyr::filter(id_client_id %in% retained_patients)
       }
 
       visits
@@ -216,13 +262,17 @@ mod_cohort_server <- function(id, i18n = NULL) {
       visits <- filtered_data()
       if (is.null(visits)) return("--")
 
-      patient_counts <- table(visits$id_client_id)
-      retained <- sum(patient_counts >= 2)
-      total <- length(patient_counts)
+      # Dplyr optimized retention calculation
+      retention_stats <- visits %>%
+        dplyr::count(id_client_id) %>%
+        dplyr::summarise(
+          retained = sum(n >= 2),
+          total = dplyr::n()
+        )
 
-      if (total == 0) return("--")
+      if (retention_stats$total == 0) return("--")
 
-      pct <- round(100 * retained / total, 1)
+      pct <- round(100 * retention_stats$retained / retention_stats$total, 1)
       tags$strong(paste0(pct, "%"))
     })
 
@@ -249,13 +299,17 @@ mod_cohort_server <- function(id, i18n = NULL) {
         ))
       }
 
-      if (!is.null(input$visit_number) && input$visit_number != "both") {
-        filters <- c(filters, list(
-          tags$span(
-            class = "badge bg-secondary me-2",
-            paste0("Visit: ", input$visit_number)
-          )
-        ))
+      if (!is.null(input$visit_number) && length(input$visit_number) > 0) {
+        # Show visit filter only if not all 4 visits selected
+        if (length(input$visit_number) < 4) {
+          visit_str <- paste0("Visit(s): ", paste(input$visit_number, collapse = ", "))
+          filters <- c(filters, list(
+            tags$span(
+              class = "badge bg-secondary me-2",
+              visit_str
+            )
+          ))
+        }
       }
 
       if (!is.null(input$retention_only) && input$retention_only) {
@@ -280,7 +334,7 @@ mod_cohort_server <- function(id, i18n = NULL) {
       updateCheckboxGroupInput(session, "gender", selected = c("male", "female"))
       updateSliderInput(session, "moca_range", value = c(0, 30))
       updateSliderInput(session, "dsst_range", value = c(0, 100))
-      updateRadioButtons(session, "visit_number", selected = "both")
+      updateCheckboxGroupInput(session, "visit_number", selected = c("0", "1", "2", "3"))
       updateCheckboxInput(session, "retention_only", value = FALSE)
     })
 
@@ -348,9 +402,9 @@ describe_filters <- function(filters) {
       paste0("Gender: ", paste(filters$gender, collapse = ", ")))
   }
 
-  if (!is.null(filters$visit_number) && filters$visit_number != "both") {
+  if (!is.null(filters$visit_number) && length(filters$visit_number) > 0 && length(filters$visit_number) < 4) {
     descriptions <- c(descriptions,
-      paste0("Visit: ", filters$visit_number))
+      paste0("Visit(s): ", paste(filters$visit_number, collapse = ", ")))
   }
 
   if (!is.null(filters$retention_only) && filters$retention_only) {

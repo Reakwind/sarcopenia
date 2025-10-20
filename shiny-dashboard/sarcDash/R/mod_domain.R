@@ -97,7 +97,7 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
       )
     })
 
-    # Simple plot
+    # Simple plot with downsampling for performance
     output$domain_plot <- plotly::renderPlotly({
       data <- domain_data()
       if (is.null(data) || ncol(data) < 3) return(NULL)
@@ -108,8 +108,28 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
 
       if (length(numeric_cols) == 0) return(NULL)
 
-      plotly::plot_ly(data, y = ~get(numeric_cols[1]), type = "box") %>%
-        plotly::layout(title = paste("Distribution of", numeric_cols[1]))
+      # Downsample to max 500 points for performance (scales to 200 patients)
+      plot_data <- data
+      if (nrow(data) > 500) {
+        set.seed(42)  # Reproducible sampling
+        sample_idx <- sample(seq_len(nrow(data)), size = 500, replace = FALSE)
+        plot_data <- data[sample_idx, ]
+      }
+
+      plotly::plot_ly(plot_data, y = ~get(numeric_cols[1]), type = "box") %>%
+        plotly::layout(
+          title = paste("Distribution of", numeric_cols[1]),
+          annotations = if (nrow(data) > 500) {
+            list(
+              text = sprintf("Showing %d of %d points", nrow(plot_data), nrow(data)),
+              xref = "paper", yref = "paper",
+              x = 0.5, y = 1.05,
+              xanchor = "center", yanchor = "bottom",
+              showarrow = FALSE,
+              font = list(size = 10, color = "gray")
+            )
+          } else NULL
+        )
     })
   })
 }

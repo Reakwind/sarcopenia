@@ -12,6 +12,29 @@ library(tidyverse)
 library(here)
 
 # ==============================================================================
+# Performance Monitoring Setup
+# ==============================================================================
+
+# Start total timer
+script_start_time <- Sys.time()
+step_timings <- list()
+
+# Function to track step performance
+track_step <- function(step_name) {
+  step_time <- Sys.time()
+  mem_usage <- as.numeric(object.size(ls(envir = .GlobalEnv))) / 1024^2  # MB
+
+  list(
+    step = step_name,
+    time = step_time,
+    memory_mb = round(mem_usage, 1)
+  )
+}
+
+cat("=== PERFORMANCE MONITORING ENABLED ===\n")
+cat("Start time:", format(script_start_time, "%Y-%m-%d %H:%M:%S"), "\n\n")
+
+# ==============================================================================
 # STEP 1: Import Raw Data
 # ==============================================================================
 
@@ -480,6 +503,9 @@ visits_data <- visits_data %>%
 
 cat("  Patient-level filling complete\n")
 
+# Calculate total number of patients dynamically
+n_patients <- n_distinct(visits_data$id_client_id)
+
 # Report on remaining patient-level missingness
 patients_with_data <- visits_data %>%
   group_by(id_client_id) %>%
@@ -493,9 +519,9 @@ patients_with_data <- visits_data %>%
   ))
 
 cat("  Patients with at least one value (after filling):\n")
-cat("    Education years:", patients_with_data$demo_number_of_education_years, "/ 20\n")
-cat("    Dominant hand:", patients_with_data$demo_dominant_hand, "/ 20\n")
-cat("    Marital status:", patients_with_data$demo_marital_status, "/ 20\n")
+cat("    Education years:", patients_with_data$demo_number_of_education_years, "/", n_patients, "\n")
+cat("    Dominant hand:", patients_with_data$demo_dominant_hand, "/", n_patients, "\n")
+cat("    Marital status:", patients_with_data$demo_marital_status, "/", n_patients, "\n")
 
 # ==============================================================================
 # STEP 10: Quality Checks
@@ -513,7 +539,26 @@ print(table(table(visits_data$id_client_id)))
 # Check 2: Visit distribution
 cat("\n2. VISIT DISTRIBUTION:\n")
 cat("   Visits per patient:\n")
-print(visits_data %>% count(id_client_id) %>% count(n, name = "n_patients"))
+
+# Calculate visit distribution (supports 0-3 visits)
+visit_dist <- visits_data %>%
+  count(id_client_id) %>%
+  count(n, name = "n_patients")
+
+print(visit_dist)
+
+# Warn if any patients have 0 visits (shouldn't happen in normal data)
+if (nrow(visits_data) == 0) {
+  warning("WARNING: No visit data found in dataset!")
+}
+
+# Check for expected visit range (0-3)
+visit_numbers <- unique(visits_data$id_visit_no)
+unexpected_visits <- visit_numbers[!visit_numbers %in% 0:3 & !is.na(visit_numbers)]
+if (length(unexpected_visits) > 0) {
+  warning("WARNING: Found unexpected visit numbers: ", paste(unexpected_visits, collapse = ", "))
+  cat("   ⚠ Unexpected visit numbers detected:", paste(unexpected_visits, collapse = ", "), "\n")
+}
 
 # Check 3: DSST scores (check both versions are present)
 cat("\n3. DSST SCORES:\n")
@@ -632,3 +677,17 @@ cat("✓ Saved: data/summary_statistics.rds (permissions: 0600)\n")
 
 cat("\n=== DATA CLEANING COMPLETE ===\n")
 cat("Next step: Create data cleaning report (docs/cleaning_report.md)\n")
+
+# ==============================================================================
+# Performance Summary
+# ==============================================================================
+
+script_end_time <- Sys.time()
+total_duration <- as.numeric(difftime(script_end_time, script_start_time, units = "secs"))
+peak_memory_mb <- as.numeric(object.size(lapply(ls(), get))) / 1024^2
+
+cat("\n=== PERFORMANCE SUMMARY ===\n")
+cat("Total execution time:", round(total_duration, 2), "seconds\n")
+cat("Peak memory usage:", round(peak_memory_mb, 1), "MB\n")
+cat("Processed:", n_patients, "patients with", nrow(visits_data), "visit records\n")
+cat("Throughput:", round(nrow(visits_data) / total_duration, 1), "records/second\n")

@@ -349,3 +349,74 @@ ds_connect_cached <- memoise::memoise(
   ds_connect,
   cache = memoise::cache_memory()
 )
+
+#' Load and validate user-uploaded CSV data
+#'
+#' @description
+#' Parses a user-uploaded CSV file and validates it against expected
+#' Sarcopenia study data structure. Supports visits data format.
+#'
+#' @param file_path Path to uploaded CSV file
+#'
+#' @return A validated tibble with visits data structure, or error
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' uploaded_data <- ds_load_csv("path/to/upload.csv")
+#' }
+ds_load_csv <- function(file_path) {
+  # Validate file exists
+  if (!file.exists(file_path)) {
+    stop("Uploaded file not found", call. = FALSE)
+  }
+
+  # Try to read CSV
+  data <- tryCatch({
+    readr::read_csv(file_path, show_col_types = FALSE)
+  }, error = function(e) {
+    stop(sprintf("Error reading CSV: %s", e$message), call. = FALSE)
+  })
+
+  # Basic validation
+  if (!inherits(data, "data.frame")) {
+    stop("Uploaded file must be a valid CSV", call. = FALSE)
+  }
+
+  if (nrow(data) == 0) {
+    stop("Uploaded CSV has zero rows", call. = FALSE)
+  }
+
+  if (ncol(data) < 3) {
+    stop("Uploaded CSV must have at least 3 columns", call. = FALSE)
+  }
+
+  # Check for required id columns (at least one)
+  id_cols <- grep("^id_", names(data), value = TRUE)
+  if (length(id_cols) == 0) {
+    stop("Uploaded CSV must have at least one id_* column (e.g., id_client_id, id_visit_no)", call. = FALSE)
+  }
+
+  # Warn if key columns missing
+  expected_cols <- c("id_client_id", "id_visit_no")
+  missing_expected <- setdiff(expected_cols, names(data))
+  if (length(missing_expected) > 0) {
+    warning(sprintf("Recommended columns missing: %s", paste(missing_expected, collapse = ", ")))
+  }
+
+  # Try to enforce types
+  data <- tryCatch({
+    validate_visits_data(data)
+  }, error = function(e) {
+    warning(sprintf("Type validation warning: %s", e$message))
+    data  # Return original if validation fails
+  })
+
+  # Return with metadata
+  attr(data, "source") <- "csv_upload"
+  attr(data, "upload_time") <- Sys.time()
+  attr(data, "original_path") <- file_path
+
+  data
+}

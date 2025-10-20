@@ -1,14 +1,15 @@
 Package: sarcDash
 Title: Sarcopenia Study Data Dashboard
-Version: 0.1.0
+Version: 1.0.0
 Authors@R:
     person(given = "Sarcopenia",
            family = "Team",
            role = c("aut", "cre"),
            email = "team@sarcopenia.study")
-Description: Interactive Shiny dashboard for exploring cleaned Sarcopenia study data
-    with comprehensive filtering, domain-specific analysis, longitudinal tracking,
-    quality checks, and bilingual support (EN/HE with RTL).
+Description: Production-ready interactive Shiny dashboard for exploring cleaned
+    Sarcopenia study data with comprehensive filtering, domain-specific analysis,
+    longitudinal tracking (0-3 visits), quality checks, CSV upload, and bilingual
+    support (EN/HE with RTL). Scales to 200 patients with performance optimizations.
 License: MIT + file LICENSE
 Imports:
     config (>= 0.3.2),

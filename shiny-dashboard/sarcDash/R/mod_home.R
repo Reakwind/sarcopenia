@@ -44,7 +44,26 @@ mod_home_ui <- function(id, i18n = NULL) {
           ),
           div(
             class = "card-body",
-            uiOutput(ns("health_content"))
+            uiOutput(ns("health_content")),
+            tags$hr(),
+            # CSV upload for custom data
+            div(
+              class = "mt-2",
+              h6(
+                class = "text-muted mb-2",
+                icon("upload"),
+                " ",
+                if (!is.null(i18n)) i18n$t("Upload Custom Data") else "Upload Custom Data"
+              ),
+              fileInput(
+                ns("csv_upload"),
+                label = if (!is.null(i18n)) i18n$t("Upload CSV File") else "Upload CSV File",
+                accept = c(".csv", "text/csv"),
+                buttonLabel = if (!is.null(i18n)) i18n$t("Browse...") else "Browse...",
+                placeholder = if (!is.null(i18n)) i18n$t("No file chosen") else "No file chosen"
+              ),
+              uiOutput(ns("upload_status"))
+            )
           )
         )
       ),
@@ -226,6 +245,78 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
           error_msg = e$message
         )
       })
+    })
+
+    # Handle CSV upload
+    uploaded_data <- reactiveVal(NULL)
+
+    observeEvent(input$csv_upload, {
+      req(input$csv_upload)
+
+      # Try to load and validate CSV
+      result <- tryCatch({
+        data <- ds_load_csv(input$csv_upload$datapath)
+        uploaded_data(data)
+        list(
+          success = TRUE,
+          message = sprintf("Successfully loaded %d rows and %d columns", nrow(data), ncol(data)),
+          n_patients = if ("id_client_id" %in% names(data)) length(unique(data$id_client_id)) else NA
+        )
+      }, error = function(e) {
+        uploaded_data(NULL)
+        list(
+          success = FALSE,
+          message = e$message
+        )
+      }, warning = function(w) {
+        # Data loaded but with warnings
+        list(
+          success = TRUE,
+          message = sprintf("Loaded with warnings: %s", w$message)
+        )
+      })
+
+      # Store result for display
+      session$userData$upload_result <- result
+    })
+
+    # Display upload status
+    output$upload_status <- renderUI({
+      req(input$csv_upload)
+      result <- session$userData$upload_result
+
+      if (is.null(result)) return(NULL)
+
+      if (result$success) {
+        div(
+          class = "alert alert-success alert-dismissible fade show",
+          role = "alert",
+          icon("check-circle"),
+          " ",
+          result$message,
+          if (!is.na(result$n_patients)) {
+            tagList(tags$br(), tags$small(sprintf("Unique patients: %d", result$n_patients)))
+          },
+          tags$button(
+            type = "button",
+            class = "btn-close",
+            `data-bs-dismiss` = "alert"
+          )
+        )
+      } else {
+        div(
+          class = "alert alert-danger alert-dismissible fade show",
+          role = "alert",
+          icon("exclamation-triangle"),
+          " ",
+          result$message,
+          tags$button(
+            type = "button",
+            class = "btn-close",
+            `data-bs-dismiss` = "alert"
+          )
+        )
+      }
     })
 
     # PHI Warning banner
@@ -431,5 +522,8 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
         }
       })
     }
+
+    # Return uploaded data for use by other modules
+    return(uploaded_data)
   })
 }

@@ -33,14 +33,17 @@ app_server <- function(input, output, session) {
   session$userData$i18n <- reactive({ i18n })
   session$userData$current_language <- current_language
 
-  # Call home module server
-  mod_home_server("home", i18n = reactive({ i18n }), parent_session = session)
+  # Call home module server (returns uploaded data reactive)
+  uploaded_data <- mod_home_server("home", i18n = reactive({ i18n }), parent_session = session)
+
+  # Make uploaded data available to all modules
+  session$userData$uploaded_data <- uploaded_data
 
   # Call dictionary module server
   mod_dictionary_server("dictionary", i18n = reactive({ i18n }))
 
   # Call cohort module server (returns filtered data)
-  cohort_data <- mod_cohort_server("cohort", i18n = reactive({ i18n }))
+  cohort_data <- mod_cohort_server("cohort", i18n = reactive({ i18n }), uploaded_data = uploaded_data)
 
   # Make cohort data available to other modules
   session$userData$cohort_data <- cohort_data
