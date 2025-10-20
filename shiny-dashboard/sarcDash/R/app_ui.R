@@ -60,23 +60,7 @@ app_ui <- function(request) {
         value = "home",
         icon = icon("home"),
 
-        div(
-          id = "main-content",
-          class = "container-fluid mt-3",
-
-          # PHI Warning banner
-          uiOutput("phi_banner"),
-
-          # Placeholder for home content
-          div(
-            class = "card mt-3",
-            div(
-              class = "card-body",
-              h5(class = "card-title", i18n$t("Welcome")),
-              p(class = "card-text", i18n$t("Home page content coming in Prompt 4"))
-            )
-          )
-        )
+        mod_home_ui("home", i18n = i18n)
       ),
 
       # Data Dictionary tab

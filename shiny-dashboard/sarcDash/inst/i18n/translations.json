@@ -592,6 +592,58 @@
     {
       "en": "Content coming in Prompt 17",
       "he": "תוכן יגיע בפרומפט 17"
+    },
+    {
+      "en": "Quick Links",
+      "he": "קישורים מהירים"
+    },
+    {
+      "en": "Learn",
+      "he": "למד"
+    },
+    {
+      "en": "Show tour on startup",
+      "he": "הצג סיור בעת הפעלה"
+    },
+    {
+      "en": "Get Started",
+      "he": "התחל"
+    },
+    {
+      "en": "Navigation",
+      "he": "ניווט"
+    },
+    {
+      "en": "Use the navigation above to explore different aspects of the sarcopenia study data",
+      "he": "השתמש בניווט למעלה כדי לחקור היבטים שונים של נתוני מחקר הסרקופניה"
+    },
+    {
+      "en": "View the current status of your dataset including row counts and last update time",
+      "he": "צפה במצב הנוכחי של מערך הנתונים שלך כולל מספר שורות וזמן עדכון אחרון"
+    },
+    {
+      "en": "Quick access to frequently used sections of the dashboard",
+      "he": "גישה מהירה לקטעים נפוצים בלוח הבקרה"
+    },
+    {
+      "en": "Start this tour anytime to learn about dashboard features",
+      "he": "התחל את הסיור הזה בכל עת כדי ללמוד על תכונות לוח הבקרה"
+    },
+    {
+      "en": "Use the top navigation to access different sections",
+      "he": "השתמש בניווט העליון כדי לגשת לקטעים שונים"
+    },
+    {
+      "en": "Switch between English and Hebrew",
+      "he": "החלף בין אנגלית לעברית"
+    },
+    {
+      "en": "You are ready to explore the data",
+      "he": "אתה מוכן לחקור את הנתונים"
+    },
+    {
+      "en": "Take a guided tour to learn about the dashboard features",
+      "he": "בצע סיור מודרך כדי ללמוד על תכונות לוח הבקרה"
     }
   ]
 }
