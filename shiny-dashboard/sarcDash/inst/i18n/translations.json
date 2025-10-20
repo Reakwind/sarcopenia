@@ -668,6 +668,18 @@
     {
       "en": "Prefix",
       "he": "קידומת"
+    },
+    {
+      "en": "Only patients with both visits",
+      "he": "רק מטופלים עם שני ביקורים"
+    },
+    {
+      "en": "Retention Rate",
+      "he": "שיעור שימור"
+    },
+    {
+      "en": "Current Filters",
+      "he": "סינונים נוכחיים"
     }
   ]
 }

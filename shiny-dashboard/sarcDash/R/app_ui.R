@@ -78,12 +78,7 @@ app_ui <- function(request) {
         value = "cohort",
         icon = icon("filter"),
 
-        div(
-          id = "filters",
-          class = "container-fluid mt-3",
-          h3(i18n$t("Cohort Builder")),
-          p(i18n$t("Content coming in Prompt 6"))
-        )
+        mod_cohort_ui("cohort", i18n = i18n)
       ),
 
       # Domains menu

@@ -38,4 +38,10 @@ app_server <- function(input, output, session) {
 
   # Call dictionary module server
   mod_dictionary_server("dictionary", i18n = reactive({ i18n }))
+
+  # Call cohort module server (returns filtered data)
+  cohort_data <- mod_cohort_server("cohort", i18n = reactive({ i18n }))
+
+  # Make cohort data available to other modules
+  session$userData$cohort_data <- cohort_data
 }
