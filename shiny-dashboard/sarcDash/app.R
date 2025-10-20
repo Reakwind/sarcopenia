@@ -1,6 +1,7 @@
 # Launch the ShinyApp (Do not remove this comment)
-# This is the entry point for Posit Connect Cloud deployment
+# To deploy, run: rsconnect::deployApp()
+# Or use the blue button on top of this file
 
-pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
-options("golem.app.prod" = TRUE)
-sarcDash::run_app()
+pkgload::load_all(export_all = FALSE,helpers = FALSE,attach_testthat = FALSE)
+options( "golem.app.prod" = TRUE)
+sarcDash::run_app() # add parameters here (if any)
