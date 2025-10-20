@@ -21,8 +21,8 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 6. Consent form signed - 222,20,demographic,consent_form_signed,demo,demo_consent_form_signed
 7. Health maintenance organization - 223,21,demographic,health_maintenance_organization,demo,demo_health_maintenance_organization
 8. Address - 224,22,demographic,address,demo,demo_address
-9. Phone type - 0. Phone type - 225,23,demographic,phone_typephone_type,demo,demo_phone_typephone_type
-9. Phone type - 1. Phone model - 225,24,demographic,phone_typephone_model,demo,demo_phone_typephone_model
+9. Phone type - 0. Phone type - 225,23,demographic,phone_type_phone_type,demo,demo_phone_type_phone_type
+9. Phone type - 1. Phone model - 225,24,demographic,phone_type_phone_model,demo,demo_phone_type_phone_model
 10. Phone number - undefined,25,demographic,phone_number_undefined,demo,demo_phone_number_undefined
 11. Marital status - 226,26,demographic,marital_status,demo,demo_marital_status
 12. Lives with - 227,27,demographic,lives_with,demo,demo_lives_with
@@ -82,9 +82,9 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 8. Year of diagnosis - 256,81,medical,year_of_diagnosis,med,med_year_of_diagnosis
 9. High blood pressure - 258,82,medical,high_blood_pressure,med,med_high_blood_pressure
 10. Hypercholesterolemia - 0.  - 259,83,medical,hypercholesterolemia,med,med_hypercholesterolemia
-11. Cholestrol value - 0. Cholestrol value - 532,84,medical,cholestrol_valuecholestrol_value,med,med_cholestrol_valuecholestrol_value
-11. Cholestrol value - 0. Cholestrol value - Unit - 532,85,medical,cholestrol_valuecholestrol_value_unit,med,med_cholestrol_valuecholestrol_value_unit
-11. Cholestrol value - 1. Date of recording - 532,86,medical,cholestrol_valuedate_of_recording,med,med_cholestrol_valuedate_of_recording
+11. Cholestrol value - 0. Cholestrol value - 532,84,medical,cholestrol_value_cholestrol_value,med,med_cholestrol_value_cholestrol_value
+11. Cholestrol value - 0. Cholestrol value - Unit - 532,85,medical,cholestrol_value_cholestrol_value_unit,med,med_cholestrol_value_cholestrol_value_unit
+11. Cholestrol value - 1. Date of recording - 532,86,medical,cholestrol_value_date_of_recording,med,med_cholestrol_value_date_of_recording
 12. LDL last blood test values - 260,87,medical,ldl_last_blood_test_values,med,med_ldl_last_blood_test_values
 12. LDL last blood test values - Unit - 260,88,medical,ldl_last_blood_test_values_unit,med,med_ldl_last_blood_test_values_unit
 13. Date of last blood test - 261,89,medical,date_of_last_blood_test,med,med_date_of_last_blood_test_v1
@@ -140,7 +140,7 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 53. Use of GLP in the past? - 2. How long was GLP used? - 538,139,medical,use_of_glp_in_the_past_how_long_was_glp_used,med,med_use_of_glp_in_the_past_how_long_was_glp_used
 53. Use of GLP in the past? - 3. Last date of usage? - 538,140,medical,use_of_glp_in_the_past_last_date_of_usage,med,med_use_of_glp_in_the_past_last_date_of_usage
 54. Use of SGLT-2 - 0.  - 450,141,medical,use_of_sglt_2,med,med_use_of_sglt_2
-54. Use of SGLT-2 - 1. Which type of SGLT-2 - 450,142,medical,use_of_sglt_2which_type_of_sglt_2,med,med_use_of_sglt_2which_type_of_sglt_2
+54. Use of SGLT-2 - 1. Which type of SGLT-2 - 450,142,medical,use_of_sglt_2_which_type_of_sglt_2,med,med_use_of_sglt_2_which_type_of_sglt_2
 55. ACE inhibitors - 314,143,medical,ace_inhibitors,med,med_ace_inhibitors
 56. AT-2 - 315,144,medical,at_2,med,med_at_2
 57. Statins - 316,145,medical,statins,med,med_statins
@@ -196,12 +196,12 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 99. LDH value - 361,195,medical,ldh_value,med,med_ldh_value
 99. LDH value - Unit - 361,196,medical,ldh_value_unit,med,med_ldh_value_unit
 100. LDH date of test - 362,197,medical,ldh_date_of_test,med,med_ldh_date_of_test
-101. Body Mass Index - 0. Height (m) - 366,198,physical,body_mass_indexheight_m,phys,phys_body_mass_indexheight_m_v1
-101. Body Mass Index - 0. Height (m) - Unit - 366,199,physical,body_mass_indexheight_m_unit,phys,phys_body_mass_indexheight_m_unit_v1
-101. Body Mass Index - 1. Weight (kg) - 366,200,physical,body_mass_indexweight_kg,phys,phys_body_mass_indexweight_kg_v1
-101. Body Mass Index - 1. Weight (kg) - Unit - 366,201,physical,body_mass_indexweight_kg_unit,phys,phys_body_mass_indexweight_kg_unit_v1
-101. Body Mass Index - 2. BMI - 366,202,physical,body_mass_indexbmi,phys,phys_body_mass_indexbmi_v1
-101. Body Mass Index - 2. BMI - Unit - 366,203,physical,body_mass_indexbmi_unit,phys,phys_body_mass_indexbmi_unit_v1
+101. Body Mass Index - 0. Height (m) - 366,198,physical,body_mass_index_height_m,phys,phys_body_mass_index_height_m_v1
+101. Body Mass Index - 0. Height (m) - Unit - 366,199,physical,body_mass_index_height_m_unit,phys,phys_body_mass_index_height_m_unit_v1
+101. Body Mass Index - 1. Weight (kg) - 366,200,physical,body_mass_index_weight_kg,phys,phys_body_mass_index_weight_kg_v1
+101. Body Mass Index - 1. Weight (kg) - Unit - 366,201,physical,body_mass_index_weight_kg_unit,phys,phys_body_mass_index_weight_kg_unit_v1
+101. Body Mass Index - 2. BMI - 366,202,physical,body_mass_index_bmi,phys,phys_body_mass_index_bmi_v1
+101. Body Mass Index - 2. BMI - Unit - 366,203,physical,body_mass_index_bmi_unit,phys,phys_body_mass_index_bmi_unit_v1
 102. Systolic - 371,204,medical,systolic,med,med_systolic
 102. Systolic - Unit - 371,205,medical,systolic_unit,med,med_systolic_unit
 103. Diastolic - 370,206,medical,diastolic,med,med_diastolic
@@ -222,8 +222,8 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 3. Do you exercise? - 7. Meets resistance exercise guidlines? - 537,221,physical,do_you_exercise_meets_resistance_exercise_guidlines,phys,phys_do_you_exercise_meets_resistance_exercise_guidlines
 4. Result in the physical activity and fitness evaluation questionnaire - 533,222,medical,result_in_the_physical_activity_and_fitness_evaluation_questionnaire,med,med_result_in_the_physical_activity_and_fitness_evaluation_questionnaire
 5. Unintentional weight loss - more than 5% of body weight loss or more than 4.5 kg weight loss in the past year without diet or exercise? - 239,223,physical,unintentional_weight_loss_more_than_5_of_body_weight_loss_or_more_than_4_5_kg_weight_loss_in_the_past_year_without_diet_or_exercise,phys,phys_unintentional_weight_loss_more_than_5_of_body_weight_loss_or_more_than_4_5_kg_weight_loss_in_the_past_year_without_diet_or_exercise
-"6. Fatigue/Exhaustion, difficulty during exercise - according to self-report exhaustion- measured according to two questions from CES-D scale. During the last week you felt that - 0. Everything I do is an effort - 240",224,physical,fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_thateverything_i_do_is_an_effort,phys,phys_fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_thateverything_i_do_is_an_effort
-"6. Fatigue/Exhaustion, difficulty during exercise - according to self-report exhaustion- measured according to two questions from CES-D scale. During the last week you felt that - 1. I had no motivation to ‘get moving’ - 240",225,physical,fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_thati_had_no_motivation_to_get_moving,phys,phys_fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_thati_had_no_motivation_to_get_moving
+"6. Fatigue/Exhaustion, difficulty during exercise - according to self-report exhaustion- measured according to two questions from CES-D scale. During the last week you felt that - 0. Everything I do is an effort - 240",224,physical,fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_that_everything_i_do_is_an_effort,phys,phys_fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_that_everything_i_do_is_an_effort
+"6. Fatigue/Exhaustion, difficulty during exercise - according to self-report exhaustion- measured according to two questions from CES-D scale. During the last week you felt that - 1. I had no motivation to ‘get moving’ - 240",225,physical,fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_that_i_had_no_motivation_to_get_moving,phys,phys_fatigue_exhaustion_difficulty_during_exercise_according_to_self_report_exhaustion_measured_according_to_two_questions_from_ces_d_scale_during_the_last_week_you_felt_that_i_had_no_motivation_to_get_moving
 7. Low level of Physical activity according to the physical activity questionnaire - 244,226,medical,low_level_of_physical_activity_according_to_the_physical_activity_questionnaire,med,med_low_level_of_physical_activity_according_to_the_physical_activity_questionnaire
 8. Slow walk: Walking pace measurement of over seven seconds in order to walk three meters - 245,227,cognitive,slow_walk_walking_pace_measurement_of_over_seven_seconds_in_order_to_walk_three_meters,cog,cog_slow_walk_walking_pace_measurement_of_over_seven_seconds_in_order_to_walk_three_meters
 9. Muscle weakness: Dynamometer measurement that tests hand grip strength. Weakness is defined as results being less then 20% on the scale according to gender and body mass. - 246,228,demographic,muscle_weakness_dynamometer_measurement_that_tests_hand_grip_strength_weakness_is_defined_as_results_being_less_then_20_on_the_scale_according_to_gender_and_body_mass,demo,demo_muscle_weakness_dynamometer_measurement_that_tests_hand_grip_strength_weakness_is_defined_as_results_being_less_then_20_on_the_scale_according_to_gender_and_body_mass
@@ -241,11 +241,11 @@ Submission Tag,12,identifier,submission_tag,id,id_submission_tag
 "17. By yourself and not using aids, do you have any difficulty walking up 10 stairs without resting? - 444",240,physical,by_yourself_and_not_using_aids_do_you_have_any_difficulty_walking_up_10_stairs_without_resting,phys,phys_by_yourself_and_not_using_aids_do_you_have_any_difficulty_walking_up_10_stairs_without_resting
 "18. By yourself and not using aids, do you have any difficulty walking a couple of blocks (e.g. several hundred meters)? - 445",241,physical,by_yourself_and_not_using_aids_do_you_have_any_difficulty_walking_a_couple_of_blocks_e_g_several_hundred_meters,phys,phys_by_yourself_and_not_using_aids_do_you_have_any_difficulty_walking_a_couple_of_blocks_e_g_several_hundred_meters
 "19. Did a doctor ever tell you that you have [illness]? How many? The illnesses include hypertension, diabetes, cancer (other than a minor skin cancer), chronic lung disease, heart attack, congestive heart failure, angina, asthma, arthritis, stroke, and kidney disease. - 446",242,physical,did_a_doctor_ever_tell_you_that_you_have_illness_how_many_the_illnesses_include_hypertension_diabetes_cancer_other_than_a_minor_skin_cancer_chronic_lung_disease_heart_attack_congestive_heart_failure_angina_asthma_arthritis_stroke_and_kidney_disease,phys,phys_did_a_doctor_ever_tell_you_that_you_have_illness_how_many_the_illnesses_include_hypertension_diabetes_cancer_other_than_a_minor_skin_cancer_chronic_lung_disease_heart_attack_congestive_heart_failure_angina_asthma_arthritis_stroke_and_kidney_disease
-20. Loss of weight - 0. Current Weight (kg) - 447,243,physical,loss_of_weightcurrent_weight_kg,phys,phys_loss_of_weightcurrent_weight_kg
-20. Loss of weight - 0. Current Weight (kg) - Unit - 447,244,physical,loss_of_weightcurrent_weight_kg_unit,phys,phys_loss_of_weightcurrent_weight_kg_unit
-20. Loss of weight - 1. Weight 1 year ago (kg) - 447,245,physical,loss_of_weightweight_1_year_ago_kg,phys,phys_loss_of_weightweight_1_year_ago_kg
-20. Loss of weight - 1. Weight 1 year ago (kg) - Unit - 447,246,physical,loss_of_weightweight_1_year_ago_kg_unit,phys,phys_loss_of_weightweight_1_year_ago_kg_unit
-20. Loss of weight - 2. Percent weight change is computed as: - 447,247,physical,loss_of_weightpercent_weight_change_is_computed_as,phys,phys_loss_of_weightpercent_weight_change_is_computed_as
+20. Loss of weight - 0. Current Weight (kg) - 447,243,physical,loss_of_weight_current_weight_kg,phys,phys_loss_of_weight_current_weight_kg
+20. Loss of weight - 0. Current Weight (kg) - Unit - 447,244,physical,loss_of_weight_current_weight_kg_unit,phys,phys_loss_of_weight_current_weight_kg_unit
+20. Loss of weight - 1. Weight 1 year ago (kg) - 447,245,physical,loss_of_weight_weight_1_year_ago_kg,phys,phys_loss_of_weight_weight_1_year_ago_kg
+20. Loss of weight - 1. Weight 1 year ago (kg) - Unit - 447,246,physical,loss_of_weight_weight_1_year_ago_kg_unit,phys,phys_loss_of_weight_weight_1_year_ago_kg_unit
+20. Loss of weight - 2. Percent weight change is computed as: - 447,247,physical,loss_of_weight_percent_weight_change_is_computed_as,phys,phys_loss_of_weight_percent_weight_change_is_computed_as
 21. Automatic calculation of Frail Scale scores - 448,248,physical,automatic_calculation_of_frail_scale_scores,phys,phys_automatic_calculation_of_frail_scale_scores
 22. Categorization - 449,249,physical,categorization,phys,phys_categorization
 23. How much difficulty do you have in lifting and carrying 10 pounds - 434,250,physical,how_much_difficulty_do_you_have_in_lifting_and_carrying_10_pounds,phys,phys_how_much_difficulty_do_you_have_in_lifting_and_carrying_10_pounds
@@ -260,26 +260,26 @@ of 10 stairs? - 437",253,physical,how_much_difficulty_do_you_have_climbing_a_fli
 "27. How many times have you
 fallen in the past year? - 438",254,physical,how_many_times_have_you_fallen_in_the_past_year,phys,phys_how_many_times_have_you_fallen_in_the_past_year
 28. Automatic calculation of SARC-F scores - 439,255,physical,automatic_calculation_of_sarc_f_scores,phys,phys_automatic_calculation_of_sarc_f_scores
-29. Right Hand - 0. Test 1 - 391,256,physical,right_handtest_1,phys,phys_right_handtest_1
-29. Right Hand - 0. Test 1 - Unit - 391,257,physical,right_handtest_1_unit,phys,phys_right_handtest_1_unit
-29. Right Hand - 1. Test 2 - 391,258,physical,right_handtest_2,phys,phys_right_handtest_2
-29. Right Hand - 1. Test 2 - Unit - 391,259,physical,right_handtest_2_unit,phys,phys_right_handtest_2_unit
-29. Right Hand - 2. Test 3 - 391,260,physical,right_handtest_3,phys,phys_right_handtest_3
-29. Right Hand - 2. Test 3 - Unit - 391,261,physical,right_handtest_3_unit,phys,phys_right_handtest_3_unit
-29. Right Hand - 3. Average - 391,262,physical,right_handaverage,phys,phys_right_handaverage
-29. Right Hand - 3. Average - Unit - 391,263,physical,right_handaverage_unit,phys,phys_right_handaverage_unit
-29. Right Hand - 4. Percentile - 391,264,physical,right_handpercentile,phys,phys_right_handpercentile
-29. Right Hand - 4. Percentile - Unit - 391,265,physical,right_handpercentile_unit,phys,phys_right_handpercentile_unit
-30. Left Hand - 0. Test 1 - 396,266,physical,left_handtest_1,phys,phys_left_handtest_1
-30. Left Hand - 0. Test 1 - Unit - 396,267,physical,left_handtest_1_unit,phys,phys_left_handtest_1_unit
-30. Left Hand - 1. Test 2 - 396,268,physical,left_handtest_2,phys,phys_left_handtest_2
-30. Left Hand - 1. Test 2 - Unit - 396,269,physical,left_handtest_2_unit,phys,phys_left_handtest_2_unit
-30. Left Hand - 2. Test 3 - 396,270,physical,left_handtest_3,phys,phys_left_handtest_3
-30. Left Hand - 2. Test 3 - Unit - 396,271,physical,left_handtest_3_unit,phys,phys_left_handtest_3_unit
-30. Left Hand - 3. Average - 396,272,physical,left_handaverage,phys,phys_left_handaverage
-30. Left Hand - 3. Average - Unit - 396,273,physical,left_handaverage_unit,phys,phys_left_handaverage_unit
-30. Left Hand - 4. Percentile - 396,274,physical,left_handpercentile,phys,phys_left_handpercentile
-30. Left Hand - 4. Percentile - Unit - 396,275,physical,left_handpercentile_unit,phys,phys_left_handpercentile_unit
+29. Right Hand - 0. Test 1 - 391,256,physical,right_hand_test_1,phys,phys_right_hand_test_1
+29. Right Hand - 0. Test 1 - Unit - 391,257,physical,right_hand_test_1_unit,phys,phys_right_hand_test_1_unit
+29. Right Hand - 1. Test 2 - 391,258,physical,right_hand_test_2,phys,phys_right_hand_test_2
+29. Right Hand - 1. Test 2 - Unit - 391,259,physical,right_hand_test_2_unit,phys,phys_right_hand_test_2_unit
+29. Right Hand - 2. Test 3 - 391,260,physical,right_hand_test_3,phys,phys_right_hand_test_3
+29. Right Hand - 2. Test 3 - Unit - 391,261,physical,right_hand_test_3_unit,phys,phys_right_hand_test_3_unit
+29. Right Hand - 3. Average - 391,262,physical,right_hand_average,phys,phys_right_hand_average
+29. Right Hand - 3. Average - Unit - 391,263,physical,right_hand_average_unit,phys,phys_right_hand_average_unit
+29. Right Hand - 4. Percentile - 391,264,physical,right_hand_percentile,phys,phys_right_hand_percentile
+29. Right Hand - 4. Percentile - Unit - 391,265,physical,right_hand_percentile_unit,phys,phys_right_hand_percentile_unit
+30. Left Hand - 0. Test 1 - 396,266,physical,left_hand_test_1,phys,phys_left_hand_test_1
+30. Left Hand - 0. Test 1 - Unit - 396,267,physical,left_hand_test_1_unit,phys,phys_left_hand_test_1_unit
+30. Left Hand - 1. Test 2 - 396,268,physical,left_hand_test_2,phys,phys_left_hand_test_2
+30. Left Hand - 1. Test 2 - Unit - 396,269,physical,left_hand_test_2_unit,phys,phys_left_hand_test_2_unit
+30. Left Hand - 2. Test 3 - 396,270,physical,left_hand_test_3,phys,phys_left_hand_test_3
+30. Left Hand - 2. Test 3 - Unit - 396,271,physical,left_hand_test_3_unit,phys,phys_left_hand_test_3_unit
+30. Left Hand - 3. Average - 396,272,physical,left_hand_average,phys,phys_left_hand_average
+30. Left Hand - 3. Average - Unit - 396,273,physical,left_hand_average_unit,phys,phys_left_hand_average_unit
+30. Left Hand - 4. Percentile - 396,274,physical,left_hand_percentile,phys,phys_left_hand_percentile
+30. Left Hand - 4. Percentile - Unit - 396,275,physical,left_hand_percentile_unit,phys,phys_left_hand_percentile_unit
 31. Number of times reached full standing - 416,276,physical,number_of_times_reached_full_standing,phys,phys_number_of_times_reached_full_standing
 32. Was the test modified? - 421,277,medical,was_the_test_modified,med,med_was_the_test_modified_v1
 33. Distance - 401,278,physical,distance,phys,phys_distance
@@ -376,7 +376,7 @@ Speed
 36. Dressing? - 0.  - 168,366,cognitive,dressing,cog,cog_dressing
 36. Dressing? - 1. Difficulty? - 168,367,cognitive,dressing_difficulty,cog,cog_dressing_difficulty
 37. Getting up from chair or toilet - 0.  - 170,368,medical,getting_up_from_chair_or_toilet,med,med_getting_up_from_chair_or_toilet
-37. Getting up from chair or toilet - 1. Difficulty? - 170,369,medical,getting_up_from_chair_or_toiletdifficulty,med,med_getting_up_from_chair_or_toiletdifficulty
+37. Getting up from chair or toilet - 1. Difficulty? - 170,369,medical,getting_up_from_chair_or_toilet_difficulty,med,med_getting_up_from_chair_or_toilet_difficulty
 38. Get up - Do you require help? - 0.  - 172,370,medical,get_up_do_you_require_help,med,med_get_up_do_you_require_help
 38. Get up - Do you require help? - 1. Get up - Help required - 172,371,medical,get_up_do_you_require_help_get_up_help_required,med,med_get_up_do_you_require_help_get_up_help_required
 38. Get up - Do you require help? - 2. Other - 172,372,medical,get_up_do_you_require_help_other,med,med_get_up_do_you_require_help_other
@@ -425,13 +425,13 @@ Speed
 3. AE - 1.  - 523,415,medical,ae,med,med_ae_v2
 3. AE - 2.  - 523,416,medical,ae,med,med_ae_v3
 4. Serious adverse event - 0.  - 115,417,adverse_events,serious_adverse_event,ae,ae_serious_adverse_event
-4. Serious adverse event - 1. if SAE - 115,418,adverse_events,serious_adverse_eventif_sae,ae,ae_serious_adverse_eventif_sae_v1
-4. Serious adverse event - 2. if SAE - 115,419,adverse_events,serious_adverse_eventif_sae,ae,ae_serious_adverse_eventif_sae_v2
-4. Serious adverse event - 3. SAE criteria - 115,420,adverse_events,serious_adverse_eventsae_criteria,ae,ae_serious_adverse_eventsae_criteria
-4. Serious adverse event - 4. Severity - 115,421,adverse_events,serious_adverse_eventseverity,ae,ae_serious_adverse_eventseverity
-4. Serious adverse event - 5. Relationship - 115,422,adverse_events,serious_adverse_eventrelationship,ae,ae_serious_adverse_eventrelationship
-4. Serious adverse event - 6. Action taken - 115,423,adverse_events,serious_adverse_eventaction_taken,ae,ae_serious_adverse_eventaction_taken
-4. Serious adverse event - 7. Outcome of AE - 115,424,adverse_events,serious_adverse_eventoutcome_of_ae,ae,ae_serious_adverse_eventoutcome_of_ae
+4. Serious adverse event - 1. if SAE - 115,418,adverse_events,serious_adverse_event_if_sae,ae,ae_serious_adverse_event_if_sae_v1
+4. Serious adverse event - 2. if SAE - 115,419,adverse_events,serious_adverse_event_if_sae,ae,ae_serious_adverse_event_if_sae_v2
+4. Serious adverse event - 3. SAE criteria - 115,420,adverse_events,serious_adverse_event_sae_criteria,ae,ae_serious_adverse_event_sae_criteria
+4. Serious adverse event - 4. Severity - 115,421,adverse_events,serious_adverse_event_severity,ae,ae_serious_adverse_event_severity
+4. Serious adverse event - 5. Relationship - 115,422,adverse_events,serious_adverse_event_relationship,ae,ae_serious_adverse_event_relationship
+4. Serious adverse event - 6. Action taken - 115,423,adverse_events,serious_adverse_event_action_taken,ae,ae_serious_adverse_event_action_taken
+4. Serious adverse event - 7. Outcome of AE - 115,424,adverse_events,serious_adverse_event_outcome_of_ae,ae,ae_serious_adverse_event_outcome_of_ae
 5. Severe hypoglycemia - 118,425,medical,severe_hypoglycemia,med,med_severe_hypoglycemia
 6. Did you fall? - 0.  - 107,426,adverse_events,did_you_fall,ae,ae_did_you_fall_v4
 6. Did you fall? - 1.  - 107,427,adverse_events,did_you_fall,ae,ae_did_you_fall_v5
@@ -440,32 +440,32 @@ Speed
 7. Fracture - 0.  - 108,430,adverse_events,fracture,ae,ae_fracture_v1
 7. Fracture - 1.  - 108,431,adverse_events,fracture,ae,ae_fracture_v2
 7. Fracture - 2.  - 108,432,adverse_events,fracture,ae,ae_fracture_v3
-7. Fracture - 3. End date - 108,433,adverse_events,fractureend_date,ae,ae_fractureend_date
+7. Fracture - 3. End date - 108,433,adverse_events,fracture_end_date,ae,ae_fracture_end_date
 8. ER admission - 0.  - 110,434,adverse_events,er_admission,ae,ae_er_admission_v1
 8. ER admission - 1.  - 110,435,adverse_events,er_admission,ae,ae_er_admission_v2
-8. ER admission - 2. Start date - 110,436,adverse_events,er_admissionstart_date,ae,ae_er_admissionstart_date
-8. ER admission - 3. End date - 110,437,adverse_events,er_admissionend_date,ae,ae_er_admissionend_date
+8. ER admission - 2. Start date - 110,436,adverse_events,er_admission_start_date,ae,ae_er_admission_start_date
+8. ER admission - 3. End date - 110,437,adverse_events,er_admission_end_date,ae,ae_er_admission_end_date
 9. Hospitalization - 0.  - 109,438,medical,hospitalization,med,med_hospitalization_v1
 9. Hospitalization - 1.  - 109,439,medical,hospitalization,med,med_hospitalization_v2
-9. Hospitalization - 2. Start date - 109,440,medical,hospitalizationstart_date,med,med_hospitalizationstart_date
-9. Hospitalization - 3. End date - 109,441,medical,hospitalizationend_date,med,med_hospitalizationend_date
+9. Hospitalization - 2. Start date - 109,440,medical,hospitalization_start_date,med,med_hospitalization_start_date
+9. Hospitalization - 3. End date - 109,441,medical,hospitalization_end_date,med,med_hospitalization_end_date
 10. Institutionalization - 0.  - 111,442,adverse_events,institutionalization,ae,ae_institutionalization_v1
 10. Institutionalization - 1.  - 111,443,adverse_events,institutionalization,ae,ae_institutionalization_v2
-10. Institutionalization - 2. Start date - 111,444,adverse_events,institutionalizationstart_date,ae,ae_institutionalizationstart_date
-10. Institutionalization - 3. End date - 111,445,adverse_events,institutionalizationend_date,ae,ae_institutionalizationend_date
+10. Institutionalization - 2. Start date - 111,444,adverse_events,institutionalization_start_date,ae,ae_institutionalization_start_date
+10. Institutionalization - 3. End date - 111,445,adverse_events,institutionalization_end_date,ae,ae_institutionalization_end_date
 11. New Disability - 0.  - 112,446,adverse_events,new_disability,ae,ae_new_disability_v1
 11. New Disability - 1.  - 112,447,adverse_events,new_disability,ae,ae_new_disability_v2
-11. New Disability - 2. Start date - 112,448,adverse_events,new_disabilitystart_date,ae,ae_new_disabilitystart_date
-11. New Disability - 3. End date - 112,449,adverse_events,new_disabilityend_date,ae,ae_new_disabilityend_date
+11. New Disability - 2. Start date - 112,448,adverse_events,new_disability_start_date,ae,ae_new_disability_start_date
+11. New Disability - 3. End date - 112,449,adverse_events,new_disability_end_date,ae,ae_new_disability_end_date
 11. New Disability - 4.  - 112,450,adverse_events,new_disability,ae,ae_new_disability_v3
 12. Other - 0.  - 113,451,medical,other,med,med_other_v1
 12. Other - 1.  - 113,452,medical,other,med,med_other_v2
-12. Other - 2. Start date - 113,453,medical,otherstart_date,med,med_otherstart_date
-12. Other - 3. End date - 113,454,medical,otherend_date,med,med_otherend_date
+12. Other - 2. Start date - 113,453,medical,other_start_date,med,med_other_start_date
+12. Other - 3. End date - 113,454,medical,other_end_date,med,med_other_end_date
 13. Death - 0.  - 114,455,adverse_events,death,ae,ae_death_v1
 13. Death - 1.  - 114,456,adverse_events,death,ae,ae_death_v2
 13. Death - 2.  - 114,457,adverse_events,death,ae,ae_death_v3
-13. Death - 3. End date - 114,458,adverse_events,deathend_date,ae,ae_deathend_date
+13. Death - 3. End date - 114,458,adverse_events,death_end_date,ae,ae_death_end_date
 14. Gastrointestinal Adverse Events - 0.  - 513,459,medical,gastrointestinal_adverse_events,med,med_gastrointestinal_adverse_events
 14. Gastrointestinal Adverse Events - Nausea - 513,460,medical,gastrointestinal_adverse_events_nausea,med,med_gastrointestinal_adverse_events_nausea
 14. Gastrointestinal Adverse Events - Vomiting - 513,461,medical,gastrointestinal_adverse_events_vomiting,med,med_gastrointestinal_adverse_events_vomiting
@@ -517,63 +517,63 @@ Speed
 8. VAT - Visceral Adipose Tissue (Litre) - Unit - 385,507,physical,vat_visceral_adipose_tissue_litre_unit,phys,phys_vat_visceral_adipose_tissue_litre_unit
 9. Fat (%) - 386,508,medical,fat,med,med_fat
 9. Fat (%) - Unit - 386,509,medical,fat_unit,med,med_fat_unit
-10. Waist to hip ratio - 0. Waist circumference  - 440,510,physical,waist_to_hip_ratiowaist_circumference,phys,phys_waist_to_hip_ratiowaist_circumference
-10. Waist to hip ratio - 0. Waist circumference  - Unit - 440,511,physical,waist_to_hip_ratiowaist_circumference_unit,phys,phys_waist_to_hip_ratiowaist_circumference_unit
-10. Waist to hip ratio - 1. Hip circumference - 440,512,physical,waist_to_hip_ratiohip_circumference,phys,phys_waist_to_hip_ratiohip_circumference
-10. Waist to hip ratio - 1. Hip circumference - Unit - 440,513,physical,waist_to_hip_ratiohip_circumference_unit,phys,phys_waist_to_hip_ratiohip_circumference_unit
-10. Waist to hip ratio - 2. Waist to hip ratio - 440,514,physical,waist_to_hip_ratiowaist_to_hip_ratio,phys,phys_waist_to_hip_ratiowaist_to_hip_ratio
-10. Waist to hip ratio - 2. Waist to hip ratio - Unit - 440,515,physical,waist_to_hip_ratiowaist_to_hip_ratio_unit,phys,phys_waist_to_hip_ratiowaist_to_hip_ratio_unit
-11. Calf circumference - 0. Right - 535,516,physical,calf_circumferenceright,phys,phys_calf_circumferenceright
-11. Calf circumference - 0. Right - Unit - 535,517,physical,calf_circumferenceright_unit,phys,phys_calf_circumferenceright_unit
-11. Calf circumference - 1. Left - 535,518,physical,calf_circumferenceleft,phys,phys_calf_circumferenceleft
-11. Calf circumference - 1. Left - Unit - 535,519,physical,calf_circumferenceleft_unit,phys,phys_calf_circumferenceleft_unit
-12. Body Mass Index - 0. Height (m) - 366,520,physical,body_mass_indexheight_m,phys,phys_body_mass_indexheight_m_v2
-12. Body Mass Index - 0. Height (m) - Unit - 366,521,physical,body_mass_indexheight_m_unit,phys,phys_body_mass_indexheight_m_unit_v2
-12. Body Mass Index - 1. Weight (kg) - 366,522,physical,body_mass_indexweight_kg,phys,phys_body_mass_indexweight_kg_v2
-12. Body Mass Index - 1. Weight (kg) - Unit - 366,523,physical,body_mass_indexweight_kg_unit,phys,phys_body_mass_indexweight_kg_unit_v2
-12. Body Mass Index - 2. BMI - 366,524,physical,body_mass_indexbmi,phys,phys_body_mass_indexbmi_v2
-12. Body Mass Index - 2. BMI - Unit - 366,525,physical,body_mass_indexbmi_unit,phys,phys_body_mass_indexbmi_unit_v2
+10. Waist to hip ratio - 0. Waist circumference  - 440,510,physical,waist_to_hip_ratio_waist_circumference,phys,phys_waist_to_hip_ratio_waist_circumference
+10. Waist to hip ratio - 0. Waist circumference  - Unit - 440,511,physical,waist_to_hip_ratio_waist_circumference_unit,phys,phys_waist_to_hip_ratio_waist_circumference_unit
+10. Waist to hip ratio - 1. Hip circumference - 440,512,physical,waist_to_hip_ratio_hip_circumference,phys,phys_waist_to_hip_ratio_hip_circumference
+10. Waist to hip ratio - 1. Hip circumference - Unit - 440,513,physical,waist_to_hip_ratio_hip_circumference_unit,phys,phys_waist_to_hip_ratio_hip_circumference_unit
+10. Waist to hip ratio - 2. Waist to hip ratio - 440,514,physical,waist_to_hip_ratio_waist_to_hip_ratio,phys,phys_waist_to_hip_ratio_waist_to_hip_ratio
+10. Waist to hip ratio - 2. Waist to hip ratio - Unit - 440,515,physical,waist_to_hip_ratio_waist_to_hip_ratio_unit,phys,phys_waist_to_hip_ratio_waist_to_hip_ratio_unit
+11. Calf circumference - 0. Right - 535,516,physical,calf_circumference_right,phys,phys_calf_circumference_right
+11. Calf circumference - 0. Right - Unit - 535,517,physical,calf_circumference_right_unit,phys,phys_calf_circumference_right_unit
+11. Calf circumference - 1. Left - 535,518,physical,calf_circumference_left,phys,phys_calf_circumference_left
+11. Calf circumference - 1. Left - Unit - 535,519,physical,calf_circumference_left_unit,phys,phys_calf_circumference_left_unit
+12. Body Mass Index - 0. Height (m) - 366,520,physical,body_mass_index_height_m,phys,phys_body_mass_index_height_m_v2
+12. Body Mass Index - 0. Height (m) - Unit - 366,521,physical,body_mass_index_height_m_unit,phys,phys_body_mass_index_height_m_unit_v2
+12. Body Mass Index - 1. Weight (kg) - 366,522,physical,body_mass_index_weight_kg,phys,phys_body_mass_index_weight_kg_v2
+12. Body Mass Index - 1. Weight (kg) - Unit - 366,523,physical,body_mass_index_weight_kg_unit,phys,phys_body_mass_index_weight_kg_unit_v2
+12. Body Mass Index - 2. BMI - 366,524,physical,body_mass_index_bmi,phys,phys_body_mass_index_bmi_v2
+12. Body Mass Index - 2. BMI - Unit - 366,525,physical,body_mass_index_bmi_unit,phys,phys_body_mass_index_bmi_unit_v2
 Adherence Form,526,medical,adherence_form,med,med_adherence_form
 1. Drug Injection - 0.  - 504,527,adherence,drug_injection,adh,adh_drug_injection_v1
-1. Drug Injection - 1. Dose - 504,528,adherence,drug_injectiondose,adh,adh_drug_injectiondose
-1. Drug Injection - 1. Dose - Unit - 504,529,adherence,drug_injectiondose_unit,adh,adh_drug_injectiondose_unit
+1. Drug Injection - 1. Dose - 504,528,adherence,drug_injection_dose,adh,adh_drug_injection_dose
+1. Drug Injection - 1. Dose - Unit - 504,529,adherence,drug_injection_dose_unit,adh,adh_drug_injection_dose_unit
 1. Drug Injection - 2.  - 504,530,adherence,drug_injection,adh,adh_drug_injection_v2
-1. Drug Injection - 3. Date - 504,531,adherence,drug_injectiondate,adh,adh_drug_injectiondate
-2. Week 1 - 0. Dose - 540,532,adherence,week_1dose,adh,adh_week_1dose
-2. Week 1 - 0. Dose - Unit - 540,533,adherence,week_1dose_unit,adh,adh_week_1dose_unit
+1. Drug Injection - 3. Date - 504,531,adherence,drug_injection_date,adh,adh_drug_injection_date
+2. Week 1 - 0. Dose - 540,532,adherence,week_1_dose,adh,adh_week_1_dose
+2. Week 1 - 0. Dose - Unit - 540,533,adherence,week_1_dose_unit,adh,adh_week_1_dose_unit
 2. Week 1 - 1.  - 540,534,adherence,week_1,adh,adh_week_1
-2. Week 1 - 2. Date - 540,535,adherence,week_1date,adh,adh_week_1date
-3. Week 2 - 0. Dose - 541,536,adherence,week_2dose,adh,adh_week_2dose
-3. Week 2 - 0. Dose - Unit - 541,537,adherence,week_2dose_unit,adh,adh_week_2dose_unit
+2. Week 1 - 2. Date - 540,535,adherence,week_1_date,adh,adh_week_1_date
+3. Week 2 - 0. Dose - 541,536,adherence,week_2_dose,adh,adh_week_2_dose
+3. Week 2 - 0. Dose - Unit - 541,537,adherence,week_2_dose_unit,adh,adh_week_2_dose_unit
 3. Week 2 - 1.  - 541,538,adherence,week_2,adh,adh_week_2
-3. Week 2 - 2. Date - 541,539,adherence,week_2date,adh,adh_week_2date
-4. Week 3 - 0. Dose - 542,540,adherence,week_3dose,adh,adh_week_3dose
-4. Week 3 - 0. Dose - Unit - 542,541,adherence,week_3dose_unit,adh,adh_week_3dose_unit
+3. Week 2 - 2. Date - 541,539,adherence,week_2_date,adh,adh_week_2_date
+4. Week 3 - 0. Dose - 542,540,adherence,week_3_dose,adh,adh_week_3_dose
+4. Week 3 - 0. Dose - Unit - 542,541,adherence,week_3_dose_unit,adh,adh_week_3_dose_unit
 4. Week 3 - 1.  - 542,542,adherence,week_3,adh,adh_week_3
-4. Week 3 - 2. Date - 542,543,adherence,week_3date,adh,adh_week_3date
-5. Week 4 - 0. Dose - 543,544,adherence,week_4dose,adh,adh_week_4dose
-5. Week 4 - 0. Dose - Unit - 543,545,adherence,week_4dose_unit,adh,adh_week_4dose_unit
+4. Week 3 - 2. Date - 542,543,adherence,week_3_date,adh,adh_week_3_date
+5. Week 4 - 0. Dose - 543,544,adherence,week_4_dose,adh,adh_week_4_dose
+5. Week 4 - 0. Dose - Unit - 543,545,adherence,week_4_dose_unit,adh,adh_week_4_dose_unit
 5. Week 4 - 1.  - 543,546,adherence,week_4,adh,adh_week_4
-5. Week 4 - 2. Date - 543,547,adherence,week_4date,adh,adh_week_4date
+5. Week 4 - 2. Date - 543,547,adherence,week_4_date,adh,adh_week_4_date
 6. Number of weekly recommended study exercise sessions - 539,548,adherence,number_of_weekly_recommended_study_exercise_sessions,adh,adh_number_of_weekly_recommended_study_exercise_sessions
 7. How many study exercise sessions did you participate in during the past week? - 505,549,adherence,how_many_study_exercise_sessions_did_you_participate_in_during_the_past_week,adh,adh_how_many_study_exercise_sessions_did_you_participate_in_during_the_past_week
 8. Exercise Session 1 - 0.  - 506,550,adherence,exercise_session_1,adh,adh_exercise_session_1
-8. Exercise Session 1 - 1. Date - 506,551,adherence,exercise_session_1date,adh,adh_exercise_session_1date
-8. Exercise Session 1 - 2. Duration - 506,552,adherence,exercise_session_1duration,adh,adh_exercise_session_1duration
-8. Exercise Session 1 - 3. Type - 506,553,adherence,exercise_session_1type,adh,adh_exercise_session_1type
-8. Exercise Session 1 - 4. Intensity - 506,554,adherence,exercise_session_1intensity,adh,adh_exercise_session_1intensity
+8. Exercise Session 1 - 1. Date - 506,551,adherence,exercise_session_1_date,adh,adh_exercise_session_1_date
+8. Exercise Session 1 - 2. Duration - 506,552,adherence,exercise_session_1_duration,adh,adh_exercise_session_1_duration
+8. Exercise Session 1 - 3. Type - 506,553,adherence,exercise_session_1_type,adh,adh_exercise_session_1_type
+8. Exercise Session 1 - 4. Intensity - 506,554,adherence,exercise_session_1_intensity,adh,adh_exercise_session_1_intensity
 9. Exercise Session 2 - 0.  - 507,555,adherence,exercise_session_2,adh,adh_exercise_session_2
-9. Exercise Session 2 - 1. Date - 507,556,adherence,exercise_session_2date,adh,adh_exercise_session_2date
-9. Exercise Session 2 - 2. Duration - 507,557,adherence,exercise_session_2duration,adh,adh_exercise_session_2duration
-9. Exercise Session 2 - 3. Type - 507,558,adherence,exercise_session_2type,adh,adh_exercise_session_2type
-9. Exercise Session 2 - 4. Intensity - 507,559,adherence,exercise_session_2intensity,adh,adh_exercise_session_2intensity
+9. Exercise Session 2 - 1. Date - 507,556,adherence,exercise_session_2_date,adh,adh_exercise_session_2_date
+9. Exercise Session 2 - 2. Duration - 507,557,adherence,exercise_session_2_duration,adh,adh_exercise_session_2_duration
+9. Exercise Session 2 - 3. Type - 507,558,adherence,exercise_session_2_type,adh,adh_exercise_session_2_type
+9. Exercise Session 2 - 4. Intensity - 507,559,adherence,exercise_session_2_intensity,adh,adh_exercise_session_2_intensity
 10. Exercise Session 3 - 0.  - 508,560,adherence,exercise_session_3,adh,adh_exercise_session_3
-10. Exercise Session 3 - 1. Date - 508,561,adherence,exercise_session_3date,adh,adh_exercise_session_3date
-10. Exercise Session 3 - 2. Duration - 508,562,adherence,exercise_session_3duration,adh,adh_exercise_session_3duration
-10. Exercise Session 3 - 3. Type - 508,563,adherence,exercise_session_3type,adh,adh_exercise_session_3type
-10. Exercise Session 3 - 4. Intensity - 508,564,adherence,exercise_session_3intensity,adh,adh_exercise_session_3intensity
+10. Exercise Session 3 - 1. Date - 508,561,adherence,exercise_session_3_date,adh,adh_exercise_session_3_date
+10. Exercise Session 3 - 2. Duration - 508,562,adherence,exercise_session_3_duration,adh,adh_exercise_session_3_duration
+10. Exercise Session 3 - 3. Type - 508,563,adherence,exercise_session_3_type,adh,adh_exercise_session_3_type
+10. Exercise Session 3 - 4. Intensity - 508,564,adherence,exercise_session_3_intensity,adh,adh_exercise_session_3_intensity
 11. Exercise Session 4 - 0.  - 509,565,adherence,exercise_session_4,adh,adh_exercise_session_4
-11. Exercise Session 4 - 1. Date - 509,566,adherence,exercise_session_4date,adh,adh_exercise_session_4date
-11. Exercise Session 4 - 2. Duration - 509,567,adherence,exercise_session_4duration,adh,adh_exercise_session_4duration
-11. Exercise Session 4 - 3. Type - 509,568,adherence,exercise_session_4type,adh,adh_exercise_session_4type
-11. Exercise Session 4 - 4. Intensity - 509,569,adherence,exercise_session_4intensity,adh,adh_exercise_session_4intensity
+11. Exercise Session 4 - 1. Date - 509,566,adherence,exercise_session_4_date,adh,adh_exercise_session_4_date
+11. Exercise Session 4 - 2. Duration - 509,567,adherence,exercise_session_4_duration,adh,adh_exercise_session_4_duration
+11. Exercise Session 4 - 3. Type - 509,568,adherence,exercise_session_4_type,adh,adh_exercise_session_4_type
+11. Exercise Session 4 - 4. Intensity - 509,569,adherence,exercise_session_4_intensity,adh,adh_exercise_session_4_intensity

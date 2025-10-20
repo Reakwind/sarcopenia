@@ -1,0 +1,537 @@
+{
+  "languages": ["en", "he"],
+  "translation": [
+    {
+      "en": "Sarcopenia Study Dashboard",
+      "he": "לוח בקרה למחקר סרקופניה"
+    },
+    {
+      "en": "Language",
+      "he": "שפה"
+    },
+    {
+      "en": "English",
+      "he": "אנגלית"
+    },
+    {
+      "en": "Hebrew",
+      "he": "עברית"
+    },
+    {
+      "en": "Theme",
+      "he": "ערכת נושא"
+    },
+    {
+      "en": "Light",
+      "he": "בהיר"
+    },
+    {
+      "en": "Dark",
+      "he": "כהה"
+    },
+    {
+      "en": "Home",
+      "he": "בית"
+    },
+    {
+      "en": "Data Dictionary",
+      "he": "מילון נתונים"
+    },
+    {
+      "en": "Cohort Builder",
+      "he": "בניית קבוצת מחקר"
+    },
+    {
+      "en": "Demographics",
+      "he": "דמוגרפיה"
+    },
+    {
+      "en": "Cognitive",
+      "he": "קוגניציה"
+    },
+    {
+      "en": "Medical",
+      "he": "רפואי"
+    },
+    {
+      "en": "Physical",
+      "he": "פיזי"
+    },
+    {
+      "en": "Adherence",
+      "he": "היענות"
+    },
+    {
+      "en": "Adverse Events",
+      "he": "אירועים שליליים"
+    },
+    {
+      "en": "Longitudinal",
+      "he": "אורכי"
+    },
+    {
+      "en": "Quality Checks",
+      "he": "בדיקות איכות"
+    },
+    {
+      "en": "Settings",
+      "he": "הגדרות"
+    },
+    {
+      "en": "Dataset Health",
+      "he": "תקינות נתונים"
+    },
+    {
+      "en": "Total Rows",
+      "he": "סה\"כ שורות"
+    },
+    {
+      "en": "Total Columns",
+      "he": "סה\"כ עמודות"
+    },
+    {
+      "en": "Last Modified",
+      "he": "עדכון אחרון"
+    },
+    {
+      "en": "Healthy",
+      "he": "תקין"
+    },
+    {
+      "en": "Warning",
+      "he": "אזהרה"
+    },
+    {
+      "en": "Error",
+      "he": "שגיאה"
+    },
+    {
+      "en": "Loading...",
+      "he": "טוען..."
+    },
+    {
+      "en": "Search",
+      "he": "חיפוש"
+    },
+    {
+      "en": "Filter",
+      "he": "סינון"
+    },
+    {
+      "en": "Reset",
+      "he": "איפוס"
+    },
+    {
+      "en": "Export",
+      "he": "ייצוא"
+    },
+    {
+      "en": "Download",
+      "he": "הורדה"
+    },
+    {
+      "en": "Apply",
+      "he": "החל"
+    },
+    {
+      "en": "Cancel",
+      "he": "ביטול"
+    },
+    {
+      "en": "Close",
+      "he": "סגור"
+    },
+    {
+      "en": "Save",
+      "he": "שמור"
+    },
+    {
+      "en": "Age",
+      "he": "גיל"
+    },
+    {
+      "en": "Gender",
+      "he": "מגדר"
+    },
+    {
+      "en": "Male",
+      "he": "זכר"
+    },
+    {
+      "en": "Female",
+      "he": "נקבה"
+    },
+    {
+      "en": "Visit Date",
+      "he": "תאריך ביקור"
+    },
+    {
+      "en": "Visit Number",
+      "he": "מספר ביקור"
+    },
+    {
+      "en": "Patient ID",
+      "he": "מזהה מטופל"
+    },
+    {
+      "en": "Patients",
+      "he": "מטופלים"
+    },
+    {
+      "en": "Visits",
+      "he": "ביקורים"
+    },
+    {
+      "en": "N Patients",
+      "he": "מס' מטופלים"
+    },
+    {
+      "en": "N Visits",
+      "he": "מס' ביקורים"
+    },
+    {
+      "en": "Age Range",
+      "he": "טווח גילאים"
+    },
+    {
+      "en": "Median",
+      "he": "חציון"
+    },
+    {
+      "en": "Mean",
+      "he": "ממוצע"
+    },
+    {
+      "en": "Standard Deviation",
+      "he": "סטיית תקן"
+    },
+    {
+      "en": "Min",
+      "he": "מינימום"
+    },
+    {
+      "en": "Max",
+      "he": "מקסימום"
+    },
+    {
+      "en": "Distribution",
+      "he": "התפלגות"
+    },
+    {
+      "en": "DSST Score",
+      "he": "ציון DSST"
+    },
+    {
+      "en": "MoCA Score",
+      "he": "ציון MoCA"
+    },
+    {
+      "en": "HbA1c",
+      "he": "המוגלובין מסוכרר"
+    },
+    {
+      "en": "BMI",
+      "he": "מדד מסת גוף"
+    },
+    {
+      "en": "Blood Pressure",
+      "he": "לחץ דם"
+    },
+    {
+      "en": "Systolic",
+      "he": "סיסטולי"
+    },
+    {
+      "en": "Diastolic",
+      "he": "דיאסטולי"
+    },
+    {
+      "en": "Education Years",
+      "he": "שנות לימוד"
+    },
+    {
+      "en": "Diabetes Duration",
+      "he": "משך סוכרת"
+    },
+    {
+      "en": "Missingness",
+      "he": "ערכים חסרים"
+    },
+    {
+      "en": "Missing",
+      "he": "חסר"
+    },
+    {
+      "en": "Complete",
+      "he": "שלם"
+    },
+    {
+      "en": "Variable",
+      "he": "משתנה"
+    },
+    {
+      "en": "Type",
+      "he": "סוג"
+    },
+    {
+      "en": "Domain",
+      "he": "תחום"
+    },
+    {
+      "en": "Description",
+      "he": "תיאור"
+    },
+    {
+      "en": "Original Name",
+      "he": "שם מקורי"
+    },
+    {
+      "en": "New Name",
+      "he": "שם חדש"
+    },
+    {
+      "en": "Filters",
+      "he": "מסננים"
+    },
+    {
+      "en": "Active Filters",
+      "he": "מסננים פעילים"
+    },
+    {
+      "en": "Reset Filters",
+      "he": "אפס מסננים"
+    },
+    {
+      "en": "Save Filter Set",
+      "he": "שמור קבוצת מסננים"
+    },
+    {
+      "en": "Load Filter Set",
+      "he": "טען קבוצת מסננים"
+    },
+    {
+      "en": "Cohort Summary",
+      "he": "סיכום קוהורט"
+    },
+    {
+      "en": "Selected",
+      "he": "נבחר"
+    },
+    {
+      "en": "All",
+      "he": "הכל"
+    },
+    {
+      "en": "None",
+      "he": "ללא"
+    },
+    {
+      "en": "Both",
+      "he": "שניהם"
+    },
+    {
+      "en": "Change",
+      "he": "שינוי"
+    },
+    {
+      "en": "Baseline",
+      "he": "בסיס"
+    },
+    {
+      "en": "Follow-up",
+      "he": "מעקב"
+    },
+    {
+      "en": "Difference",
+      "he": "הפרש"
+    },
+    {
+      "en": "Paired Analysis",
+      "he": "ניתוח מזווג"
+    },
+    {
+      "en": "Visit 1",
+      "he": "ביקור 1"
+    },
+    {
+      "en": "Visit 2",
+      "he": "ביקור 2"
+    },
+    {
+      "en": "Visit 3",
+      "he": "ביקור 3"
+    },
+    {
+      "en": "Retention",
+      "he": "שימור"
+    },
+    {
+      "en": "Has both visits",
+      "he": "יש שני ביקורים"
+    },
+    {
+      "en": "Outliers",
+      "he": "חריגים"
+    },
+    {
+      "en": "Show Outliers",
+      "he": "הצג חריגים"
+    },
+    {
+      "en": "Hide Outliers",
+      "he": "הסתר חריגים"
+    },
+    {
+      "en": "Flagged Values",
+      "he": "ערכים מסומנים"
+    },
+    {
+      "en": "Value",
+      "he": "ערך"
+    },
+    {
+      "en": "Percentile",
+      "he": "אחוזון"
+    },
+    {
+      "en": "Severity",
+      "he": "חומרה"
+    },
+    {
+      "en": "Mild",
+      "he": "קל"
+    },
+    {
+      "en": "Moderate",
+      "he": "בינוני"
+    },
+    {
+      "en": "Severe",
+      "he": "חמור"
+    },
+    {
+      "en": "Date",
+      "he": "תאריך"
+    },
+    {
+      "en": "Event Type",
+      "he": "סוג אירוע"
+    },
+    {
+      "en": "Timeline",
+      "he": "ציר זמן"
+    },
+    {
+      "en": "Rate per 100 patient-years",
+      "he": "שיעור לכל 100 שנות מטופל"
+    },
+    {
+      "en": "No data available",
+      "he": "אין נתונים זמינים"
+    },
+    {
+      "en": "Failed to load data",
+      "he": "נכשל בטעינת נתונים"
+    },
+    {
+      "en": "Start Tour",
+      "he": "התחל סיור"
+    },
+    {
+      "en": "Next",
+      "he": "הבא"
+    },
+    {
+      "en": "Previous",
+      "he": "הקודם"
+    },
+    {
+      "en": "Finish",
+      "he": "סיים"
+    },
+    {
+      "en": "Skip Tour",
+      "he": "דלג על סיור"
+    },
+    {
+      "en": "PHI Warning",
+      "he": "אזהרת מידע מזהה"
+    },
+    {
+      "en": "This dashboard contains protected health information. Do not share screenshots or exports.",
+      "he": "לוח בקרה זה מכיל מידע רפואי מוגן. אין לשתף צילומי מסך או קבצים מיוצאים."
+    },
+    {
+      "en": "I Understand",
+      "he": "הבנתי"
+    },
+    {
+      "en": "Quick Actions",
+      "he": "פעולות מהירות"
+    },
+    {
+      "en": "Build Cohort",
+      "he": "בנה קוהורט"
+    },
+    {
+      "en": "Explore Domains",
+      "he": "חקור תחומים"
+    },
+    {
+      "en": "Run QC",
+      "he": "הרץ בקרת איכות"
+    },
+    {
+      "en": "Export Data",
+      "he": "ייצוא נתונים"
+    },
+    {
+      "en": "Accessibility",
+      "he": "נגישות"
+    },
+    {
+      "en": "High Contrast",
+      "he": "ניגודיות גבוהה"
+    },
+    {
+      "en": "Font Size",
+      "he": "גודל גופן"
+    },
+    {
+      "en": "Skip to content",
+      "he": "דלג לתוכן"
+    },
+    {
+      "en": "Skip to filters",
+      "he": "דלג למסננים"
+    },
+    {
+      "en": "Performance",
+      "he": "ביצועים"
+    },
+    {
+      "en": "Enable caching",
+      "he": "הפעל מטמון"
+    },
+    {
+      "en": "Max plot points",
+      "he": "מקס' נקודות בגרף"
+    },
+    {
+      "en": "Correlation",
+      "he": "מתאם"
+    },
+    {
+      "en": "P-value",
+      "he": "ערך P"
+    },
+    {
+      "en": "Confidence Interval",
+      "he": "רווח סמך"
+    },
+    {
+      "en": "Sample Size",
+      "he": "גודל מדגם"
+    }
+  ]
+}
