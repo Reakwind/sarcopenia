@@ -44,4 +44,12 @@ app_server <- function(input, output, session) {
 
   # Make cohort data available to other modules
   session$userData$cohort_data <- cohort_data
+
+  # Domain modules
+  mod_domain_server("demographics", "demo", cohort_data)
+  mod_domain_server("cognitive", "cog", cohort_data)
+  mod_domain_server("medical", "med", cohort_data)
+  mod_domain_server("physical", "phys", cohort_data)
+  mod_domain_server("adherence", "adh", cohort_data)
+  mod_domain_server("adverse_events", "ae", cohort_data)
 }

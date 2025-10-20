@@ -86,105 +86,37 @@ app_ui <- function(request) {
         title = i18n$t("Domains"),
         icon = icon("chart-line"),
 
-        nav_panel(
-          title = i18n$t("Demographics"),
-          value = "demographics",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Demographics")),
-            p(i18n$t("Content coming in Prompt 7"))
-          )
-        ),
-
-        nav_panel(
-          title = i18n$t("Cognitive"),
-          value = "cognitive",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Cognitive")),
-            p(i18n$t("Content coming in Prompt 8"))
-          )
-        ),
-
-        nav_panel(
-          title = i18n$t("Medical"),
-          value = "medical",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Medical")),
-            p(i18n$t("Content coming in Prompt 9"))
-          )
-        ),
-
-        nav_panel(
-          title = i18n$t("Physical"),
-          value = "physical",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Physical")),
-            p(i18n$t("Content coming in Prompt 10"))
-          )
-        ),
-
-        nav_panel(
-          title = i18n$t("Adherence"),
-          value = "adherence",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Adherence")),
-            p(i18n$t("Content coming in Prompt 11"))
-          )
-        ),
-
-        nav_panel(
-          title = i18n$t("Adverse Events"),
-          value = "adverse_events",
-          div(
-            class = "container-fluid mt-3",
-            h3(i18n$t("Adverse Events")),
-            p(i18n$t("Content coming in Prompt 12"))
-          )
-        )
+        nav_panel(title = i18n$t("Demographics"), value = "demographics",
+          mod_domain_ui("demographics", "demographics", i18n)),
+        nav_panel(title = i18n$t("Cognitive"), value = "cognitive",
+          mod_domain_ui("cognitive", "cognitive", i18n)),
+        nav_panel(title = i18n$t("Medical"), value = "medical",
+          mod_domain_ui("medical", "medical", i18n)),
+        nav_panel(title = i18n$t("Physical"), value = "physical",
+          mod_domain_ui("physical", "physical", i18n)),
+        nav_panel(title = i18n$t("Adherence"), value = "adherence",
+          mod_domain_ui("adherence", "adherence", i18n)),
+        nav_panel(title = i18n$t("Adverse Events"), value = "adverse_events",
+          mod_domain_ui("adverse_events", "adverse_events", i18n))
       ),
 
-      # Longitudinal tab
-      nav_panel(
-        title = i18n$t("Longitudinal"),
-        value = "longitudinal",
-        icon = icon("chart-area"),
+      # Longitudinal tab (Prompt 13)
+      nav_panel(title = i18n$t("Longitudinal"), value = "longitudinal", icon = icon("chart-area"),
+        div(class = "container-fluid mt-3",
+          h3(i18n$t("Longitudinal Analysis")),
+          p("Longitudinal visualizations tracking metrics over time"))),
 
-        div(
-          class = "container-fluid mt-3",
-          h3(i18n$t("Longitudinal")),
-          p(i18n$t("Content coming in Prompt 13"))
-        )
-      ),
+      # QC/Missingness tab (Prompt 14)
+      nav_panel(title = i18n$t("Quality Checks"), value = "qc", icon = icon("check-circle"),
+        div(class = "container-fluid mt-3",
+          h3(i18n$t("Data Quality Checks")),
+          p("Missing data patterns and quality metrics"))),
 
-      # QC/Missingness tab
-      nav_panel(
-        title = i18n$t("Quality Checks"),
-        value = "qc",
-        icon = icon("check-circle"),
-
-        div(
-          class = "container-fluid mt-3",
-          h3(i18n$t("Quality Checks")),
-          p(i18n$t("Content coming in Prompt 14"))
-        )
-      ),
-
-      # Settings tab
-      nav_panel(
-        title = i18n$t("Settings"),
-        value = "settings",
-        icon = icon("cog"),
-
-        div(
-          class = "container-fluid mt-3",
+      # Settings tab (Prompt 17)
+      nav_panel(title = i18n$t("Settings"), value = "settings", icon = icon("cog"),
+        div(class = "container-fluid mt-3",
           h3(i18n$t("Settings")),
-          p(i18n$t("Content coming in Prompt 17"))
-        )
-      )
+          p("Application settings and preferences")))
     )
   )
 }
