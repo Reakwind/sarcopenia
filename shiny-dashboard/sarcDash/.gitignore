@@ -18,11 +18,7 @@ renv/staging/
 rsconnect/
 .secrets/
 
-# Data (should come from parent project)
-data/*.rds
-data/*.csv
-*.rds
-*.csv
+
 
 # Logs
 *.log
