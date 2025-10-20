@@ -69,11 +69,7 @@ app_ui <- function(request) {
         value = "dictionary",
         icon = icon("book"),
 
-        div(
-          class = "container-fluid mt-3",
-          h3(i18n$t("Data Dictionary")),
-          p(i18n$t("Content coming in Prompt 5"))
-        )
+        mod_dictionary_ui("dictionary", i18n = i18n)
       ),
 
       # Cohort Builder tab

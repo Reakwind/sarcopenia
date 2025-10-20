@@ -35,4 +35,7 @@ app_server <- function(input, output, session) {
 
   # Call home module server
   mod_home_server("home", i18n = reactive({ i18n }), parent_session = session)
+
+  # Call dictionary module server
+  mod_dictionary_server("dictionary", i18n = reactive({ i18n }))
 }

@@ -644,6 +644,30 @@
     {
       "en": "Take a guided tour to learn about the dashboard features",
       "he": "בצע סיור מודרך כדי ללמוד על תכונות לוח הבקרה"
+    },
+    {
+      "en": "Variable mapping and metadata for all study data",
+      "he": "מיפוי משתנים ומטא-נתונים עבור כל נתוני המחקר"
+    },
+    {
+      "en": "Filter by Prefix",
+      "he": "סנן לפי קידומת"
+    },
+    {
+      "en": "Identifiers",
+      "he": "מזהים"
+    },
+    {
+      "en": "Clear Filter",
+      "he": "נקה סינון"
+    },
+    {
+      "en": "Search by any column...",
+      "he": "חפש בכל עמודה..."
+    },
+    {
+      "en": "Prefix",
+      "he": "קידומת"
     }
   ]
 }
