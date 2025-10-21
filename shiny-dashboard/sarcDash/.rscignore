@@ -1,26 +1,40 @@
 # .rscignore - Exclude files from shinyapps.io deployment
 #
-# For golem apps, exclude package source code (R/, man/) from deployment.
-# The package will be built and installed from DESCRIPTION instead.
-# This prevents the "sourcing R/ in a package" warning and conflicts.
-
-# Exclude package source - will be built and installed via DESCRIPTION
-^R$
-^man$
+# For golem apps deployed to shinyapps.io:
+# - DO include R/, NAMESPACE, DESCRIPTION (needed to build package)
+# - Exclude development and renv files
 
 # Exclude development files
 ^dev$
 ^tests$
 ^\.Rproj\.user$
 ^.*\.Rproj$
+^\.Rbuildignore$
+^\.gitignore$
 
 # Exclude renv - dependencies installed from DESCRIPTION instead
 ^renv$
 ^renv\.lock$
+^\.Rprofile$
 
 # Exclude git and version control
 ^\.git$
 ^\.github$
+
+# Exclude other development files
+^data-raw$
+dev_history\.R$
+^run_dev\.R$
+^\.here$
+^test_functionality\.R$
+^FUNCTIONALITY_ISSUES\.md$
+
+# INCLUDE for deployment:
+# - app.R (entry point)
+# - DESCRIPTION (package definition)
+# - NAMESPACE (package exports)
+# - R/ (package source code - MUST be included!)
+# - inst/ (app resources: extdata, i18n, www)
 
 # Exclude other development files
 ^data-raw$

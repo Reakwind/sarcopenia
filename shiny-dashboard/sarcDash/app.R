@@ -2,18 +2,40 @@
 # To deploy, run: rsconnect::deployApp()
 # Or use the blue button on top of this file
 
-# Smart loading: Use pkgload in development, library() in production
+# Smart loading for different environments
+# Priority: pkgload (dev) > installed package > source files (shinyapps.io)
 if (requireNamespace("pkgload", quietly = TRUE) && dir.exists("R")) {
   # Development mode: Load from source using pkgload
   message("Running in DEVELOPMENT mode (using pkgload)")
   pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
   options("golem.app.prod" = FALSE)
-} else {
-  # Production mode: Load installed package
+} else if (requireNamespace("sarcDash", quietly = TRUE)) {
+  # Production mode with installed package
   message("Running in PRODUCTION mode (using library)")
   library(sarcDash)
   options("golem.app.prod" = TRUE)
+} else {
+  # shinyapps.io mode: Source R/ files directly
+  message("Running on shinyapps.io (sourcing R/ files)")
+  options("golem.app.prod" = TRUE)
+
+  # Load required libraries that aren't auto-loaded
+  library(shiny)
+  library(golem)
+
+  # Source all R files in correct order
+  r_files <- list.files("R", pattern = "\\.R$", full.names = TRUE, recursive = TRUE)
+  # Sort to ensure dependencies load first
+  r_files <- sort(r_files)
+  for (f in r_files) {
+    source(f, local = FALSE)
+  }
 }
 
 # Run the app
-sarcDash::run_app() # add parameters here (if any)
+# Use :: notation if package is loaded, otherwise call directly
+if (requireNamespace("sarcDash", quietly = TRUE)) {
+  sarcDash::run_app()
+} else {
+  run_app()
+}
