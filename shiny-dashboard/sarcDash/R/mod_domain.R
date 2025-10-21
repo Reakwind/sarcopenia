@@ -147,20 +147,20 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
         plot_data <- data[sample_idx, ]
       }
 
-      plotly::plot_ly(plot_data, y = ~get(numeric_cols[1]), type = "box") %>%
-        plotly::layout(
-          title = paste("Distribution of", numeric_cols[1]),
-          annotations = if (nrow(data) > 500) {
-            list(
-              text = sprintf("Showing %d of %d points", nrow(plot_data), nrow(data)),
-              xref = "paper", yref = "paper",
-              x = 0.5, y = 1.05,
-              xanchor = "center", yanchor = "bottom",
-              showarrow = FALSE,
-              font = list(size = 10, color = "gray")
-            )
-          } else NULL
-        )
+      plotly::layout(
+        plotly::plot_ly(plot_data, y = ~get(numeric_cols[1]), type = "box"),
+        title = paste("Distribution of", numeric_cols[1]),
+        annotations = if (nrow(data) > 500) {
+          list(
+            text = sprintf("Showing %d of %d points", nrow(plot_data), nrow(data)),
+            xref = "paper", yref = "paper",
+            x = 0.5, y = 1.05,
+            xanchor = "center", yanchor = "bottom",
+            showarrow = FALSE,
+            font = list(size = 10, color = "gray")
+          )
+        } else NULL
+      )
     })
   })
 }
