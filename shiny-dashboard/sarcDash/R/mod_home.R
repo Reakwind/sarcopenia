@@ -327,7 +327,7 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
       status <- data_status()
       last_updated_text <- ""
 
-      if (!is.null(status) && status$status != "error" && !is.null(status$last_modified)) {
+      if (!is.null(status) && status$health != "error" && !is.null(status$last_modified)) {
         formatted_time <- format(status$last_modified, "%Y-%m-%d %H:%M")
         last_updated_text <- paste0(
           if (!is.null(i18n_obj)) i18n_obj$t("Last updated") else "Last updated",
@@ -367,7 +367,7 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
     output$health_content <- renderUI({
       status <- data_status()
 
-      if (!is.null(status) && status$status == "error") {
+      if (!is.null(status) && status$health == "error") {
         # Show error alert
         div(
           class = "alert alert-danger",
@@ -385,10 +385,10 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
             class = "mb-3",
             h6(class = "text-muted mb-1", "Status"),
             h4(
-              class = if (status$status == "healthy") "text-success" else "text-warning",
-              icon(if (status$status == "healthy") "check-circle" else "exclamation-circle"),
+              class = if (status$health == "healthy") "text-success" else "text-warning",
+              icon(if (status$health == "healthy") "check-circle" else "exclamation-circle"),
               " ",
-              toupper(status$status)
+              toupper(status$health)
             )
           ),
           div(

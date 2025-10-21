@@ -46,8 +46,9 @@ test_that("bslib theme is properly configured", {
 test_that("thematic package is available for plot theming", {
   skip_if_not_installed("thematic")
 
-  # Verify thematic functions exist
-  expect_true(exists("thematic_shiny", where = "package:thematic"))
+  # Verify thematic package can be loaded and has required function
+  expect_true(requireNamespace("thematic", quietly = TRUE))
+  expect_true(exists("thematic_shiny", where = asNamespace("thematic")))
 })
 
 # Test 4: Skip links for accessibility

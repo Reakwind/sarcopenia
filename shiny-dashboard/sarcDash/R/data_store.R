@@ -405,12 +405,11 @@ ds_load_csv <- function(file_path) {
     warning(sprintf("Recommended columns missing: %s", paste(missing_expected, collapse = ", ")))
   }
 
-  # Try to enforce types
+  # Try to enforce types - fail explicitly if validation fails
   data <- tryCatch({
     validate_visits_data(data)
   }, error = function(e) {
-    warning(sprintf("Type validation warning: %s", e$message))
-    data  # Return original if validation fails
+    stop(sprintf("Data validation failed: %s. Please ensure your CSV matches the expected format.", e$message), call. = FALSE)
   })
 
   # Return with metadata
