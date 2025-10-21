@@ -42,3 +42,33 @@ get_golem_config <- function(
     use_parent = use_parent
   )
 }
+
+
+#' Get data directory path
+#'
+#' @description
+#' Returns the correct path to data files, switching between development
+#' and production environments automatically.
+#'
+#' @return Character string path to data directory
+#'
+#' @details
+#' In development mode (golem.app.prod = FALSE), data is expected in
+#' the parent project's "data" directory (../../data).
+#'
+#' In production mode (golem.app.prod = TRUE), data is bundled in the
+#' package at inst/extdata and accessed via app_sys().
+#'
+#' @noRd
+get_data_dir <- function() {
+  # Check if in production mode
+  is_prod <- getOption("golem.app.prod", default = FALSE)
+
+  if (isTRUE(is_prod)) {
+    # Production: data in inst/extdata
+    app_sys("extdata")
+  } else {
+    # Development: data in parent project directory
+    here::here("data")
+  }
+}

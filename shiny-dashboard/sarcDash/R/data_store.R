@@ -15,7 +15,8 @@ NULL
 #' file modification times.
 #'
 #' @param data_dir Path to directory containing data files. Defaults to
-#'   "../../data" (relative to package root, pointing to parent project data).
+#'   automatic detection based on environment (dev vs production).
+#'   In production, uses inst/extdata. In development, uses ../../data.
 #'
 #' @return A list with four elements:
 #'   \itemize{
@@ -48,7 +49,7 @@ NULL
 #' data <- ds_connect()
 #' names(data)  # "visits", "ae", "dict", "summary"
 #' }
-ds_connect <- function(data_dir = "../../data") {
+ds_connect <- function(data_dir = get_data_dir()) {
   # Resolve path
   data_dir <- normalizePath(data_dir, mustWork = FALSE)
 
@@ -201,7 +202,8 @@ validate_dict_data <- function(df) {
 #' Returns dataset metadata including row/column counts, last modified
 #' timestamps, and a health status string suitable for UI display.
 #'
-#' @param data_dir Path to directory containing data files.
+#' @param data_dir Path to directory containing data files. Defaults to
+#'   automatic detection based on environment (dev vs production).
 #' @param connect If TRUE (default), attempts to load data to get detailed stats.
 #'   If FALSE, only returns file-level metadata.
 #'
@@ -226,7 +228,7 @@ validate_dict_data <- function(df) {
 #' status$health  # "healthy"
 #' status$visits_rows  # 38
 #' }
-ds_status <- function(data_dir = "../../data", connect = TRUE) {
+ds_status <- function(data_dir = get_data_dir(), connect = TRUE) {
   data_dir <- normalizePath(data_dir, mustWork = FALSE)
 
   files <- list(

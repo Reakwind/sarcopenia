@@ -186,7 +186,7 @@ mod_dictionary_server <- function(id, i18n = NULL) {
     # Load data dictionary
     dict_data <- reactive({
       tryCatch({
-        data_dir <- here::here("data")
+        data_dir <- get_data_dir()
         dict_path <- file.path(data_dir, "data_dictionary_cleaned.csv")
 
         if (!file.exists(dict_path)) {

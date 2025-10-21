@@ -237,8 +237,7 @@ mod_home_server <- function(id, i18n = NULL, parent_session = NULL) {
 
       # Get status with error handling
       tryCatch({
-        data_dir <- here::here("data")
-        ds_status(data_dir, connect = FALSE)
+        ds_status(connect = FALSE)
       }, error = function(e) {
         list(
           status = "error",

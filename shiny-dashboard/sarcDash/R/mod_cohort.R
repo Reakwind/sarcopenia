@@ -171,8 +171,7 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
 
       # Fall back to default data directory
       tryCatch({
-        data_dir <- here::here("data")
-        ds_connect(data_dir)
+        ds_connect()
       }, error = function(e) {
         NULL
       })
