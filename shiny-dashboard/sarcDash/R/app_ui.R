@@ -35,8 +35,8 @@ app_ui <- function(request) {
       lang = "en",
 
       # Language selector in navbar
-      nav_spacer(),
-      nav_item(
+      bslib::nav_spacer(),
+      bslib::nav_item(
         language_selector_ui("language", selected = "en", i18n = i18n)
       ),
 
@@ -55,7 +55,7 @@ app_ui <- function(request) {
       ),
 
       # Home tab
-      nav_panel(
+      bslib::nav_panel(
         title = i18n$t("Home"),
         value = "home",
         icon = icon("home"),
@@ -64,7 +64,7 @@ app_ui <- function(request) {
       ),
 
       # Data Dictionary tab
-      nav_panel(
+      bslib::nav_panel(
         title = i18n$t("Data Dictionary"),
         value = "dictionary",
         icon = icon("book"),
@@ -73,7 +73,7 @@ app_ui <- function(request) {
       ),
 
       # Cohort Builder tab
-      nav_panel(
+      bslib::nav_panel(
         title = i18n$t("Cohort Builder"),
         value = "cohort",
         icon = icon("filter"),
@@ -82,38 +82,38 @@ app_ui <- function(request) {
       ),
 
       # Domains menu
-      nav_menu(
+      bslib::nav_menu(
         title = i18n$t("Domains"),
         icon = icon("chart-line"),
 
-        nav_panel(title = i18n$t("Demographics"), value = "demographics",
+        bslib::nav_panel(title = i18n$t("Demographics"), value = "demographics",
           mod_domain_ui("demographics", "demographics", i18n)),
-        nav_panel(title = i18n$t("Cognitive"), value = "cognitive",
+        bslib::nav_panel(title = i18n$t("Cognitive"), value = "cognitive",
           mod_domain_ui("cognitive", "cognitive", i18n)),
-        nav_panel(title = i18n$t("Medical"), value = "medical",
+        bslib::nav_panel(title = i18n$t("Medical"), value = "medical",
           mod_domain_ui("medical", "medical", i18n)),
-        nav_panel(title = i18n$t("Physical"), value = "physical",
+        bslib::nav_panel(title = i18n$t("Physical"), value = "physical",
           mod_domain_ui("physical", "physical", i18n)),
-        nav_panel(title = i18n$t("Adherence"), value = "adherence",
+        bslib::nav_panel(title = i18n$t("Adherence"), value = "adherence",
           mod_domain_ui("adherence", "adherence", i18n)),
-        nav_panel(title = i18n$t("Adverse Events"), value = "adverse_events",
+        bslib::nav_panel(title = i18n$t("Adverse Events"), value = "adverse_events",
           mod_domain_ui("adverse_events", "adverse_events", i18n))
       ),
 
       # Longitudinal tab (Prompt 13)
-      nav_panel(title = i18n$t("Longitudinal"), value = "longitudinal", icon = icon("chart-area"),
+      bslib::nav_panel(title = i18n$t("Longitudinal"), value = "longitudinal", icon = icon("chart-area"),
         div(class = "container-fluid mt-3",
           h3(i18n$t("Longitudinal Analysis")),
           p("Longitudinal visualizations tracking metrics over time"))),
 
       # QC/Missingness tab (Prompt 14)
-      nav_panel(title = i18n$t("Quality Checks"), value = "qc", icon = icon("check-circle"),
+      bslib::nav_panel(title = i18n$t("Quality Checks"), value = "qc", icon = icon("check-circle"),
         div(class = "container-fluid mt-3",
           h3(i18n$t("Data Quality Checks")),
           p("Missing data patterns and quality metrics"))),
 
       # Settings tab (Prompt 17)
-      nav_panel(title = i18n$t("Settings"), value = "settings", icon = icon("cog"),
+      bslib::nav_panel(title = i18n$t("Settings"), value = "settings", icon = icon("cog"),
         div(class = "container-fluid mt-3",
           h3(i18n$t("Settings")),
           p("Application settings and preferences")))
