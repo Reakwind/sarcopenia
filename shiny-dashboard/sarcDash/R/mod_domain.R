@@ -53,7 +53,18 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
     # Get domain-specific columns
     domain_data <- reactive({
       if (is.null(cohort_data)) return(NULL)
-      data <- cohort_data()
+      cohort <- cohort_data()
+      if (is.null(cohort)) return(NULL)
+
+      # Handle different data sources for different domains
+      if (domain == "ae") {
+        # Adverse events use separate ae data
+        data <- if (is.list(cohort) && !is.null(cohort$ae)) cohort$ae else NULL
+      } else {
+        # Other domains use visits data
+        data <- if (is.list(cohort) && !is.null(cohort$visits)) cohort$visits else cohort
+      }
+
       if (is.null(data)) return(NULL)
 
       # Select columns matching domain prefix

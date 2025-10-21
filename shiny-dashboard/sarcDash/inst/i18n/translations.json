@@ -680,6 +680,26 @@
     {
       "en": "Current Filters",
       "he": "סינונים נוכחיים"
+    },
+    {
+      "en": "Upload Custom Data",
+      "he": "העלה נתונים מותאמים אישית"
+    },
+    {
+      "en": "Upload CSV File",
+      "he": "העלה קובץ CSV"
+    },
+    {
+      "en": "Browse...",
+      "he": "עיון..."
+    },
+    {
+      "en": "No file chosen",
+      "he": "לא נבחר קובץ"
+    },
+    {
+      "en": "Export CSV",
+      "he": "ייצוא CSV"
     }
   ]
 }

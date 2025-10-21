@@ -41,17 +41,17 @@ mod_cohort_ui <- function(id, i18n = NULL) {
         min = 0, max = 100, value = c(0, 100), step = 1
       ),
 
-      # Visit number (supports 0-3)
+      # Visit number (supports 1, 2, 3, 5)
       checkboxGroupInput(
         ns("visit_number"),
         label = if (!is.null(i18n)) i18n$t("Visit Number") else "Visit Number",
         choices = list(
-          "Visit 0" = "0",
           "Visit 1" = "1",
           "Visit 2" = "2",
-          "Visit 3" = "3"
+          "Visit 3" = "3",
+          "Visit 5" = "5"
         ),
-        selected = c("0", "1", "2", "3")
+        selected = c("1", "2", "3", "5")
       ),
 
       # Retention filter
@@ -204,9 +204,9 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       # MoCA filter (debounced)
       if (!is.null(moca_range_debounced())) {
         visits <- dplyr::filter(visits,
-                               !is.na(cog_moca_total),
-                               cog_moca_total >= moca_range_debounced()[1],
-                               cog_moca_total <= moca_range_debounced()[2])
+                               !is.na(cog_moca_total_score),
+                               cog_moca_total_score >= moca_range_debounced()[1],
+                               cog_moca_total_score <= moca_range_debounced()[2])
       }
 
       # DSST filter (debounced)
@@ -234,6 +234,24 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       }
 
       visits
+    })
+
+    # Filtered cohort data (includes visits + ae filtered by cohort patient IDs)
+    cohort_filtered <- reactive({
+      visits <- filtered_data()
+      if (is.null(visits)) return(NULL)
+
+      d <- data()
+      result <- list(visits = visits)
+
+      # Filter AE data to match cohort patient IDs
+      if (!is.null(d$ae)) {
+        patient_ids <- unique(visits$id_client_id)
+        ae_filtered <- dplyr::filter(d$ae, id_client_id %in% patient_ids)
+        result$ae <- ae_filtered
+      }
+
+      result
     })
 
     # Cohort summary metrics
@@ -283,8 +301,8 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
         updateSliderInput(session, "age_range", value = c(age_min, age_max))
 
         # Reset MoCA if available
-        if ("cog_moca_total" %in% names(visits)) {
-          moca_vals <- visits$cog_moca_total[!is.na(visits$cog_moca_total)]
+        if ("cog_moca_total_score" %in% names(visits)) {
+          moca_vals <- visits$cog_moca_total_score[!is.na(visits$cog_moca_total_score)]
           if (length(moca_vals) > 0) {
             updateSliderInput(session, "moca_range",
                             value = c(min(moca_vals), max(moca_vals)))
@@ -303,7 +321,7 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
 
       # Reset other filters to defaults
       updateCheckboxGroupInput(session, "gender", selected = c("male", "female"))
-      updateCheckboxGroupInput(session, "visit_number", selected = c("0", "1", "2", "3"))
+      updateCheckboxGroupInput(session, "visit_number", selected = c("1", "2", "3", "5"))
       updateCheckboxInput(session, "retention_only", value = FALSE)
     })
 
@@ -321,8 +339,8 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
                         value = c(age_min, age_max))
 
         # Update MoCA slider to match actual data range
-        if ("cog_moca_total" %in% names(visits)) {
-          moca_vals <- visits$cog_moca_total[!is.na(visits$cog_moca_total)]
+        if ("cog_moca_total_score" %in% names(visits)) {
+          moca_vals <- visits$cog_moca_total_score[!is.na(visits$cog_moca_total_score)]
           if (length(moca_vals) > 0) {
             moca_min <- min(moca_vals)
             moca_max <- max(moca_vals)
@@ -433,8 +451,8 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       }
     )
 
-    # Return filtered data for other modules to use
-    return(filtered_data)
+    # Return filtered cohort data (visits + ae) for other modules to use
+    return(cohort_filtered)
   })
 }
 

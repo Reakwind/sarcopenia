@@ -59,7 +59,7 @@ get_golem_config <- function(
 #' In production mode (golem.app.prod = TRUE), data is bundled in the
 #' package at inst/extdata and accessed via app_sys().
 #'
-#' @noRd
+#' @export
 get_data_dir <- function() {
   # Check if in production mode
   is_prod <- getOption("golem.app.prod", default = FALSE)
