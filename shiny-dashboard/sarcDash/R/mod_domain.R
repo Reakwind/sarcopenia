@@ -66,7 +66,20 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
     # Render table
     output$domain_table <- reactable::renderReactable({
       data <- domain_data()
-      if (is.null(data)) return(NULL)
+      if (is.null(data)) {
+        # Return empty reactable with message
+        return(reactable::reactable(
+          data.frame(Message = "No data available. Please visit the Cohort Builder tab first."),
+          columns = list(Message = reactable::colDef(name = ""))
+        ))
+      }
+
+      if (nrow(data) == 0) {
+        return(reactable::reactable(
+          data.frame(Message = "No data matches the current cohort filters."),
+          columns = list(Message = reactable::colDef(name = ""))
+        ))
+      }
 
       reactable::reactable(
         data,
@@ -83,7 +96,25 @@ mod_domain_server <- function(id, domain = "demo", cohort_data = NULL) {
     # Summary statistics
     output$summary_stats <- renderUI({
       data <- domain_data()
-      if (is.null(data)) return(p("No data available"))
+      if (is.null(data)) {
+        return(
+          div(
+            class = "alert alert-info",
+            icon("info-circle"),
+            " No data loaded. Visit the Cohort Builder tab to select data."
+          )
+        )
+      }
+
+      if (nrow(data) == 0) {
+        return(
+          div(
+            class = "alert alert-warning",
+            icon("filter"),
+            " No records match the current cohort filters."
+          )
+        )
+      }
 
       tagList(
         tags$dl(

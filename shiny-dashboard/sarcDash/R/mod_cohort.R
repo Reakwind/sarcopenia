@@ -191,50 +191,46 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
 
       # Age filter (debounced)
       if (!is.null(age_range_debounced())) {
-        visits <- visits %>%
-          dplyr::filter(id_age >= age_range_debounced()[1],
-                        id_age <= age_range_debounced()[2])
+        visits <- dplyr::filter(visits,
+                               id_age >= age_range_debounced()[1],
+                               id_age <= age_range_debounced()[2])
       }
 
-      # Gender filter
+      # Gender filter (case-insensitive: data has "Male"/"Female", checkboxes use lowercase)
       if (!is.null(input$gender) && length(input$gender) > 0) {
-        visits <- visits %>%
-          dplyr::filter(tolower(id_gender) %in% input$gender)
+        visits <- dplyr::filter(visits, tolower(id_gender) %in% input$gender)
       }
 
       # MoCA filter (debounced)
       if (!is.null(moca_range_debounced())) {
-        visits <- visits %>%
-          dplyr::filter(!is.na(cog_moca_total),
-                        cog_moca_total >= moca_range_debounced()[1],
-                        cog_moca_total <= moca_range_debounced()[2])
+        visits <- dplyr::filter(visits,
+                               !is.na(cog_moca_total),
+                               cog_moca_total >= moca_range_debounced()[1],
+                               cog_moca_total <= moca_range_debounced()[2])
       }
 
       # DSST filter (debounced)
       if (!is.null(dsst_range_debounced())) {
-        visits <- visits %>%
-          dplyr::filter(!is.na(cog_dsst_score),
-                        cog_dsst_score >= dsst_range_debounced()[1],
-                        cog_dsst_score <= dsst_range_debounced()[2])
+        visits <- dplyr::filter(visits,
+                               !is.na(cog_dsst_score),
+                               cog_dsst_score >= dsst_range_debounced()[1],
+                               cog_dsst_score <= dsst_range_debounced()[2])
       }
 
       # Visit number filter (supports multiple selections 0-3)
       if (!is.null(input$visit_number) && length(input$visit_number) > 0) {
         visit_nums <- as.numeric(input$visit_number)
-        visits <- visits %>%
-          dplyr::filter(id_visit_no %in% visit_nums)
+        visits <- dplyr::filter(visits, id_visit_no %in% visit_nums)
       }
 
       # Retention filter (dplyr optimized)
       if (!is.null(input$retention_only) && input$retention_only) {
         # Get patients with at least 2 visits
-        retained_patients <- visits %>%
-          dplyr::count(id_client_id) %>%
-          dplyr::filter(n >= 2) %>%
-          dplyr::pull(id_client_id)
+        visit_counts <- dplyr::count(visits, id_client_id)
+        retained_patients <- dplyr::filter(visit_counts, n >= 2)
+        retained_patients <- dplyr::pull(retained_patients, id_client_id)
 
-        visits <- visits %>%
-          dplyr::filter(id_client_id %in% retained_patients)
+        visits <- dplyr::filter(visits, id_client_id %in% retained_patients)
       }
 
       visits
@@ -243,7 +239,8 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
     # Cohort summary metrics
     output$n_patients <- renderUI({
       visits <- filtered_data()
-      if (is.null(visits)) return("--")
+      if (is.null(visits)) return(tags$span(class = "text-muted", "--"))
+      if (nrow(visits) == 0) return(tags$span(class = "text-danger", "0"))
 
       n <- length(unique(visits$id_client_id))
       tags$strong(format(n, big.mark = ","))
@@ -251,7 +248,8 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
 
     output$n_visits <- renderUI({
       visits <- filtered_data()
-      if (is.null(visits)) return("--")
+      if (is.null(visits)) return(tags$span(class = "text-muted", "--"))
+      if (nrow(visits) == 0) return(tags$span(class = "text-danger", "0"))
 
       n <- nrow(visits)
       tags$strong(format(n, big.mark = ","))
@@ -262,12 +260,10 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       if (is.null(visits)) return("--")
 
       # Dplyr optimized retention calculation
-      retention_stats <- visits %>%
-        dplyr::count(id_client_id) %>%
-        dplyr::summarise(
-          retained = sum(n >= 2),
-          total = dplyr::n()
-        )
+      visit_counts <- dplyr::count(visits, id_client_id)
+      retention_stats <- dplyr::summarise(visit_counts,
+                                         retained = sum(n >= 2),
+                                         total = dplyr::n())
 
       if (retention_stats$total == 0) return("--")
 
@@ -275,8 +271,99 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       tags$strong(paste0(pct, "%"))
     })
 
+    # Reset filters button
+    observeEvent(input$reset_filters, {
+      d <- data()
+      if (!is.null(d) && !is.null(d$visits)) {
+        visits <- d$visits
+
+        # Reset to data-driven ranges
+        age_min <- min(visits$id_age, na.rm = TRUE)
+        age_max <- max(visits$id_age, na.rm = TRUE)
+        updateSliderInput(session, "age_range", value = c(age_min, age_max))
+
+        # Reset MoCA if available
+        if ("cog_moca_total" %in% names(visits)) {
+          moca_vals <- visits$cog_moca_total[!is.na(visits$cog_moca_total)]
+          if (length(moca_vals) > 0) {
+            updateSliderInput(session, "moca_range",
+                            value = c(min(moca_vals), max(moca_vals)))
+          }
+        }
+
+        # Reset DSST if available
+        if ("cog_dsst_score" %in% names(visits)) {
+          dsst_vals <- visits$cog_dsst_score[!is.na(visits$cog_dsst_score)]
+          if (length(dsst_vals) > 0) {
+            updateSliderInput(session, "dsst_range",
+                            value = c(min(dsst_vals), max(dsst_vals)))
+          }
+        }
+      }
+
+      # Reset other filters to defaults
+      updateCheckboxGroupInput(session, "gender", selected = c("male", "female"))
+      updateCheckboxGroupInput(session, "visit_number", selected = c("0", "1", "2", "3"))
+      updateCheckboxInput(session, "retention_only", value = FALSE)
+    })
+
+    # Update slider ranges based on loaded data
+    observe({
+      d <- data()
+      if (!is.null(d) && !is.null(d$visits)) {
+        visits <- d$visits
+
+        # Update age slider to match actual data range
+        age_min <- min(visits$id_age, na.rm = TRUE)
+        age_max <- max(visits$id_age, na.rm = TRUE)
+        updateSliderInput(session, "age_range",
+                        min = age_min, max = age_max,
+                        value = c(age_min, age_max))
+
+        # Update MoCA slider to match actual data range
+        if ("cog_moca_total" %in% names(visits)) {
+          moca_vals <- visits$cog_moca_total[!is.na(visits$cog_moca_total)]
+          if (length(moca_vals) > 0) {
+            moca_min <- min(moca_vals)
+            moca_max <- max(moca_vals)
+            updateSliderInput(session, "moca_range",
+                            min = moca_min, max = moca_max,
+                            value = c(moca_min, moca_max))
+          }
+        }
+
+        # Update DSST slider to match actual data range
+        if ("cog_dsst_score" %in% names(visits)) {
+          dsst_vals <- visits$cog_dsst_score[!is.na(visits$cog_dsst_score)]
+          if (length(dsst_vals) > 0) {
+            dsst_min <- min(dsst_vals)
+            dsst_max <- max(dsst_vals)
+            updateSliderInput(session, "dsst_range",
+                            min = dsst_min, max = dsst_max,
+                            value = c(dsst_min, dsst_max))
+          }
+        }
+      }
+    })
+
     # Filter description (human-readable)
     output$filter_description <- renderUI({
+      # Show empty state message if no data matches filters
+      visits <- filtered_data()
+      if (!is.null(visits) && nrow(visits) == 0) {
+        return(
+          div(
+            class = "alert alert-warning",
+            role = "alert",
+            icon("exclamation-triangle"),
+            " ",
+            strong("No data matches your current filters."),
+            tags$br(),
+            tags$small("Try adjusting your filter criteria or click 'Reset Filters' to start over.")
+          )
+        )
+      }
+
       filters <- list()
 
       if (!is.null(input$age_range)) {
@@ -325,16 +412,6 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
       }
 
       tagList(filters)
-    })
-
-    # Reset filters
-    observeEvent(input$reset_filters, {
-      updateSliderInput(session, "age_range", value = c(40, 100))
-      updateCheckboxGroupInput(session, "gender", selected = c("male", "female"))
-      updateSliderInput(session, "moca_range", value = c(0, 30))
-      updateSliderInput(session, "dsst_range", value = c(0, 100))
-      updateCheckboxGroupInput(session, "visit_number", selected = c("0", "1", "2", "3"))
-      updateCheckboxInput(session, "retention_only", value = FALSE)
     })
 
     # Save filters as JSON
