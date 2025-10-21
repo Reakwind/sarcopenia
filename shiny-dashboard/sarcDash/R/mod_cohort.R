@@ -178,9 +178,9 @@ mod_cohort_server <- function(id, i18n = NULL, uploaded_data = NULL) {
     })
 
     # Debounced slider inputs (500ms delay for performance)
-    age_range_debounced <- reactive(input$age_range) %>% debounce(500)
-    moca_range_debounced <- reactive(input$moca_range) %>% debounce(500)
-    dsst_range_debounced <- reactive(input$dsst_range) %>% debounce(500)
+    age_range_debounced <- debounce(reactive(input$age_range), 500)
+    moca_range_debounced <- debounce(reactive(input$moca_range), 500)
+    dsst_range_debounced <- debounce(reactive(input$dsst_range), 500)
 
     # Filtered data based on current filters (dplyr optimized)
     filtered_data <- reactive({
