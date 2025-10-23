@@ -496,9 +496,23 @@ server <- function(input, output, session) {
       cleaned_data()$visits_data,
       filterable = TRUE,
       searchable = TRUE,
-      defaultPageSize = 20,
+      defaultPageSize = 10,
       striped = TRUE,
-      highlight = TRUE
+      highlight = TRUE,
+      resizable = TRUE,
+      compact = TRUE,
+      wrap = FALSE,
+      defaultColDef = colDef(
+        minWidth = 100,
+        maxWidth = 300,
+        align = "left",
+        headerStyle = list(background = "#f7f7f8")
+      ),
+      theme = reactableTheme(
+        borderColor = "#dfe2e5",
+        stripedColor = "#f6f8fa",
+        highlightColor = "#f0f5f9"
+      )
     )
   })
 
@@ -510,9 +524,23 @@ server <- function(input, output, session) {
       cleaned_data()$adverse_events_data,
       filterable = TRUE,
       searchable = TRUE,
-      defaultPageSize = 20,
+      defaultPageSize = 10,
       striped = TRUE,
-      highlight = TRUE
+      highlight = TRUE,
+      resizable = TRUE,
+      compact = TRUE,
+      wrap = FALSE,
+      defaultColDef = colDef(
+        minWidth = 100,
+        maxWidth = 300,
+        align = "left",
+        headerStyle = list(background = "#f7f7f8")
+      ),
+      theme = reactableTheme(
+        borderColor = "#dfe2e5",
+        stripedColor = "#f6f8fa",
+        highlightColor = "#f0f5f9"
+      )
     )
   })
 
