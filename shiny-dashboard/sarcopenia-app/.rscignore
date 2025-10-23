@@ -1,0 +1,39 @@
+# .rscignore - Control what rsconnect deploys to shinyapps.io
+# Only deploy: app.R and data_dictionary_enhanced.csv
+
+# Exclude test files
+test_new_functions.R
+test_output.csv
+
+# Exclude documentation
+docs/
+DEPLOYMENT_SUMMARY.md
+
+# Exclude data dictionary development files
+enhance_data_dictionary.R
+data_dictionary_cleaned.csv
+
+# Exclude deployment config (rsconnect manages this)
+rsconnect/
+
+# Exclude version control
+.git/
+.gitignore
+
+# Exclude any R package development files (if they exist)
+R/
+man/
+tests/
+dev/
+DESCRIPTION
+NAMESPACE
+.Rprofile
+renv/
+renv.lock
+.Rbuildignore
+.here
+
+# Exclude hidden files
+.DS_Store
+.Rhistory
+.RData
