@@ -448,7 +448,8 @@ server <- function(input, output, session) {
       incProgress(0.2, detail = "Reading CSV...")
       raw_data <- read_csv(input$csv_file$datapath,
                           show_col_types = FALSE,
-                          col_types = cols(.default = "c"))
+                          col_types = cols(.default = "c"),
+                          na = character())
 
       incProgress(0.3, detail = "Applying cleaning rules...")
       result <- tryCatch({
