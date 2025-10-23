@@ -523,7 +523,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       req(cleaned_data())
-      write_csv(cleaned_data()$visits_data, file, na = "")
+      write_csv(cleaned_data()$visits_data, file)
     }
   )
 
@@ -534,7 +534,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       req(cleaned_data())
-      write_csv(cleaned_data()$adverse_events_data, file, na = "")
+      write_csv(cleaned_data()$adverse_events_data, file)
     }
   )
 }
