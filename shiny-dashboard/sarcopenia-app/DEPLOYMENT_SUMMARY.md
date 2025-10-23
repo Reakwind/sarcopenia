@@ -4,15 +4,25 @@
 
 **App URL**: https://780-data-explorer.shinyapps.io/sarcDash/
 
-**Deployment Date**: October 22, 2025
+**Deployment Date**: October 23, 2025
 
-**Version**: 2.0
+**Version**: 2.0 (Protected)
 
-**Status**: ✅ Successfully Deployed
+**Status**: ✅ Successfully Deployed with Core Protection
 
 ---
 
 ## 🎯 What's New in v2.0
+
+### October 23 Update: Core Protection Implemented
+
+**Protection Documentation Added:**
+- ✅ CORE_PROTECTION.md - Comprehensive protection guidelines
+- ✅ README.md - Updated with protection reminders and safe coding examples
+- ✅ Git tag v2.0-stable - Emergency rollback point
+- ✅ All protection docs pushed to repository
+
+**Purpose:** Safeguard the validated cleaning pipeline as analysis features are added in the future.
 
 ### Major Overhaul: Complete Rewrite of Cleaning Pipeline
 
@@ -236,6 +246,7 @@ For questions or issues:
 
 ---
 
-**Generated**: October 22, 2025
-**App Version**: 2.0
+**Generated**: October 23, 2025
+**App Version**: 2.0 (Protected)
 **Deployment**: Production (shinyapps.io)
+**Protection**: Core cleaning pipeline documented and tagged (v2.0-stable)
