@@ -1,87 +1,393 @@
 # ============================================================================
-# DATA VISUALIZATION FUNCTIONS
+# DATA VISUALIZATION FUNCTIONS - EXPLORATORY DATA ANALYSIS
 # ============================================================================
 #
-# Functions for creating plots and charts
-# - Distributions (histograms, density plots, boxplots)
-# - Comparisons (bar charts, grouped plots)
-# - Trends (line plots, scatter plots)
-# - Heatmaps and correlation plots
+# Functions for exploratory data analysis with emphasis on:
+# - Missingness patterns (respecting patient-level "" vs NA logic)
+# - Data quality visualization
+# - Instrument completion tracking
 #
 # SAFE TO MODIFY - These functions work on cleaned_data() output
 # ============================================================================
 
-#' Create Distribution Plot
+#' Analyze Missingness Patterns
 #'
-#' Creates histogram or density plot for a numeric variable
+#' Analyzes missingness for each variable, distinguishing between:
+#' - Has data (non-empty, non-NA)
+#' - Empty string ("") - test not performed this visit but patient has data elsewhere
+#' - NA - truly missing for this patient across all visits
 #'
-#' @param data Cleaned visits data
-#' @param variable Variable name to plot
-#' @param plot_type Type: "histogram", "density", "boxplot"
-#' @return ggplot object
+#' @param data Cleaned visits data (use original columns, not _numeric)
+#' @param dict Data dictionary with instrument metadata
+#' @return Dataframe with missingness analysis per variable
 #' @export
-plot_distribution <- function(data, variable, plot_type = "histogram") {
-  # TODO: Implement distribution plots using ggplot2
+analyze_missingness <- function(data, dict) {
+  message("[MISSINGNESS] Analyzing missingness patterns...")
 
-  message("Creating distribution plot for: ", variable)
+  # Exclude identifier and analysis columns
+  exclude_patterns <- c("^id_", "_numeric$", "_factor$", "_date$", "_unit$")
 
-  # Placeholder implementation
-  return(NULL)
+  # Get variable list
+  all_vars <- names(data)
+  vars_to_analyze <- all_vars[!grepl(paste(exclude_patterns, collapse = "|"), all_vars)]
+
+  message("[MISSINGNESS] Analyzing ", length(vars_to_analyze), " variables")
+
+  # Analyze each variable
+  results <- lapply(vars_to_analyze, function(var) {
+    values <- data[[var]]
+
+    n_total <- length(values)
+    n_has_data <- sum(!is.na(values) & values != "", na.rm = TRUE)
+    n_empty_string <- sum(!is.na(values) & values == "", na.rm = TRUE)
+    n_na <- sum(is.na(values))
+
+    pct_has_data <- (n_has_data / n_total) * 100
+    pct_empty <- (n_empty_string / n_total) * 100
+    pct_na <- (n_na / n_total) * 100
+
+    # Get metadata from dictionary
+    dict_row <- dict[dict$new_name == var, ]
+    instrument <- if (nrow(dict_row) > 0) dict_row$instrument else NA
+    section <- if (nrow(dict_row) > 0) dict_row$section else NA
+    var_category <- if (nrow(dict_row) > 0) dict_row$variable_category else NA
+
+    data.frame(
+      variable = var,
+      instrument = instrument,
+      section = section,
+      variable_category = var_category,
+      n_total = n_total,
+      n_has_data = n_has_data,
+      n_empty_string = n_empty_string,
+      n_na = n_na,
+      pct_has_data = round(pct_has_data, 1),
+      pct_empty = round(pct_empty, 1),
+      pct_na = round(pct_na, 1),
+      stringsAsFactors = FALSE
+    )
+  })
+
+  results_df <- do.call(rbind, results)
+
+  message("[MISSINGNESS] Analysis complete!")
+  return(results_df)
 }
 
 
-#' Create Group Comparison Plot
+#' Create Interactive Missingness Heatmap
 #'
-#' Creates plot comparing outcome across groups
+#' Creates plotly heatmap showing missingness pattern for selected variables
 #'
 #' @param data Cleaned visits data
-#' @param outcome_var Outcome variable name
-#' @param group_var Grouping variable name
-#' @param plot_type Type: "boxplot", "violin", "bar"
-#' @return ggplot object
+#' @param variables Vector of variable names to include
+#' @param patient_ids Optional: specific patient IDs to show (NULL = all)
+#' @return plotly heatmap object
 #' @export
-plot_group_comparison <- function(data, outcome_var, group_var, plot_type = "boxplot") {
-  # TODO: Implement group comparison plots
+create_missingness_heatmap <- function(data, variables, patient_ids = NULL) {
+  require(plotly)
 
-  message("Creating group comparison plot...")
+  message("[HEATMAP] Creating missingness heatmap...")
 
-  # Placeholder implementation
-  return(NULL)
+  # Filter patients if specified
+  if (!is.null(patient_ids)) {
+    data <- data[data$id_client_id %in% patient_ids, ]
+  }
+
+  # Create matrix for heatmap
+  patient_list <- unique(data$id_client_id)
+  n_patients <- length(patient_list)
+  n_vars <- length(variables)
+
+  message("[HEATMAP] ", n_patients, " patients x ", n_vars, " variables")
+
+  # Build matrix: rows = patients, cols = variables
+  miss_matrix <- matrix(NA, nrow = n_patients, ncol = n_vars)
+  rownames(miss_matrix) <- patient_list
+  colnames(miss_matrix) <- variables
+
+  for (i in seq_along(patient_list)) {
+    patient_data <- data[data$id_client_id == patient_list[i], ]
+
+    for (j in seq_along(variables)) {
+      var <- variables[j]
+      if (var %in% names(patient_data)) {
+        values <- patient_data[[var]]
+
+        # Categorize missingness
+        # 0 = Has data, 1 = Empty string, 2 = NA
+        if (any(!is.na(values) & values != "")) {
+          miss_matrix[i, j] <- 0  # Has data
+        } else if (any(!is.na(values) & values == "")) {
+          miss_matrix[i, j] <- 1  # Empty string
+        } else {
+          miss_matrix[i, j] <- 2  # NA
+        }
+      } else {
+        miss_matrix[i, j] <- 2  # Variable not in data
+      }
+    }
+  }
+
+  # Create plotly heatmap
+  fig <- plot_ly(
+    x = variables,
+    y = patient_list,
+    z = miss_matrix,
+    type = "heatmap",
+    colors = c("#2ecc71", "#f39c12", "#e74c3c"),  # Green, Yellow, Red
+    colorscale = list(
+      c(0, "#2ecc71"),    # Has data = green
+      c(0.5, "#f39c12"),  # Empty string = yellow
+      c(1, "#e74c3c")     # NA = red
+    ),
+    hovertemplate = paste(
+      "Patient: %{y}<br>",
+      "Variable: %{x}<br>",
+      "Status: %{z}<br>",
+      "<extra></extra>"
+    ),
+    showscale = TRUE,
+    colorbar = list(
+      title = "Status",
+      tickvals = c(0, 1, 2),
+      ticktext = c("Has Data", "Empty (\"\")", "NA")
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = paste0("Missingness Heatmap<br><sub>n = ", n_patients, " patients</sub>"),
+        x = 0
+      ),
+      xaxis = list(title = "Variables", tickangle = -45),
+      yaxis = list(title = "Patients"),
+      margin = list(b = 150)
+    )
+
+  message("[HEATMAP] Heatmap created!")
+  return(fig)
 }
 
 
-#' Create Correlation Heatmap
+#' Summarize Missingness by Instrument
 #'
-#' Creates heatmap visualization of correlation matrix
+#' Creates summary table of missingness statistics by instrument
 #'
-#' @param cor_matrix Correlation matrix
-#' @return ggplot object
+#' @param missingness_analysis Output from analyze_missingness()
+#' @return Dataframe with instrument-level summary
 #' @export
-plot_correlation_heatmap <- function(cor_matrix) {
-  # TODO: Implement correlation heatmap
+summarize_missingness_by_instrument <- function(missingness_analysis) {
+  message("[SUMMARY] Summarizing by instrument...")
 
-  message("Creating correlation heatmap...")
+  # Remove NAs from instrument column for grouping
+  miss_with_inst <- missingness_analysis[!is.na(missingness_analysis$instrument), ]
 
-  # Placeholder implementation
-  return(NULL)
+  if (nrow(miss_with_inst) == 0) {
+    message("[SUMMARY] No instrument metadata found")
+    return(data.frame())
+  }
+
+  # Group by instrument
+  summary <- miss_with_inst %>%
+    group_by(instrument) %>%
+    summarise(
+      n_variables = n(),
+      avg_pct_data = round(mean(pct_has_data, na.rm = TRUE), 1),
+      avg_pct_empty = round(mean(pct_empty, na.rm = TRUE), 1),
+      avg_pct_na = round(mean(pct_na, na.rm = TRUE), 1),
+      min_completion = round(min(pct_has_data, na.rm = TRUE), 1),
+      max_completion = round(max(pct_has_data, na.rm = TRUE), 1),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(avg_pct_data))
+
+  message("[SUMMARY] Summary complete for ", nrow(summary), " instruments")
+  return(as.data.frame(summary))
 }
 
 
-#' Create Scatter Plot with Regression Line
+#' Get Patient Missingness Profile
 #'
-#' Creates scatter plot with optional regression line
+#' Analyzes missingness for a specific patient
 #'
 #' @param data Cleaned visits data
-#' @param x_var X-axis variable name
-#' @param y_var Y-axis variable name
-#' @param add_regression Add regression line (TRUE/FALSE)
-#' @return ggplot object
+#' @param patient_id Patient ID to analyze
+#' @param dict Data dictionary
+#' @return List with patient profile information
 #' @export
-plot_scatter_regression <- function(data, x_var, y_var, add_regression = TRUE) {
-  # TODO: Implement scatter plot with regression
+get_patient_missingness_profile <- function(data, patient_id, dict) {
+  message("[PATIENT] Analyzing patient: ", patient_id)
 
-  message("Creating scatter plot...")
+  patient_data <- data[data$id_client_id == patient_id, ]
 
-  # Placeholder implementation
-  return(NULL)
+  if (nrow(patient_data) == 0) {
+    message("[PATIENT] Patient not found")
+    return(NULL)
+  }
+
+  # Exclude identifier and analysis columns
+  exclude_patterns <- c("^id_", "_numeric$", "_factor$", "_date$", "_unit$")
+  all_vars <- names(patient_data)
+  vars_to_check <- all_vars[!grepl(paste(exclude_patterns, collapse = "|"), all_vars)]
+
+  # Analyze each variable for this patient
+  var_status <- lapply(vars_to_check, function(var) {
+    values <- patient_data[[var]]
+
+    has_data <- any(!is.na(values) & values != "")
+    has_empty <- any(!is.na(values) & values == "")
+    has_na <- any(is.na(values))
+
+    status <- if (has_data) {
+      "Has Data"
+    } else if (has_empty) {
+      "Empty String"
+    } else if (has_na) {
+      "NA"
+    } else {
+      "Unknown"
+    }
+
+    # Get instrument
+    dict_row <- dict[dict$new_name == var, ]
+    instrument <- if (nrow(dict_row) > 0) dict_row$instrument else NA
+
+    data.frame(
+      variable = var,
+      instrument = instrument,
+      status = status,
+      n_visits = nrow(patient_data),
+      stringsAsFactors = FALSE
+    )
+  })
+
+  profile <- do.call(rbind, var_status)
+
+  # Summary statistics
+  n_with_data <- sum(profile$status == "Has Data")
+  n_empty <- sum(profile$status == "Empty String")
+  n_na <- sum(profile$status == "NA")
+
+  result <- list(
+    patient_id = patient_id,
+    n_visits = nrow(patient_data),
+    n_variables_total = nrow(profile),
+    n_with_data = n_with_data,
+    n_empty = n_empty,
+    n_na = n_na,
+    variable_details = profile
+  )
+
+  message("[PATIENT] Profile complete: ", n_with_data, " vars with data, ",
+          n_empty, " empty, ", n_na, " NA")
+
+  return(result)
+}
+
+
+#' Create Visit Completion Timeline
+#'
+#' Shows % completion over visits
+#'
+#' @param data Cleaned visits data
+#' @param dict Data dictionary
+#' @param instrument_filter Optional: filter by specific instrument
+#' @return plotly line plot
+#' @export
+create_visit_completion_timeline <- function(data, dict, instrument_filter = NULL) {
+  require(plotly)
+
+  message("[TIMELINE] Creating completion timeline...")
+
+  # Get visit numbers
+  if (!"id_visit_no" %in% names(data)) {
+    message("[TIMELINE] Visit number column not found")
+    return(NULL)
+  }
+
+  # Exclude identifier and analysis columns
+  exclude_patterns <- c("^id_", "_numeric$", "_factor$", "_date$", "_unit$")
+  all_vars <- names(data)
+  vars_to_check <- all_vars[!grepl(paste(exclude_patterns, collapse = "|"), all_vars)]
+
+  # Filter by instrument if specified
+  if (!is.null(instrument_filter)) {
+    dict_filtered <- dict[dict$instrument == instrument_filter & !is.na(dict$instrument), ]
+    vars_to_check <- intersect(vars_to_check, dict_filtered$new_name)
+  }
+
+  # Calculate completion by visit
+  visits <- sort(unique(data$id_visit_no))
+  completion_by_visit <- sapply(visits, function(visit) {
+    visit_data <- data[data$id_visit_no == visit, vars_to_check]
+
+    total_cells <- prod(dim(visit_data))
+    if (total_cells == 0) return(0)
+
+    has_data <- sum(sapply(visit_data, function(col) {
+      sum(!is.na(col) & col != "", na.rm = TRUE)
+    }))
+
+    (has_data / total_cells) * 100
+  })
+
+  # Create plot
+  fig <- plot_ly(
+    x = visits,
+    y = completion_by_visit,
+    type = "scatter",
+    mode = "lines+markers",
+    marker = list(size = 10),
+    line = list(width = 2),
+    hovertemplate = paste(
+      "Visit: %{x}<br>",
+      "Completion: %{y:.1f}%<br>",
+      "<extra></extra>"
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = if (!is.null(instrument_filter)) {
+          paste0("Completion Timeline - ", instrument_filter,
+                 "<br><sub>n = ", nrow(data), " observations</sub>")
+        } else {
+          paste0("Overall Completion Timeline<br><sub>n = ", nrow(data), " observations</sub>")
+        },
+        x = 0
+      ),
+      xaxis = list(title = "Visit Number"),
+      yaxis = list(title = "% Completion", range = c(0, 100)),
+      hovermode = "closest"
+    )
+
+  message("[TIMELINE] Timeline created!")
+  return(fig)
+}
+
+
+#' Helper: Get Variables by Instrument
+#'
+#' Extract variable names for a specific instrument
+#'
+#' @param dict Data dictionary
+#' @param instrument_name Name of instrument
+#' @return Vector of variable names
+#' @export
+get_instrument_variables <- function(dict, instrument_name) {
+  dict_filtered <- dict[dict$instrument == instrument_name & !is.na(dict$instrument), ]
+  return(dict_filtered$new_name)
+}
+
+
+#' Helper: Get Variables by Section
+#'
+#' Extract variable names for a specific section
+#'
+#' @param dict Data dictionary
+#' @param section_name Name of section (cognitive, physical, demographic, medical)
+#' @return Vector of variable names
+#' @export
+get_section_variables <- function(dict, section_name) {
+  dict_filtered <- dict[dict$section == section_name & !is.na(dict$section), ]
+  return(dict_filtered$new_name)
 }
