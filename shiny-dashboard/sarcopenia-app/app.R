@@ -16,6 +16,7 @@
 library(shiny)
 library(bslib)
 library(reactable)
+library(plotly)
 library(dplyr)
 library(tidyr)
 library(readr)
@@ -50,6 +51,13 @@ source("R/mod_visualization.R")
 source("R/mod_reports.R")
 
 message("All components loaded successfully!")
+
+# ============================================================================
+# LOAD DATA DICTIONARY
+# ============================================================================
+
+dict <- read_csv("data_dictionary_enhanced.csv", show_col_types = FALSE)
+message("Data dictionary loaded: ", nrow(dict), " variables")
 
 # ============================================================================
 # SHINY UI
@@ -95,12 +103,13 @@ ui <- page_sidebar(
              card(
                card_header("Adverse Events Preview"),
                reactableOutput("ae_table")
-             ))
+             )),
 
-    # TODO: Add new analysis tabs here
-    # Uncomment when ready to implement:
+    # Exploratory Data Analysis Tab
+    nav_panel("Data Explorer", mod_visualization_ui("viz"))
+
+    # TODO: Add additional analysis tabs here when ready:
     # nav_panel("Analysis", mod_analysis_ui("analysis")),
-    # nav_panel("Visualizations", mod_visualization_ui("viz")),
     # nav_panel("Reports", mod_reports_ui("reports"))
   )
 )
@@ -242,10 +251,11 @@ server <- function(input, output, session) {
     }
   )
 
-  # TODO: Call module servers when implementing new features
-  # Uncomment when ready:
+  # Call visualization module server
+  mod_visualization_server("viz", cleaned_data, dict)
+
+  # TODO: Call additional module servers when ready:
   # mod_analysis_server("analysis", cleaned_data)
-  # mod_visualization_server("viz", cleaned_data)
   # mod_reports_server("reports", cleaned_data)
 }
 
