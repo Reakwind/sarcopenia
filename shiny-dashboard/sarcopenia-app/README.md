@@ -1,8 +1,9 @@
-# Sarcopenia Data Cleaning App v2.0
+# Sarcopenia Data Cleaning App v2.1
 
-**Status:** ✅ Stable and Production-Ready  
-**Deployed:** https://780-data-explorer.shinyapps.io/sarcDash/  
-**Version:** v2.0-stable (tagged)
+**Status:** ✅ Modular Architecture - Production-Ready
+**Deployed:** https://780-data-explorer.shinyapps.io/sarcDash/
+**Version:** v2.1-modular
+**Architecture:** Source-based modular (NOT Golem package)
 
 ## Quick Start
 
@@ -46,31 +47,71 @@
 
 ```
 sarcopenia-app/
-├── app.R                              # Main Shiny app
+├── app.R                              # Main app entry point (258 lines)
+├── R/                                 # Modular code organization
+│   ├── fct_cleaning.R                 # Core cleaning functions (PROTECTED)
+│   ├── fct_analysis.R                 # Statistical analysis (scaffold)
+│   ├── fct_visualization.R            # Plotting/charting (scaffold)
+│   ├── fct_reports.R                  # Report generation (scaffold)
+│   ├── utils.R                        # Utility functions
+│   ├── mod_analysis.R                 # Analysis tab module (scaffold)
+│   ├── mod_visualization.R            # Visualization tab module (scaffold)
+│   └── mod_reports.R                  # Reports tab module (scaffold)
 ├── data_dictionary_enhanced.csv       # Variable metadata (PROTECTED)
-├── test_new_functions.R              # Test script
-├── CORE_PROTECTION.md                # Protection guidelines (READ THIS!)
-├── DEPLOYMENT_SUMMARY.md             # Deployment info
+├── test_new_functions.R               # Test script
+├── CORE_PROTECTION.md                 # Protection guidelines (READ THIS!)
+├── DEPLOYMENT_SUMMARY.md              # Deployment info
 ├── docs/
-│   ├── DATA_CLEANING_RULES.md       # Business logic (IMMUTABLE)
-│   └── DEVELOPER_SPEC.md            # Technical spec (IMMUTABLE)
-└── rsconnect/                        # Deployment config
+│   ├── DATA_CLEANING_RULES.md         # Business logic (IMMUTABLE)
+│   ├── DEVELOPER_SPEC.md              # Technical spec (IMMUTABLE)
+│   └── ARCHITECTURE.md                # Modular architecture guide
+└── rsconnect/                         # Deployment config
 ```
 
-## Adding New Features (Safe)
+## Adding New Features (Safe with Modular Architecture)
 
-### ✅ SAFE: Add Analysis Tab
+### ✅ SAFE: Add Analysis Functions
 ```r
-# Add new nav_panel AFTER cleaning
-nav_panel("My Analysis",
-  card(plotOutput("my_plot")))
-  
-# Use cleaned_data()$visits_data
+# In R/fct_analysis.R - add your statistical analysis function
+calculate_my_stats <- function(data, variables) {
+  # Implement your analysis
+  # Uses cleaned_data()$visits_data
+  return(results)
+}
+
+# In app.R server - call your function
+output$my_results <- renderTable({
+  req(cleaned_data())
+  calculate_my_stats(cleaned_data()$visits_data, selected_vars)
+})
+```
+
+### ✅ SAFE: Add Visualization Functions
+```r
+# In R/fct_visualization.R - add plotting function
+plot_my_chart <- function(data, x_var, y_var) {
+  # Create ggplot
+  ggplot(data, aes(x = !!sym(x_var), y = !!sym(y_var))) +
+    geom_point()
+}
+
+# In R/mod_visualization.R - use in module
 output$my_plot <- renderPlot({
   req(cleaned_data())
-  df <- cleaned_data()$visits_data
-  # Your analysis here - SAFE!
+  plot_my_chart(cleaned_data()$visits_data, input$x, input$y)
 })
+```
+
+### ✅ SAFE: Add New Tab Module
+```r
+# Step 1: Implement module in R/mod_mynew.R
+source("R/mod_mynew.R")  # Add to app.R source section
+
+# Step 2: Add UI to app.R navset_card_tab
+nav_panel("My Feature", mod_mynew_ui("mynew"))
+
+# Step 3: Call server in app.R server function
+mod_mynew_server("mynew", cleaned_data)
 ```
 
 ### ⚠️ CAUTION: Modify Output
@@ -79,13 +120,16 @@ output$my_plot <- renderPlot({
 # Ensure "" vs "NA" distinction preserved
 ```
 
-### ❌ NEVER: Modify Core Functions
+### ❌ NEVER: Modify Core Cleaning File
 ```r
-# DO NOT change:
+# DO NOT modify R/fct_cleaning.R without following testing protocol!
+# Protected functions:
 # - convert_patient_level_na()
 # - fill_time_invariant()
 # - create_analysis_columns()
 # - Pipeline order in clean_csv()
+#
+# See CORE_PROTECTION.md for details
 ```
 
 ## Testing
@@ -127,13 +171,23 @@ git checkout -b emergency-fix
 
 ## Version History
 
-### v2.0-stable (2025-10-23) - CURRENT
+### v2.1-modular (2025-10-24) - CURRENT
+- ✅ **Modular architecture** - Code organized in R/ directory
+- ✅ **Core protected** - Cleaning functions in R/fct_cleaning.R
+- ✅ **Scaffolds ready** - Analysis, visualization, reports modules
+- ✅ **Simplified app.R** - Reduced from 576 to 258 lines
+- ✅ **All tests passing** - Exact same functionality maintained
+- ✅ **Deployment unchanged** - Source-based (NOT Golem package)
+- ✅ **Rollback available** - v2.0-pre-refactor tag
+
+### v2.0-stable (2025-10-23)
 - ✅ Patient-level NA conversion working
 - ✅ Time-invariant filling working
 - ✅ Dual columns created
 - ✅ CSV output correct
 - ✅ Table rendering optimized
 - ✅ Core protection documented
+- ⚠️ Single-file app.R (576 lines)
 
 ### v1.0 (Previous)
 - ❌ Broken - column-based NA assignment

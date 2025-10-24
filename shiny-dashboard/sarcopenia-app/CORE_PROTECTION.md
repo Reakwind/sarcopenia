@@ -4,8 +4,10 @@
 
 ## Protected Core Components
 
-### 1. Data Cleaning Functions (app.R lines 26-381)
-**DO NOT MODIFY without extensive testing:**
+### 1. Data Cleaning Functions (R/fct_cleaning.R)
+**⚠️ PROTECTED FILE - DO NOT MODIFY without extensive testing:**
+
+Location: `R/fct_cleaning.R` (all cleaning functions extracted from app.R)
 
 - `clean_csv()` - Main cleaning pipeline orchestrator
 - `convert_patient_level_na()` - Patient-level missingness logic
@@ -13,6 +15,7 @@
 - `create_analysis_columns()` - Dual column creation
 - `apply_variable_mapping()` - Variable name mapping
 - `split_visits_and_ae()` - Data splitting logic
+- `generate_summary()` - Summary statistics generation
 
 **Pipeline Order (CRITICAL - DO NOT REORDER):**
 1. Remove section markers
@@ -41,9 +44,59 @@
 
 ---
 
+---
+
+## Modular Architecture (v2.1)
+
+**New in v2.1:** Code organized into modular structure for maintainability
+
+### File Structure
+```
+R/
+├── fct_cleaning.R          # PROTECTED - Core cleaning functions
+├── fct_analysis.R          # SAFE - Statistical analysis (scaffold)
+├── fct_visualization.R     # SAFE - Plotting/charting (scaffold)
+├── fct_reports.R           # SAFE - Report generation (scaffold)
+├── utils.R                 # SAFE - Utility functions
+├── mod_analysis.R          # SAFE - Analysis tab module
+├── mod_visualization.R     # SAFE - Visualization tab module
+└── mod_reports.R           # SAFE - Reports tab module
+```
+
+### app.R Structure (258 lines)
+- Library imports
+- Source all R/ files
+- UI definition
+- Server definition
+- Does NOT contain cleaning functions (now in R/fct_cleaning.R)
+
+---
+
 ## Rules for Adding New Features
 
-### ✅ SAFE: Add features AFTER cleaning
+### ✅ SAFE: Add new functions to scaffold files
+```r
+# In R/fct_analysis.R - add your analysis functions
+my_new_analysis <- function(data) {
+  # Uses cleaned_data()$visits_data
+  # SAFE - doesn't affect cleaning pipeline
+}
+```
+
+### ✅ SAFE: Add new modules for tabs
+```r
+# In R/mod_analysis.R - implement analysis tab
+mod_analysis_ui <- function(id) {
+  # UI for analysis tab
+}
+
+mod_analysis_server <- function(id, cleaned_data) {
+  # Server logic for analysis
+  # Access data with: cleaned_data()$visits_data
+}
+```
+
+### ✅ SAFE: Add features in app.R server
 ```r
 # In server function, AFTER cleaned_data() is populated:
 observeEvent(input$new_analysis_button, {
@@ -70,10 +123,14 @@ observeEvent(input$new_analysis_button, {
 - Verify downloaded data matches expectations
 
 ### ❌ DANGEROUS: Modifying cleaning functions
+**DO NOT modify R/fct_cleaning.R without following the testing protocol!**
+
 - Changing step order in `clean_csv()`
 - Modifying logic in `convert_patient_level_na()`
-- Altering time-invariant filling logic
+- Altering time-invariant filling logic in `fill_time_invariant()`
+- Changing dual column creation in `create_analysis_columns()`
 - Changing data dictionary categorization
+- Modifying any function in R/fct_cleaning.R
 
 ---
 
@@ -114,9 +171,23 @@ observeEvent(input$new_analysis_button, {
 
 ## Version History
 
-### v2.0 (CURRENT - STABLE)
+### v2.1-modular (CURRENT)
+**Date:** 2025-10-24
+**Status:** ✅ Refactored to modular architecture
+
+**Changes:**
+- Extracted all cleaning functions to R/fct_cleaning.R (PROTECTED)
+- Created scaffold files for analysis, visualization, reports
+- Reduced app.R from 576 to 258 lines
+- Maintained exact same functionality
+- All test cases still passing
+- Deployment method unchanged (source-based, NOT package)
+
+**Rollback point:** v2.0-pre-refactor tag
+
+### v2.0-stable
 **Date:** 2025-10-23
-**Status:** ✅ Fully functional and tested
+**Status:** ✅ Fully functional and tested (single-file app.R)
 
 **Core Logic:**
 - Patient-level NA conversion (5,842 conversions)
