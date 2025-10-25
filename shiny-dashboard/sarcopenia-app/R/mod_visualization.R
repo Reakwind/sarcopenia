@@ -24,51 +24,53 @@ mod_visualization_ui <- function(id) {
     # Control Panel Card
     card(
       card_header(icon("sliders"), "Analysis Controls"),
-      layout_columns(
-        col_widths = c(3, 3, 3, 3),
+      card_body(
+        layout_columns(
+          col_widths = c(3, 3, 3, 3),
 
-        # View type selector
-        selectInput(
-          ns("view_type"),
-          "Analysis Type:",
-          choices = c(
-            "Missingness Overview" = "miss_overview",
-            "Missingness Heatmap" = "miss_heatmap",
-            "Visit Timeline" = "miss_timeline",
-            "Patient Profile" = "patient_profile"
+          # View type selector
+          selectInput(
+            ns("view_type"),
+            "Analysis Type:",
+            choices = c(
+              "Missingness Overview" = "miss_overview",
+              "Missingness Heatmap" = "miss_heatmap",
+              "Visit Timeline" = "miss_timeline",
+              "Patient Profile" = "patient_profile"
+            ),
+            selected = "miss_overview"
           ),
-          selected = "miss_overview"
-        ),
 
-        # Instrument filter
-        selectInput(
-          ns("instrument_filter"),
-          "Instrument:",
-          choices = c("All Instruments" = "all"),
-          selected = "all"
-        ),
-
-        # Section filter
-        selectInput(
-          ns("section_filter"),
-          "Section:",
-          choices = c(
-            "All Sections" = "all",
-            "Cognitive" = "cognitive",
-            "Physical" = "physical",
-            "Demographic" = "demographic",
-            "Medical" = "medical"
+          # Instrument filter
+          selectInput(
+            ns("instrument_filter"),
+            "Instrument:",
+            choices = c("All Instruments" = "all"),
+            selected = "all"
           ),
-          selected = "all"
-        ),
 
-        # Patient filter
-        selectInput(
-          ns("patient_filter"),
-          "Patient:",
-          choices = c("All Patients" = "all"),
-          selected = "all",
-          multiple = FALSE
+          # Section filter
+          selectInput(
+            ns("section_filter"),
+            "Section:",
+            choices = c(
+              "All Sections" = "all",
+              "Cognitive" = "cognitive",
+              "Physical" = "physical",
+              "Demographic" = "demographic",
+              "Medical" = "medical"
+            ),
+            selected = "all"
+          ),
+
+          # Patient filter
+          selectInput(
+            ns("patient_filter"),
+            "Patient:",
+            choices = c("All Patients" = "all"),
+            selected = "all",
+            multiple = FALSE
+          )
         )
       )
     ),
@@ -337,9 +339,11 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
         ),
         striped = TRUE,
         highlight = TRUE,
-        defaultPageSize = 15,
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 50,
         showPageSizeOptions = TRUE,
-        pageSizeOptions = c(10, 15, 20, 50)
+        pageSizeOptions = c(10, 20, 50, 100)
       )
     })
 
@@ -381,7 +385,11 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
         ),
         striped = TRUE,
         highlight = TRUE,
-        defaultPageSize = 20
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 20,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(10, 20, 50)
       )
     })
 
@@ -569,9 +577,11 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
         groupBy = "instrument",
         striped = TRUE,
         highlight = TRUE,
-        defaultPageSize = 20,
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 50,
         showPageSizeOptions = TRUE,
-        pageSizeOptions = c(20, 50, 100)
+        pageSizeOptions = c(20, 50, 100, 200)
       )
     })
 
