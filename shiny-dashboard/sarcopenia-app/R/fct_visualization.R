@@ -12,10 +12,13 @@
 
 #' Analyze Missingness Patterns
 #'
-#' Analyzes missingness for each variable, distinguishing between:
+#' Analyzes missingness for each variable using 2-category logic:
 #' - Has data (non-empty, non-NA)
-#' - Empty string ("") - test not performed this visit but patient has data elsewhere
-#' - NA - truly missing for this patient across all visits
+#' - Missing (NA only - truly missing after patient-level cleaning)
+#'
+#' Note: Empty strings ("") are NOT counted as missing. After the cleaning
+#' pipeline, empty strings mean "test not performed this visit" but the patient
+#' has data for this variable in other visits. Only NA represents truly missing data.
 #'
 #' @param data Cleaned visits data (use original columns, not _numeric)
 #' @param dict Data dictionary with instrument metadata
@@ -38,13 +41,13 @@ analyze_missingness <- function(data, dict) {
     values <- data[[var]]
 
     n_total <- length(values)
+    # Has data = non-empty AND non-NA
     n_has_data <- sum(!is.na(values) & values != "", na.rm = TRUE)
-    n_empty_string <- sum(!is.na(values) & values == "", na.rm = TRUE)
-    n_na <- sum(is.na(values))
+    # Missing = NA only (empty strings are NOT missing)
+    n_missing <- sum(is.na(values))
 
     pct_has_data <- (n_has_data / n_total) * 100
-    pct_empty <- (n_empty_string / n_total) * 100
-    pct_na <- (n_na / n_total) * 100
+    pct_missing <- (n_missing / n_total) * 100
 
     # Get metadata from dictionary
     dict_row <- dict[dict$new_name == var, ]
@@ -59,11 +62,9 @@ analyze_missingness <- function(data, dict) {
       variable_category = var_category,
       n_total = n_total,
       n_has_data = n_has_data,
-      n_empty_string = n_empty_string,
-      n_na = n_na,
+      n_missing = n_missing,
       pct_has_data = round(pct_has_data, 1),
-      pct_empty = round(pct_empty, 1),
-      pct_na = round(pct_na, 1),
+      pct_missing = round(pct_missing, 1),
       stringsAsFactors = FALSE
     )
   })
@@ -78,6 +79,7 @@ analyze_missingness <- function(data, dict) {
 #' Create Interactive Missingness Heatmap
 #'
 #' Creates plotly heatmap showing missingness pattern for selected variables
+#' using 2-color scheme (Has Data vs Missing/NA only)
 #'
 #' @param data Cleaned visits data
 #' @param variables Vector of variable names to include
@@ -102,6 +104,8 @@ create_missingness_heatmap <- function(data, variables, patient_ids = NULL) {
   message("[HEATMAP] ", n_patients, " patients x ", n_vars, " variables")
 
   # Build matrix: rows = patients, cols = variables
+  # 0 = Has Data (non-empty, non-NA)
+  # 1 = Missing (NA only)
   miss_matrix <- matrix(NA, nrow = n_patients, ncol = n_vars)
   rownames(miss_matrix) <- patient_list
   colnames(miss_matrix) <- variables
@@ -114,32 +118,29 @@ create_missingness_heatmap <- function(data, variables, patient_ids = NULL) {
       if (var %in% names(patient_data)) {
         values <- patient_data[[var]]
 
-        # Categorize missingness
-        # 0 = Has data, 1 = Empty string, 2 = NA
+        # 2-category logic: Has data vs Missing (NA)
+        # Empty strings ("") are treated as "has data" (not missing)
         if (any(!is.na(values) & values != "")) {
           miss_matrix[i, j] <- 0  # Has data
-        } else if (any(!is.na(values) & values == "")) {
-          miss_matrix[i, j] <- 1  # Empty string
         } else {
-          miss_matrix[i, j] <- 2  # NA
+          miss_matrix[i, j] <- 1  # Missing (NA)
         }
       } else {
-        miss_matrix[i, j] <- 2  # Variable not in data
+        miss_matrix[i, j] <- 1  # Variable not in data = missing
       }
     }
   }
 
-  # Create plotly heatmap
+  # Create plotly heatmap with 2-color scheme
   fig <- plot_ly(
     x = variables,
     y = patient_list,
     z = miss_matrix,
     type = "heatmap",
-    colors = c("#2ecc71", "#f39c12", "#e74c3c"),  # Green, Yellow, Red
+    colors = c("#2ecc71", "#e74c3c"),  # Green, Red
     colorscale = list(
       c(0, "#2ecc71"),    # Has data = green
-      c(0.5, "#f39c12"),  # Empty string = yellow
-      c(1, "#e74c3c")     # NA = red
+      c(1, "#e74c3c")     # Missing (NA) = red
     ),
     hovertemplate = paste(
       "Patient: %{y}<br>",
@@ -150,8 +151,8 @@ create_missingness_heatmap <- function(data, variables, patient_ids = NULL) {
     showscale = TRUE,
     colorbar = list(
       title = "Status",
-      tickvals = c(0, 1, 2),
-      ticktext = c("Has Data", "Empty (\"\")", "NA")
+      tickvals = c(0, 1),
+      ticktext = c("Has Data", "Missing")
     )
   ) %>%
     layout(
@@ -193,8 +194,7 @@ summarize_missingness_by_instrument <- function(missingness_analysis) {
     summarise(
       n_variables = n(),
       avg_pct_data = round(mean(pct_has_data, na.rm = TRUE), 1),
-      avg_pct_empty = round(mean(pct_empty, na.rm = TRUE), 1),
-      avg_pct_na = round(mean(pct_na, na.rm = TRUE), 1),
+      avg_pct_missing = round(mean(pct_missing, na.rm = TRUE), 1),
       min_completion = round(min(pct_has_data, na.rm = TRUE), 1),
       max_completion = round(max(pct_has_data, na.rm = TRUE), 1),
       .groups = "drop"
@@ -234,18 +234,13 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
   var_status <- lapply(vars_to_check, function(var) {
     values <- patient_data[[var]]
 
+    # 2-category logic: Has data vs Missing (NA only)
     has_data <- any(!is.na(values) & values != "")
-    has_empty <- any(!is.na(values) & values == "")
-    has_na <- any(is.na(values))
 
     status <- if (has_data) {
       "Has Data"
-    } else if (has_empty) {
-      "Empty String"
-    } else if (has_na) {
-      "NA"
     } else {
-      "Unknown"
+      "Missing"  # NA only (empty strings not counted as missing)
     }
 
     # Get instrument
@@ -265,21 +260,19 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
 
   # Summary statistics
   n_with_data <- sum(profile$status == "Has Data")
-  n_empty <- sum(profile$status == "Empty String")
-  n_na <- sum(profile$status == "NA")
+  n_missing <- sum(profile$status == "Missing")
 
   result <- list(
     patient_id = patient_id,
     n_visits = nrow(patient_data),
     n_variables_total = nrow(profile),
     n_with_data = n_with_data,
-    n_empty = n_empty,
-    n_na = n_na,
+    n_missing = n_missing,
     variable_details = profile
   )
 
   message("[PATIENT] Profile complete: ", n_with_data, " vars with data, ",
-          n_empty, " empty, ", n_na, " NA")
+          n_missing, " missing")
 
   return(result)
 }

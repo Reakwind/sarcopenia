@@ -79,8 +79,7 @@ mod_visualization_ui <- function(id) {
 
     # Panel 1: Missingness Overview
     conditionalPanel(
-      condition = "input.view_type == 'miss_overview'",
-      ns = ns,
+      condition = "input['viz-view_type'] == 'miss_overview'",
 
       card(
         card_header(icon("table"), "Missingness Summary by Instrument"),
@@ -100,8 +99,7 @@ mod_visualization_ui <- function(id) {
 
     # Panel 2: Missingness Heatmap
     conditionalPanel(
-      condition = "input.view_type == 'miss_heatmap'",
-      ns = ns,
+      condition = "input['viz-view_type'] == 'miss_heatmap'",
 
       card(
         card_header(icon("table-cells"), "Variable Selection"),
@@ -140,8 +138,7 @@ mod_visualization_ui <- function(id) {
 
     # Panel 3: Visit Timeline
     conditionalPanel(
-      condition = "input.view_type == 'miss_timeline'",
-      ns = ns,
+      condition = "input['viz-view_type'] == 'miss_timeline'",
 
       card(
         card_header(icon("chart-line"), "Completion Over Time"),
@@ -154,8 +151,7 @@ mod_visualization_ui <- function(id) {
 
     # Panel 4: Patient Profile
     conditionalPanel(
-      condition = "input.view_type == 'patient_profile'",
-      ns = ns,
+      condition = "input['viz-view_type'] == 'patient_profile'",
 
       card(
         card_header(icon("user"), "Patient Missingness Profile"),
@@ -316,13 +312,8 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
               list(fontWeight = "bold", color = color)
             }
           ),
-          avg_pct_empty = reactable::colDef(
-            name = "Avg % Empty",
-            width = 120,
-            format = reactable::colFormat(suffix = "%")
-          ),
-          avg_pct_na = reactable::colDef(
-            name = "Avg % NA",
+          avg_pct_missing = reactable::colDef(
+            name = "Avg % Missing",
             width = 120,
             format = reactable::colFormat(suffix = "%")
           ),
@@ -354,7 +345,7 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
       top_missing <- filtered_missingness() %>%
         arrange(pct_has_data) %>%
         head(20) %>%
-        select(variable, instrument, pct_has_data, pct_empty, pct_na)
+        select(variable, instrument, pct_has_data, pct_missing)
 
       reactable::reactable(
         top_missing,
@@ -372,13 +363,8 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
               list(fontWeight = "bold", color = color)
             }
           ),
-          pct_empty = reactable::colDef(
-            name = "% Empty",
-            width = 100,
-            format = reactable::colFormat(suffix = "%")
-          ),
-          pct_na = reactable::colDef(
-            name = "% NA",
+          pct_missing = reactable::colDef(
+            name = "% Missing",
             width = 100,
             format = reactable::colFormat(suffix = "%")
           )
@@ -508,7 +494,7 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
       tagList(
         h5(paste("Patient:", profile$patient_id)),
         layout_columns(
-          col_widths = c(3, 3, 3, 3),
+          col_widths = c(4, 4, 4),
           value_box(
             title = "Visits",
             value = profile$n_visits,
@@ -520,13 +506,8 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
             theme = "success"
           ),
           value_box(
-            title = "Empty Strings",
-            value = profile$n_empty,
-            theme = "warning"
-          ),
-          value_box(
-            title = "Truly Missing (NA)",
-            value = profile$n_na,
+            title = "Missing (NA)",
+            value = profile$n_missing,
             theme = "danger"
           )
         )
@@ -562,13 +543,11 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
             width = 150,
             style = function(value) {
               if (value == "Has Data") {
-                color <- "#2ecc71"
-              } else if (value == "Empty String") {
-                color <- "#f39c12"
-              } else if (value == "NA") {
-                color <- "#e74c3c"
+                color <- "#2ecc71"  # Green
+              } else if (value == "Missing") {
+                color <- "#e74c3c"  # Red
               } else {
-                color <- "#7f8c8d"
+                color <- "#7f8c8d"  # Gray (fallback)
               }
               list(fontWeight = "bold", color = color)
             }
