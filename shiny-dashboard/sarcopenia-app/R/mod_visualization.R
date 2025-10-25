@@ -25,51 +25,57 @@ mod_visualization_ui <- function(id) {
     card(
       card_header(icon("sliders"), "Analysis Controls"),
       card_body(
-        layout_columns(
-          col_widths = c(3, 3, 3, 3),
-
+        fluidRow(
           # View type selector
-          selectInput(
-            ns("view_type"),
-            "Analysis Type:",
-            choices = c(
-              "Missingness Overview" = "miss_overview",
-              "Missingness Heatmap" = "miss_heatmap",
-              "Visit Timeline" = "miss_timeline",
-              "Patient Profile" = "patient_profile"
-            ),
-            selected = "miss_overview"
+          column(3,
+            selectInput(
+              ns("view_type"),
+              "Analysis Type:",
+              choices = c(
+                "Missingness Overview" = "miss_overview",
+                "Missingness Heatmap" = "miss_heatmap",
+                "Visit Timeline" = "miss_timeline",
+                "Patient Profile" = "patient_profile"
+              ),
+              selected = "miss_overview"
+            )
           ),
 
           # Instrument filter
-          selectInput(
-            ns("instrument_filter"),
-            "Instrument:",
-            choices = c("All Instruments" = "all"),
-            selected = "all"
+          column(3,
+            selectInput(
+              ns("instrument_filter"),
+              "Instrument:",
+              choices = c("All Instruments" = "all"),
+              selected = "all"
+            )
           ),
 
           # Section filter
-          selectInput(
-            ns("section_filter"),
-            "Section:",
-            choices = c(
-              "All Sections" = "all",
-              "Cognitive" = "cognitive",
-              "Physical" = "physical",
-              "Demographic" = "demographic",
-              "Medical" = "medical"
-            ),
-            selected = "all"
+          column(3,
+            selectInput(
+              ns("section_filter"),
+              "Section:",
+              choices = c(
+                "All Sections" = "all",
+                "Cognitive" = "cognitive",
+                "Physical" = "physical",
+                "Demographic" = "demographic",
+                "Medical" = "medical"
+              ),
+              selected = "all"
+            )
           ),
 
           # Patient filter
-          selectInput(
-            ns("patient_filter"),
-            "Patient:",
-            choices = c("All Patients" = "all"),
-            selected = "all",
-            multiple = FALSE
+          column(3,
+            selectInput(
+              ns("patient_filter"),
+              "Patient:",
+              choices = c("All Patients" = "all"),
+              selected = "all",
+              multiple = FALSE
+            )
           )
         )
       )
