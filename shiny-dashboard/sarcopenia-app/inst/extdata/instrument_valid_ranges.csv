@@ -1,0 +1,44 @@
+variable_name,instrument,data_type,min_valid,max_valid,min_normal,max_normal,units,reference
+cog_moca_total_score,MoCA,numeric,0,30,26,30,points,Nasreddine et al. 2005
+phys_balance_test_score,SPPB,numeric,0,12,10,12,points,Guralnik et al. 1994
+med_gait_speed_test_score,SPPB,numeric,0,12,10,12,points,Guralnik et al. 1994
+med_chair_stand_test_score,SPPB,numeric,0,12,10,12,points,Guralnik et al. 1994
+cog_phq9_total_score,PHQ-9,numeric,0,27,0,4,points,Kroenke et al. 2001
+cog_raw_dss_score,DSST,numeric,0,133,NA,NA,points,Wechsler 1997
+cog_dsst_score,DSST,numeric,0,133,NA,NA,points,Wechsler 1997
+phys_right_hand_test_1,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_right_hand_test_2,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_right_hand_test_3,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_right_hand_average,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_right_hand_percentile,Grip Strength,numeric,0,100,NA,NA,percentile,Bohannon et al. 2006
+phys_left_hand_test_1,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_left_hand_test_2,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_left_hand_test_3,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_left_hand_average,Grip Strength,numeric,0,80,NA,NA,kg,Bohannon et al. 2006
+phys_left_hand_percentile,Grip Strength,numeric,0,100,NA,NA,percentile,Bohannon et al. 2006
+med_systolic,Vital Signs,numeric,70,200,90,120,mmHg,AHA Guidelines 2017
+med_diastolic,Vital Signs,numeric,40,130,60,80,mmHg,AHA Guidelines 2017
+med_pulse,Vital Signs,numeric,30,150,60,100,bpm,AHA Guidelines 2017
+phys_body_mass_index_height_m_v1,Body Composition,numeric,1.0,2.5,NA,NA,meters,WHO Standards
+phys_body_mass_index_weight_kg_v1,Body Composition,numeric,25,250,NA,NA,kg,Clinical Range
+phys_body_mass_index_bmi_v1,Body Composition,numeric,12,60,18.5,24.9,kg/m²,WHO BMI Classification
+phys_loss_of_weight_current_weight_kg,Body Composition,numeric,25,250,NA,NA,kg,Clinical Range
+phys_automatic_calculation_of_sarc_f_scores,SARC-F,numeric,0,10,0,3,points,Malmstrom & Morley 2013
+phys_time_up_go_test_score,Gait Speed,numeric,0,60,0,10,seconds,Podsiadlo & Richardson 1991
+id_age,Demographics,numeric,60,110,65,95,years,Study Population
+demo_number_of_education_years,Demographics,numeric,0,30,8,20,years,General Population
+phys_number_of_times_reached_full_standing,SPPB,numeric,0,20,10,15,count,SPPB Protocol
+phys_distance,Gait Speed,numeric,0,10,3,6,meters,Gait Speed Protocol
+cog_visuospatial_executive,MoCA,numeric,0,5,4,5,points,MoCA Subscale
+cog_cube,MoCA,numeric,0,1,1,1,points,MoCA Subscale
+cog_clock,MoCA,numeric,0,3,3,3,points,MoCA Subscale
+cog_naming,MoCA,numeric,0,3,3,3,points,MoCA Subscale
+cog_list_of_digits,MoCA,numeric,0,2,2,2,points,MoCA Subscale
+cog_letters,MoCA,numeric,0,1,1,1,points,MoCA Subscale
+cog_subtraction,MoCA,numeric,0,3,3,3,points,MoCA Subscale
+cog_language,MoCA,numeric,0,2,2,2,points,MoCA Subscale
+cog_fluency,MoCA,numeric,0,1,1,1,points,MoCA Subscale
+cog_abstraction,MoCA,numeric,0,2,2,2,points,MoCA Subscale
+cog_delayed_recall,MoCA,numeric,0,5,4,5,points,MoCA Subscale
+cog_orientation,MoCA,numeric,0,6,6,6,points,MoCA Subscale
+cog_who_5_total_score,WHO-5,numeric,0,25,13,25,points,WHO Wellbeing Index

@@ -35,7 +35,12 @@ mod_visualization_ui <- function(id) {
                 "Missingness Overview" = "miss_overview",
                 "Missingness Heatmap" = "miss_heatmap",
                 "Visit Timeline" = "miss_timeline",
-                "Patient Profile" = "patient_profile"
+                "Patient Profile" = "patient_profile",
+                "─── Outlier Detection ───" = "divider_outliers",
+                "Outlier Summary" = "outlier_summary",
+                "Outlier Details" = "outlier_details",
+                "Outlier Boxplots" = "outlier_boxplots",
+                "Outlier Timeline" = "outlier_timeline"
               ),
               selected = "miss_overview"
             )
@@ -166,6 +171,101 @@ mod_visualization_ui <- function(id) {
           reactable::reactableOutput(ns("patient_profile_table"))
         )
       )
+    ),
+
+    # ========================================================================
+    # OUTLIER DETECTION PANELS
+    # ========================================================================
+
+    # Panel 5: Outlier Summary
+    conditionalPanel(
+      condition = "input['viz-view_type'] == 'outlier_summary'",
+
+      card(
+        card_header(icon("triangle-exclamation"), "Outliers by Instrument"),
+        card_body(
+          uiOutput(ns("outlier_summary_info")),
+          reactable::reactableOutput(ns("outlier_instrument_table"))
+        )
+      ),
+
+      card(
+        card_header(icon("chart-column"), "Top Variables with Outliers"),
+        card_body(
+          reactable::reactableOutput(ns("outlier_variable_table"))
+        )
+      )
+    ),
+
+    # Panel 6: Outlier Details
+    conditionalPanel(
+      condition = "input['viz-view_type'] == 'outlier_details'",
+
+      card(
+        card_header(icon("list"), "All Outlier Records"),
+        card_body(
+          uiOutput(ns("outlier_details_info")),
+          fluidRow(
+            column(4,
+              selectInput(
+                ns("outlier_type_filter"),
+                "Outlier Type:",
+                choices = c(
+                  "All Types" = "all",
+                  "Range Violations" = "range",
+                  "IQR Outliers" = "iqr",
+                  "Z-Score Outliers" = "zscore"
+                ),
+                selected = "all"
+              )
+            ),
+            column(4,
+              downloadButton(ns("download_outliers"), "Download Outliers CSV",
+                            class = "btn-primary mt-4")
+            )
+          ),
+          reactable::reactableOutput(ns("outlier_details_table"))
+        )
+      )
+    ),
+
+    # Panel 7: Outlier Boxplots
+    conditionalPanel(
+      condition = "input['viz-view_type'] == 'outlier_boxplots'",
+
+      card(
+        card_header(icon("table-cells"), "Variable Selection"),
+        card_body(
+          p("Select a numeric variable to visualize outliers:"),
+          selectInput(
+            ns("boxplot_variable"),
+            "Variable:",
+            choices = NULL,
+            selected = NULL
+          )
+        )
+      ),
+
+      card(
+        card_header(icon("chart-simple"), "Distribution with Outliers"),
+        card_body(
+          uiOutput(ns("boxplot_info")),
+          plotly::plotlyOutput(ns("outlier_boxplot"), height = "600px")
+        )
+      )
+    ),
+
+    # Panel 8: Outlier Timeline
+    conditionalPanel(
+      condition = "input['viz-view_type'] == 'outlier_timeline'",
+
+      card(
+        card_header(icon("chart-line"), "Outlier Trends Across Visits"),
+        card_body(
+          uiOutput(ns("outlier_timeline_info")),
+          plotly::plotlyOutput(ns("outlier_timeline"), height = "500px")
+        )
+      )
     )
   )
 }
@@ -271,6 +371,189 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
     # Clear variable selection button
     observeEvent(input$clear_vars, {
       updateSelectInput(session, "heatmap_vars", selected = character(0))
+    })
+
+
+    # =========================================================================
+    # OUTLIER DETECTION - REACTIVE EXPRESSIONS
+    # =========================================================================
+
+    # Load valid ranges reference
+    valid_ranges <- reactive({
+      ranges_file <- system.file("extdata", "instrument_valid_ranges.csv",
+                                 package = "sarcDash", mustWork = FALSE)
+
+      # If package not installed, try local path
+      if (ranges_file == "") {
+        ranges_file <- "inst/extdata/instrument_valid_ranges.csv"
+      }
+
+      if (file.exists(ranges_file)) {
+        read_csv(ranges_file, show_col_types = FALSE)
+      } else {
+        message("[OUTLIERS] Valid ranges file not found")
+        data.frame()  # Return empty dataframe
+      }
+    })
+
+    # Detect range violations
+    range_violations <- reactive({
+      req(cleaned_data())
+      req(valid_ranges())
+
+      if (nrow(valid_ranges()) == 0) {
+        return(data.frame())
+      }
+
+      detect_range_violations(
+        cleaned_data()$visits_data,
+        dict_data,
+        valid_ranges()
+      )
+    })
+
+    # Get numeric variables for IQR/Z-score detection
+    numeric_variables <- reactive({
+      req(valid_ranges())
+
+      if (nrow(valid_ranges()) > 0) {
+        valid_ranges()$variable_name
+      } else {
+        character(0)
+      }
+    })
+
+    # Detect IQR outliers
+    iqr_outliers <- reactive({
+      req(cleaned_data())
+      req(numeric_variables())
+
+      if (length(numeric_variables()) == 0) {
+        return(data.frame())
+      }
+
+      detect_outliers_iqr(
+        cleaned_data()$visits_data,
+        numeric_variables(),
+        multiplier = 1.5
+      )
+    })
+
+    # Detect Z-score outliers
+    zscore_outliers <- reactive({
+      req(cleaned_data())
+      req(numeric_variables())
+
+      if (length(numeric_variables()) == 0) {
+        return(data.frame())
+      }
+
+      detect_outliers_zscore(
+        cleaned_data()$visits_data,
+        numeric_variables(),
+        threshold = 3
+      )
+    })
+
+    # Combine all outliers
+    all_outliers <- reactive({
+      range <- range_violations()
+      iqr <- iqr_outliers()
+      zscore <- zscore_outliers()
+
+      # Add outlier_type column and combine
+      result <- list()
+
+      if (nrow(range) > 0) {
+        range$outlier_type <- "range"
+        range <- range %>% select(patient_id, visit_no, variable, value, outlier_type)
+        result[[length(result) + 1]] <- range
+      }
+
+      if (nrow(iqr) > 0) {
+        iqr$outlier_type <- "iqr"
+        iqr <- iqr %>% select(patient_id, visit_no, variable, value, outlier_type)
+        result[[length(result) + 1]] <- iqr
+      }
+
+      if (nrow(zscore) > 0) {
+        zscore$outlier_type <- "zscore"
+        zscore <- zscore %>% select(patient_id, visit_no, variable, value, outlier_type)
+        result[[length(result) + 1]] <- zscore
+      }
+
+      if (length(result) > 0) {
+        do.call(rbind, result)
+      } else {
+        data.frame()
+      }
+    })
+
+    # Outlier summary by instrument
+    outlier_summary_instrument <- reactive({
+      req(range_violations())
+      req(iqr_outliers())
+      req(zscore_outliers())
+
+      summarize_outliers_by_instrument(
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        dict_data
+      )
+    })
+
+    # Outlier summary by variable
+    outlier_summary_variable <- reactive({
+      req(range_violations())
+      req(iqr_outliers())
+      req(zscore_outliers())
+
+      summarize_outliers_by_variable(
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        dict_data
+      )
+    })
+
+    # Filtered outliers for details table
+    filtered_outliers <- reactive({
+      req(all_outliers())
+
+      result <- all_outliers()
+
+      # Filter by outlier type
+      if (input$outlier_type_filter != "all") {
+        result <- result[result$outlier_type == input$outlier_type_filter, ]
+      }
+
+      # Filter by instrument
+      if (input$instrument_filter != "all") {
+        # Get variables for this instrument
+        inst_vars <- dict_data$new_name[dict_data$instrument == input$instrument_filter &
+                                         !is.na(dict_data$instrument)]
+        result <- result[result$variable %in% inst_vars, ]
+      }
+
+      # Filter by patient
+      if (input$patient_filter != "all") {
+        result <- result[result$patient_id == input$patient_filter, ]
+      }
+
+      result
+    })
+
+    # Update boxplot variable choices
+    observe({
+      req(numeric_variables())
+
+      updateSelectInput(
+        session,
+        "boxplot_variable",
+        choices = numeric_variables(),
+        selected = if (length(numeric_variables()) > 0) numeric_variables()[1] else NULL
+      )
     })
 
 
@@ -579,6 +862,254 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
           duration = 3
         )
       }
+    })
+
+
+    # =========================================================================
+    # OUTPUT: OUTLIER SUMMARY
+    # =========================================================================
+
+    output$outlier_summary_info <- renderUI({
+      req(all_outliers())
+
+      n_total <- nrow(all_outliers())
+      n_patients <- length(unique(all_outliers()$patient_id))
+
+      tagList(
+        p(
+          strong("Total outliers detected: "), n_total,
+          " across ", n_patients, " patients"
+        )
+      )
+    })
+
+    output$outlier_instrument_table <- reactable::renderReactable({
+      req(outlier_summary_instrument())
+
+      reactable::reactable(
+        outlier_summary_instrument(),
+        columns = list(
+          instrument = reactable::colDef(name = "Instrument", minWidth = 150),
+          n_variables = reactable::colDef(name = "# Variables", width = 100),
+          n_range_violations = reactable::colDef(
+            name = "Range Violations",
+            width = 120,
+            style = function(value) {
+              if (value > 0) list(fontWeight = "bold", color = "#e74c3c")
+            }
+          ),
+          n_iqr_outliers = reactable::colDef(
+            name = "IQR Outliers",
+            width = 110,
+            style = function(value) {
+              if (value > 0) list(fontWeight = "bold", color = "#f39c12")
+            }
+          ),
+          n_zscore_outliers = reactable::colDef(
+            name = "Z-Score Outliers",
+            width = 130,
+            style = function(value) {
+              if (value > 0) list(fontWeight = "bold", color = "#9b59b6")
+            }
+          ),
+          n_total_outliers = reactable::colDef(
+            name = "Total Outliers",
+            width = 120,
+            style = function(value) {
+              color <- if (value > 50) "#e74c3c"
+                       else if (value > 20) "#f39c12"
+                       else "#3498db"
+              list(fontWeight = "bold", color = color)
+            }
+          )
+        ),
+        striped = TRUE,
+        highlight = TRUE,
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 20
+      )
+    })
+
+    output$outlier_variable_table <- reactable::renderReactable({
+      req(outlier_summary_variable())
+
+      # Show top 30 variables
+      top_vars <- outlier_summary_variable() %>% head(30)
+
+      reactable::reactable(
+        top_vars,
+        columns = list(
+          variable = reactable::colDef(name = "Variable", minWidth = 200),
+          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
+          n_range_violations = reactable::colDef(name = "Range", width = 80),
+          n_iqr_outliers = reactable::colDef(name = "IQR", width = 70),
+          n_zscore_outliers = reactable::colDef(name = "Z-Score", width = 90),
+          n_total_outliers = reactable::colDef(
+            name = "Total",
+            width = 80,
+            style = function(value) {
+              list(fontWeight = "bold", color = "#e74c3c")
+            }
+          )
+        ),
+        striped = TRUE,
+        highlight = TRUE,
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 30
+      )
+    })
+
+
+    # =========================================================================
+    # OUTPUT: OUTLIER DETAILS
+    # =========================================================================
+
+    output$outlier_details_info <- renderUI({
+      req(filtered_outliers())
+
+      n_outliers <- nrow(filtered_outliers())
+      n_patients <- length(unique(filtered_outliers()$patient_id))
+      n_variables <- length(unique(filtered_outliers()$variable))
+
+      p(
+        strong("Showing: "), n_outliers, " outliers",
+        " (", n_patients, " patients, ", n_variables, " variables)"
+      )
+    })
+
+    output$outlier_details_table <- reactable::renderReactable({
+      req(filtered_outliers())
+
+      # Add instrument column
+      outliers_with_inst <- filtered_outliers()
+      outliers_with_inst$instrument <- sapply(outliers_with_inst$variable, function(var) {
+        dict_row <- dict_data[dict_data$new_name == var, ]
+        if (nrow(dict_row) > 0) dict_row$instrument[1] else NA
+      })
+
+      reactable::reactable(
+        outliers_with_inst,
+        columns = list(
+          patient_id = reactable::colDef(name = "Patient", width = 120),
+          visit_no = reactable::colDef(name = "Visit", width = 80),
+          variable = reactable::colDef(name = "Variable", minWidth = 180),
+          instrument = reactable::colDef(name = "Instrument", width = 130),
+          value = reactable::colDef(name = "Value", width = 100),
+          outlier_type = reactable::colDef(
+            name = "Type",
+            width = 100,
+            cell = function(value) {
+              label <- switch(value,
+                "range" = "Range Violation",
+                "iqr" = "IQR Outlier",
+                "zscore" = "Z-Score Outlier",
+                value
+              )
+              color <- switch(value,
+                "range" = "#e74c3c",
+                "iqr" = "#f39c12",
+                "zscore" = "#9b59b6",
+                "#95a5a6"
+              )
+              tags$span(style = paste0("color: ", color, "; font-weight: bold;"), label)
+            }
+          )
+        ),
+        filterable = TRUE,
+        searchable = TRUE,
+        striped = TRUE,
+        highlight = TRUE,
+        fullWidth = TRUE,
+        height = "auto",
+        defaultPageSize = 50,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(25, 50, 100, 200)
+      )
+    })
+
+    # Download outliers CSV
+    output$download_outliers <- downloadHandler(
+      filename = function() {
+        paste0("outliers_", Sys.Date(), ".csv")
+      },
+      content = function(file) {
+        write.csv(filtered_outliers(), file, row.names = FALSE)
+      }
+    )
+
+
+    # =========================================================================
+    # OUTPUT: OUTLIER BOXPLOTS
+    # =========================================================================
+
+    output$boxplot_info <- renderUI({
+      req(input$boxplot_variable)
+
+      outliers_for_var <- all_outliers() %>%
+        filter(variable == input$boxplot_variable)
+
+      if (nrow(outliers_for_var) > 0) {
+        p(
+          strong("Outliers for this variable: "), nrow(outliers_for_var),
+          " (", length(unique(outliers_for_var$patient_id)), " patients)"
+        )
+      } else {
+        p(
+          icon("check-circle"),
+          " No outliers detected for this variable",
+          style = "color: #2ecc71;"
+        )
+      }
+    })
+
+    output$outlier_boxplot <- plotly::renderPlotly({
+      req(input$boxplot_variable)
+      req(cleaned_data())
+
+      message("[MOD_VIZ] Creating boxplot for ", input$boxplot_variable)
+
+      create_outlier_boxplot(
+        cleaned_data()$visits_data,
+        input$boxplot_variable,
+        all_outliers()
+      )
+    })
+
+
+    # =========================================================================
+    # OUTPUT: OUTLIER TIMELINE
+    # =========================================================================
+
+    output$outlier_timeline_info <- renderUI({
+      n_range <- nrow(range_violations())
+      n_iqr <- nrow(iqr_outliers())
+      n_zscore <- nrow(zscore_outliers())
+
+      tagList(
+        p(
+          strong("Outlier counts by type:"),
+          " Range violations: ", n_range, ", ",
+          "IQR outliers: ", n_iqr, ", ",
+          "Z-score outliers: ", n_zscore
+        )
+      )
+    })
+
+    output$outlier_timeline <- plotly::renderPlotly({
+      req(range_violations())
+      req(iqr_outliers())
+      req(zscore_outliers())
+
+      message("[MOD_VIZ] Creating outlier timeline")
+
+      create_outlier_timeline(
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        visit_col = "visit_no"
+      )
     })
 
   })
