@@ -626,3 +626,467 @@ create_outlier_timeline <- function(range_violations, iqr_outliers,
   message("[PLOT] Timeline created")
   return(fig)
 }
+
+
+# =============================================================================
+# PATIENT-FOCUSED SUMMARY FUNCTIONS
+# =============================================================================
+# Functions to identify which patients have issues and enable patient outreach
+# =============================================================================
+
+#' Summarize Outliers by Patient
+#'
+#' Creates a summary table showing each patient's outlier count and severity.
+#' Enables identification of patients with most data quality issues for outreach.
+#'
+#' @param range_violations Data frame from detect_range_violations()
+#' @param iqr_outliers Data frame from detect_outliers_iqr()
+#' @param zscore_outliers Data frame from detect_outliers_zscore()
+#'
+#' @return Data frame with columns:
+#'   - patient_id: Patient identifier
+#'   - total_outliers: Total number of outliers detected for this patient
+#'   - range_violations: Count of clinical range violations
+#'   - iqr_outliers: Count of IQR statistical outliers
+#'   - zscore_outliers: Count of Z-score statistical outliers
+#'   - visits_with_outliers: Comma-separated list of visit numbers with outliers
+#'   - n_visits_affected: Number of distinct visits with outliers
+#'   - severity_score: Weighted severity (range=3, iqr=2, zscore=1)
+#'
+#' @export
+summarize_patient_outliers <- function(range_violations, iqr_outliers, zscore_outliers) {
+
+  message("[PATIENT] Summarizing outliers by patient...")
+
+  # Combine all outlier types with type indicator
+  all_outliers <- bind_rows(
+    range_violations %>%
+      mutate(outlier_type = "range") %>%
+      select(patient_id, visit_no, variable, value, outlier_type),
+    iqr_outliers %>%
+      mutate(outlier_type = "iqr") %>%
+      select(patient_id, visit_no, variable, value, outlier_type),
+    zscore_outliers %>%
+      mutate(outlier_type = "zscore") %>%
+      select(patient_id, visit_no, variable, value, outlier_type)
+  )
+
+  # If no outliers detected
+  if (nrow(all_outliers) == 0) {
+    message("[PATIENT] No outliers detected - returning empty summary")
+    return(data.frame(
+      patient_id = character(0),
+      total_outliers = integer(0),
+      range_violations = integer(0),
+      iqr_outliers = integer(0),
+      zscore_outliers = integer(0),
+      visits_with_outliers = character(0),
+      n_visits_affected = integer(0),
+      severity_score = numeric(0)
+    ))
+  }
+
+  # Summarize by patient
+  patient_summary <- all_outliers %>%
+    group_by(patient_id) %>%
+    summarise(
+      total_outliers = n(),
+      range_violations = sum(outlier_type == "range"),
+      iqr_outliers = sum(outlier_type == "iqr"),
+      zscore_outliers = sum(outlier_type == "zscore"),
+      visits_with_outliers = paste(sort(unique(visit_no)), collapse = ", "),
+      n_visits_affected = n_distinct(visit_no),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      # Severity score: range violations weighted highest (clinical concern)
+      severity_score = (range_violations * 3) + (iqr_outliers * 2) + (zscore_outliers * 1)
+    ) %>%
+    arrange(desc(severity_score), desc(total_outliers))
+
+  message("[PATIENT] Summary created: ", nrow(patient_summary), " patients with outliers")
+  message("[PATIENT] Total outliers across all patients: ", sum(patient_summary$total_outliers))
+
+  return(patient_summary)
+}
+
+
+#' Get Patient Outlier Profile
+#'
+#' Returns detailed outlier information for a specific patient across all visits.
+#' Shows all detection parameters to help understand WHY each value was flagged.
+#'
+#' @param patient_id Patient identifier to profile
+#' @param range_violations Data frame from detect_range_violations()
+#' @param iqr_outliers Data frame from detect_outliers_iqr()
+#' @param zscore_outliers Data frame from detect_outliers_zscore()
+#' @param dict Data dictionary with variable metadata
+#'
+#' @return Data frame with columns:
+#'   - visit_no: Visit number where outlier occurred
+#'   - variable: Variable name
+#'   - variable_label: Human-readable label from data dictionary
+#'   - instrument: Instrument name
+#'   - value: Observed value
+#'   - outlier_type: Type of detection (range/iqr/zscore)
+#'   - detection_details: Human-readable explanation of why flagged
+#'
+#' @export
+get_patient_outlier_profile <- function(patient_id, range_violations, iqr_outliers,
+                                         zscore_outliers, dict) {
+
+  message("[PATIENT] Creating outlier profile for patient: ", patient_id)
+
+  # Prepare range violations for this patient
+  patient_range <- range_violations %>%
+    filter(patient_id == !!patient_id) %>%
+    mutate(
+      outlier_type = "Range Violation",
+      detection_details = paste0(
+        violation_type, ": Value ", value,
+        " outside valid range [", min_valid, "-", max_valid, "]"
+      )
+    ) %>%
+    select(visit_no, variable, value, outlier_type, detection_details, instrument)
+
+  # Prepare IQR outliers for this patient
+  patient_iqr <- iqr_outliers %>%
+    filter(patient_id == !!patient_id) %>%
+    mutate(
+      outlier_type = "IQR Outlier",
+      detection_details = paste0(
+        "Value ", value, " outside IQR bounds [",
+        round(lower_bound, 2), "-", round(upper_bound, 2), "]",
+        " (Q1=", round(q1, 2), ", Q3=", round(q3, 2), ", IQR=", round(iqr, 2), ")"
+      )
+    ) %>%
+    left_join(dict %>% select(variable_name, instrument),
+              by = c("variable" = "variable_name")) %>%
+    select(visit_no, variable, value, outlier_type, detection_details, instrument)
+
+  # Prepare Z-score outliers for this patient
+  patient_zscore <- zscore_outliers %>%
+    filter(patient_id == !!patient_id) %>%
+    mutate(
+      outlier_type = "Z-Score Outlier",
+      detection_details = paste0(
+        "Z-score = ", round(zscore, 2), " (",
+        round(abs(zscore), 2), " SDs ",
+        ifelse(zscore > 0, "above", "below"), " mean=", round(mean, 2), ")"
+      )
+    ) %>%
+    left_join(dict %>% select(variable_name, instrument),
+              by = c("variable" = "variable_name")) %>%
+    select(visit_no, variable, value, outlier_type, detection_details, instrument)
+
+  # Combine all outlier types
+  patient_profile <- bind_rows(patient_range, patient_iqr, patient_zscore)
+
+  # If no outliers for this patient
+  if (nrow(patient_profile) == 0) {
+    message("[PATIENT] No outliers found for patient ", patient_id)
+    return(data.frame(
+      visit_no = character(0),
+      variable = character(0),
+      variable_label = character(0),
+      instrument = character(0),
+      value = character(0),
+      outlier_type = character(0),
+      detection_details = character(0)
+    ))
+  }
+
+  # Add variable labels from data dictionary
+  patient_profile <- patient_profile %>%
+    left_join(dict %>% select(variable_name, variable_label),
+              by = c("variable" = "variable_name")) %>%
+    mutate(
+      variable_label = ifelse(is.na(variable_label), variable, variable_label),
+      instrument = ifelse(is.na(instrument), "Unknown", instrument)
+    ) %>%
+    select(visit_no, variable, variable_label, instrument, value,
+           outlier_type, detection_details) %>%
+    arrange(visit_no, instrument, variable)
+
+  message("[PATIENT] Profile created: ", nrow(patient_profile), " outliers found")
+
+  return(patient_profile)
+}
+
+
+#' Summarize Missing Data by Patient
+#'
+#' Creates a summary table showing each patient's missing data count.
+#' Only counts TRUE NA values (empty strings "" are NOT considered missing).
+#' Enables identification of patients with most missing data for outreach.
+#'
+#' @param data Cleaned visits data
+#' @param dict Data dictionary with variable metadata
+#'
+#' @return Data frame with columns:
+#'   - patient_id: Patient identifier
+#'   - total_variables: Total number of variables in dataset
+#'   - variables_with_data: Number of variables with at least one non-NA value
+#'   - variables_missing: Number of variables that are completely missing (all NA)
+#'   - pct_missing: Percentage of variables that are missing
+#'   - visits_with_missing: Comma-separated list of visit numbers with any NA
+#'   - n_visits_affected: Number of distinct visits with missing data
+#'   - most_affected_instruments: Top 3 instruments with most missing variables
+#'
+#' @export
+summarize_patient_missingness <- function(data, dict) {
+
+  message("[PATIENT] Summarizing missing data by patient...")
+
+  # Get patient ID column
+  id_col <- grep("^id_", names(data), value = TRUE)[1]
+
+  if (is.null(id_col) || length(id_col) == 0) {
+    stop("Cannot find patient ID column (should start with 'id_')")
+  }
+
+  # Get visit column
+  visit_col <- grep("visit", names(data), ignore.case = TRUE, value = TRUE)[1]
+
+  if (is.null(visit_col) || length(visit_col) == 0) {
+    warning("Cannot find visit column - visit analysis will be skipped")
+    visit_col <- NULL
+  }
+
+  # Exclude ID and visit columns from missingness analysis
+  exclude_cols <- c(id_col, visit_col)
+  analysis_vars <- setdiff(names(data), exclude_cols)
+
+  message("[PATIENT] Analyzing ", length(analysis_vars), " variables across ",
+          length(unique(data[[id_col]])), " patients")
+
+  # STEP 1: Count missing/present variables per patient using correct dplyr syntax
+  patient_summary <- data %>%
+    select(all_of(c(id_col, analysis_vars))) %>%
+    group_by(across(all_of(id_col))) %>%
+    summarise(
+      across(
+        all_of(analysis_vars),
+        list(
+          all_missing = ~all(is.na(.x)),
+          any_data = ~any(!is.na(.x))
+        ),
+        .names = "{.col}___{.fn}"
+      ),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      variables_missing = rowSums(select(., ends_with("___all_missing"))),
+      variables_with_data = rowSums(select(., ends_with("___any_data"))),
+      total_variables = length(analysis_vars)
+    ) %>%
+    select(all_of(id_col), total_variables, variables_with_data, variables_missing)
+
+  # STEP 2: Find visits with any missing data (if visit column exists)
+  if (!is.null(visit_col)) {
+    visit_missing_summary <- data %>%
+      select(all_of(c(id_col, visit_col, analysis_vars))) %>%
+      mutate(
+        has_any_na = rowSums(is.na(select(., all_of(analysis_vars)))) > 0
+      ) %>%
+      filter(has_any_na) %>%
+      group_by(across(all_of(id_col))) %>%
+      summarise(
+        visits_with_missing = paste(sort(unique(!!sym(visit_col))), collapse = ", "),
+        n_visits_affected = n_distinct(!!sym(visit_col)),
+        .groups = "drop"
+      )
+
+    # Join with patient summary
+    patient_summary <- patient_summary %>%
+      left_join(visit_missing_summary, by = id_col) %>%
+      mutate(
+        visits_with_missing = if_else(is.na(visits_with_missing), "", visits_with_missing),
+        n_visits_affected = if_else(is.na(n_visits_affected), 0L, n_visits_affected)
+      )
+  } else {
+    patient_summary <- patient_summary %>%
+      mutate(
+        visits_with_missing = NA_character_,
+        n_visits_affected = NA_integer_
+      )
+  }
+
+  # STEP 3: Calculate percentage
+  patient_summary <- patient_summary %>%
+    mutate(pct_missing = round(variables_missing / total_variables * 100, 1))
+
+  # STEP 4: Find most affected instruments
+  if (nrow(dict) > 0 && "variable_name" %in% names(dict) && "instrument" %in% names(dict)) {
+    # First create a temp data frame with patient ID and variable missing status
+    patient_var_status <- data %>%
+      select(all_of(c(id_col, analysis_vars))) %>%
+      group_by(across(all_of(id_col))) %>%
+      summarise(
+        across(
+          all_of(analysis_vars),
+          ~all(is.na(.x)),
+          .names = "{.col}"
+        ),
+        .groups = "drop"
+      )
+
+    # Pivot to long format to get missing variables per patient
+    patient_missing_vars <- patient_var_status %>%
+      pivot_longer(
+        cols = -all_of(id_col),
+        names_to = "variable",
+        values_to = "is_missing"
+      ) %>%
+      filter(is_missing) %>%
+      select(-is_missing)
+
+    # Join with dict to get instruments and find top 3
+    patient_instruments <- patient_missing_vars %>%
+      left_join(
+        dict %>% select(variable_name, instrument),
+        by = c("variable" = "variable_name")
+      ) %>%
+      filter(!is.na(instrument)) %>%
+      group_by(across(all_of(id_col)), instrument) %>%
+      summarise(n_missing_vars = n(), .groups = "drop") %>%
+      group_by(across(all_of(id_col))) %>%
+      slice_max(n_missing_vars, n = 3, with_ties = FALSE) %>%
+      summarise(
+        most_affected_instruments = paste(instrument, collapse = ", "),
+        .groups = "drop"
+      )
+
+    # Join with patient summary
+    patient_summary <- patient_summary %>%
+      left_join(patient_instruments, by = id_col) %>%
+      mutate(
+        most_affected_instruments = if_else(
+          is.na(most_affected_instruments) | most_affected_instruments == "",
+          "None",
+          most_affected_instruments
+        )
+      )
+  } else {
+    patient_summary <- patient_summary %>%
+      mutate(most_affected_instruments = "Unknown - no data dictionary")
+  }
+
+  # Rename id column to patient_id
+  patient_summary <- patient_summary %>%
+    rename(patient_id = !!sym(id_col))
+
+  # Sort by most missing data
+  patient_summary <- patient_summary %>%
+    arrange(desc(pct_missing), desc(variables_missing))
+
+  message("[PATIENT] Summary created: ", nrow(patient_summary), " patients analyzed")
+  message("[PATIENT] Patients with missing data: ",
+          sum(patient_summary$variables_missing > 0))
+
+  return(patient_summary)
+}
+
+
+#' Create Unified Patient Summary with Priority Scoring
+#'
+#' Combines missingness and outlier data for each patient and calculates
+#' priority scores for patient outreach
+#'
+#' Priority scoring:
+#' - 🔴 High Priority: >30% missing OR >10 outliers
+#' - 🟡 Medium Priority: 10-30% missing OR 3-10 outliers
+#' - 🟢 Clean: <10% missing AND <3 outliers
+#'
+#' @param patient_missingness_summary Output from summarize_patient_missingness()
+#' @param patient_outliers_summary Output from summarize_patient_outliers()
+#' @return Dataframe with unified patient summary and priority indicators
+#' @export
+create_unified_patient_summary <- function(patient_missingness_summary,
+                                           patient_outliers_summary) {
+  message("[UNIFIED] Creating unified patient summary...")
+
+  # Start with missingness summary (all patients)
+  unified <- patient_missingness_summary %>%
+    select(
+      patient_id,
+      total_variables,
+      variables_with_data,
+      variables_missing,
+      pct_missing,
+      visits_with_missing,
+      n_visits_affected,
+      most_affected_instruments
+    ) %>%
+    rename(n_visits_missing = n_visits_affected)
+
+  # Add outlier data (left join - not all patients have outliers)
+  if (nrow(patient_outliers_summary) > 0) {
+    outlier_data <- patient_outliers_summary %>%
+      select(
+        patient_id,
+        total_outliers,
+        range_violations,
+        iqr_outliers,
+        zscore_outliers,
+        visits_with_outliers,
+        n_visits_affected
+      ) %>%
+      rename(n_visits_outliers = n_visits_affected)
+
+    unified <- unified %>%
+      left_join(outlier_data, by = "patient_id")
+  } else {
+    # No outliers - add empty columns
+    unified <- unified %>%
+      mutate(
+        total_outliers = 0,
+        range_violations = 0,
+        iqr_outliers = 0,
+        zscore_outliers = 0,
+        visits_with_outliers = "",
+        n_visits_outliers = 0
+      )
+  }
+
+  # Replace NAs in outlier columns with 0
+  unified <- unified %>%
+    mutate(
+      total_outliers = ifelse(is.na(total_outliers), 0, total_outliers),
+      range_violations = ifelse(is.na(range_violations), 0, range_violations),
+      iqr_outliers = ifelse(is.na(iqr_outliers), 0, iqr_outliers),
+      zscore_outliers = ifelse(is.na(zscore_outliers), 0, zscore_outliers),
+      visits_with_outliers = ifelse(is.na(visits_with_outliers), "", visits_with_outliers),
+      n_visits_outliers = ifelse(is.na(n_visits_outliers), 0, n_visits_outliers)
+    )
+
+  # Calculate priority score
+  unified <- unified %>%
+    mutate(
+      # Priority logic
+      priority = case_when(
+        pct_missing > 30 | total_outliers > 10 ~ "🔴 High",
+        pct_missing > 10 | total_outliers > 3 ~ "🟡 Medium",
+        TRUE ~ "🟢 Clean"
+      ),
+
+      # Numeric priority for sorting (1=High, 2=Medium, 3=Clean)
+      priority_score = case_when(
+        pct_missing > 30 | total_outliers > 10 ~ 1,
+        pct_missing > 10 | total_outliers > 3 ~ 2,
+        TRUE ~ 3
+      )
+    )
+
+  # Sort by priority (High first) then by severity
+  unified <- unified %>%
+    arrange(priority_score, desc(pct_missing), desc(total_outliers))
+
+  message("[UNIFIED] Summary created: ", nrow(unified), " patients")
+  message("[UNIFIED] Priority breakdown:")
+  message("  🔴 High Priority: ", sum(unified$priority == "🔴 High"))
+  message("  🟡 Medium Priority: ", sum(unified$priority == "🟡 Medium"))
+  message("  🟢 Clean: ", sum(unified$priority == "🟢 Clean"))
+
+  return(unified)
+}

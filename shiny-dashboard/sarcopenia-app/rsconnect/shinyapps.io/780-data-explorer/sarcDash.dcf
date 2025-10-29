@@ -5,6 +5,8 @@ account: 780-data-explorer
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 15806625
-bundleId: 11073849
+bundleId:
 url: https://780-data-explorer.shinyapps.io/sarcDash/
 version: 1
+asMultiple: FALSE
+asStatic: FALSE

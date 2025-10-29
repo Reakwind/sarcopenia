@@ -230,6 +230,9 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
   all_vars <- names(patient_data)
   vars_to_check <- all_vars[!grepl(paste(exclude_patterns, collapse = "|"), all_vars)]
 
+  # Get visit column for visit-level detail
+  visit_col <- grep("visit", names(patient_data), ignore.case = TRUE, value = TRUE)[1]
+
   # Analyze each variable for this patient
   var_status <- lapply(vars_to_check, function(var) {
     values <- patient_data[[var]]
@@ -243,6 +246,20 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
       "Missing"  # NA only (empty strings not counted as missing)
     }
 
+    # NEW: Identify which specific visits have missing data (NA only)
+    if (!is.null(visit_col)) {
+      visits_with_na <- patient_data[[visit_col]][is.na(values)]
+
+      if (length(visits_with_na) > 0) {
+        # Sort and create comma-separated list
+        visits_missing <- paste(sort(unique(visits_with_na)), collapse = ", ")
+      } else {
+        visits_missing <- "None"
+      }
+    } else {
+      visits_missing <- "Unknown (no visit column)"
+    }
+
     # Get instrument
     dict_row <- dict[dict$new_name == var, ]
     instrument <- if (nrow(dict_row) > 0) dict_row$instrument else NA
@@ -252,6 +269,7 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
       instrument = instrument,
       status = status,
       n_visits = nrow(patient_data),
+      visits_missing = visits_missing,  # NEW COLUMN
       stringsAsFactors = FALSE
     )
   })

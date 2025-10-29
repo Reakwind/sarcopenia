@@ -21,259 +21,156 @@ mod_visualization_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    # Control Panel Card
+    # ========================================================================
+    # SECTION 1: DATA QUALITY AT-A-GLANCE
+    # ========================================================================
     card(
-      card_header(icon("sliders"), "Analysis Controls"),
+      card_header(icon("chart-line"), "Data Quality Overview"),
       card_body(
+        layout_columns(
+          col_widths = c(4, 4, 4),
+          value_box(
+            title = "Total Patients",
+            value = uiOutput(ns("vb_total_patients")),
+            theme = "primary",
+            showcase = icon("users")
+          ),
+          value_box(
+            title = "Total Outliers",
+            value = uiOutput(ns("vb_total_outliers")),
+            theme = "warning",
+            showcase = icon("triangle-exclamation")
+          ),
+          value_box(
+            title = "Overall Completion",
+            value = uiOutput(ns("vb_overall_completion")),
+            theme = "success",
+            showcase = icon("check-circle")
+          )
+        )
+      )
+    ),
+
+    # ========================================================================
+    # SECTION 2: PATIENTS NEEDING ATTENTION
+    # ========================================================================
+    card(
+      card_header(icon("users"), "Patients Needing Attention"),
+      card_body(
+        p(class = "text-muted",
+          "Patients are automatically prioritized by data quality issues. ",
+          strong("🔴 High Priority:"), " >30% missing or >10 outliers. ",
+          strong("🟡 Medium:"), " 10-30% missing or 3-10 outliers. ",
+          strong("🟢 Clean:"), " <10% missing and <3 outliers."
+        ),
+
         fluidRow(
-          # View type selector
-          column(3,
+          column(6,
             selectInput(
-              ns("view_type"),
-              "Analysis Type:",
+              ns("patient_filter_type"),
+              "Filter Patients:",
               choices = c(
-                "Missingness Overview" = "miss_overview",
-                "Missingness Heatmap" = "miss_heatmap",
-                "Visit Timeline" = "miss_timeline",
-                "Patient Profile" = "patient_profile",
-                "─── Outlier Detection ───" = "divider_outliers",
-                "Outlier Summary" = "outlier_summary",
-                "Outlier Details" = "outlier_details",
-                "Outlier Boxplots" = "outlier_boxplots",
-                "Outlier Timeline" = "outlier_timeline"
+                "All Issues" = "all",
+                "High Missing Data (>30% NA)" = "high_missing",
+                "Has Outliers" = "has_outliers",
+                "Missing + Outliers" = "both"
               ),
-              selected = "miss_overview"
+              selected = "all"
             )
           ),
+          column(6,
+            downloadButton(ns("download_patient_list"),
+                          "Export Filtered List (CSV)",
+                          class = "btn-success",
+                          style = "margin-top: 25px;")
+          )
+        ),
 
-          # Instrument filter
-          column(3,
+        hr(),
+
+        reactable::reactableOutput(ns("patients_table"), height = "500px")
+      )
+    ),
+
+    # ========================================================================
+    # SECTION 3: PATIENT DETAIL PANEL (Expandable)
+    # ========================================================================
+    uiOutput(ns("patient_detail_panel")),
+
+    # ========================================================================
+    # SECTION 4: VISUAL EXPLORATION (Collapsible)
+    # ========================================================================
+    accordion(
+      id = ns("viz_accordion"),
+      accordion_panel(
+        title = "Visual Exploration",
+        icon = icon("chart-bar"),
+
+        fluidRow(
+          column(6,
             selectInput(
-              ns("instrument_filter"),
+              ns("viz_type"),
+              "Select Visualization:",
+              choices = c(
+                "Missingness Heatmap" = "miss_heatmap",
+                "Outlier Timeline" = "outlier_timeline",
+                "Completion by Visit" = "completion_timeline"
+              ),
+              selected = "miss_heatmap"
+            )
+          ),
+          column(6,
+            selectInput(
+              ns("viz_instrument"),
               "Instrument:",
               choices = c("All Instruments" = "all"),
               selected = "all"
             )
-          ),
-
-          # Section filter
-          column(3,
-            selectInput(
-              ns("section_filter"),
-              "Section:",
-              choices = c(
-                "All Sections" = "all",
-                "Cognitive" = "cognitive",
-                "Physical" = "physical",
-                "Demographic" = "demographic",
-                "Medical" = "medical"
-              ),
-              selected = "all"
-            )
-          ),
-
-          # Patient filter
-          column(3,
-            selectInput(
-              ns("patient_filter"),
-              "Patient:",
-              choices = c("All Patients" = "all"),
-              selected = "all",
-              multiple = FALSE
-            )
           )
-        )
-      )
-    ),
+        ),
 
-    # Main visualization area - conditional panels
+        # Heatmap view
+        conditionalPanel(
+          condition = "input['viz-viz_type'] == 'miss_heatmap'",
 
-    # Panel 1: Missingness Overview
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'miss_overview'",
-
-      card(
-        card_header(icon("table"), "Missingness Summary by Instrument"),
-        card_body(
-          uiOutput(ns("miss_summary_info")),
-          reactable::reactableOutput(ns("miss_summary_table"))
-        )
-      ),
-
-      card(
-        card_header(icon("chart-column"), "Top Missing Variables"),
-        card_body(
-          reactable::reactableOutput(ns("top_missing_table"))
-        )
-      )
-    ),
-
-    # Panel 2: Missingness Heatmap
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'miss_heatmap'",
-
-      card(
-        card_header(icon("table-cells"), "Variable Selection"),
-        card_body(
-          p("Select variables to display in heatmap:"),
-          selectInput(
-            ns("heatmap_vars"),
-            "Variables:",
-            choices = NULL,
-            selected = NULL,
-            multiple = TRUE,
-            selectize = FALSE,
-            size = 10
-          ),
-          actionButton(
-            ns("select_all_vars"),
-            "Select First 20",
-            class = "btn-sm btn-outline-primary"
-          ),
-          actionButton(
-            ns("clear_vars"),
-            "Clear",
-            class = "btn-sm btn-outline-secondary"
-          )
-        )
-      ),
-
-      card(
-        card_header(icon("grip-horizontal"), "Missingness Heatmap"),
-        card_body(
-          uiOutput(ns("heatmap_info")),
-          plotly::plotlyOutput(ns("miss_heatmap"), height = "600px")
-        )
-      )
-    ),
-
-    # Panel 3: Visit Timeline
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'miss_timeline'",
-
-      card(
-        card_header(icon("chart-line"), "Completion Over Time"),
-        card_body(
-          uiOutput(ns("timeline_info")),
-          plotly::plotlyOutput(ns("miss_timeline"), height = "500px")
-        )
-      )
-    ),
-
-    # Panel 4: Patient Profile
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'patient_profile'",
-
-      card(
-        card_header(icon("user"), "Patient Missingness Profile"),
-        card_body(
-          uiOutput(ns("patient_profile_summary")),
-          reactable::reactableOutput(ns("patient_profile_table"))
-        )
-      )
-    ),
-
-    # ========================================================================
-    # OUTLIER DETECTION PANELS
-    # ========================================================================
-
-    # Panel 5: Outlier Summary
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'outlier_summary'",
-
-      card(
-        card_header(icon("triangle-exclamation"), "Outliers by Instrument"),
-        card_body(
-          uiOutput(ns("outlier_summary_info")),
-          reactable::reactableOutput(ns("outlier_instrument_table"))
-        )
-      ),
-
-      card(
-        card_header(icon("chart-column"), "Top Variables with Outliers"),
-        card_body(
-          reactable::reactableOutput(ns("outlier_variable_table"))
-        )
-      )
-    ),
-
-    # Panel 6: Outlier Details
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'outlier_details'",
-
-      card(
-        card_header(icon("list"), "All Outlier Records"),
-        card_body(
-          uiOutput(ns("outlier_details_info")),
           fluidRow(
-            column(4,
+            column(12,
+              p("Select variables to display:"),
               selectInput(
-                ns("outlier_type_filter"),
-                "Outlier Type:",
-                choices = c(
-                  "All Types" = "all",
-                  "Range Violations" = "range",
-                  "IQR Outliers" = "iqr",
-                  "Z-Score Outliers" = "zscore"
-                ),
-                selected = "all"
-              )
-            ),
-            column(4,
-              downloadButton(ns("download_outliers"), "Download Outliers CSV",
-                            class = "btn-primary mt-4")
+                ns("heatmap_vars"),
+                NULL,
+                choices = NULL,
+                multiple = TRUE,
+                selectize = FALSE,
+                size = 8
+              ),
+              actionButton(ns("select_first_20"), "Select First 20", class = "btn-sm btn-outline-primary"),
+              actionButton(ns("clear_selection"), "Clear", class = "btn-sm btn-outline-secondary")
             )
           ),
-          reactable::reactableOutput(ns("outlier_details_table"))
-        )
-      )
-    ),
 
-    # Panel 7: Outlier Boxplots
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'outlier_boxplots'",
+          plotly::plotlyOutput(ns("viz_heatmap"), height = "600px")
+        ),
 
-      card(
-        card_header(icon("table-cells"), "Variable Selection"),
-        card_body(
-          p("Select a numeric variable to visualize outliers:"),
-          selectInput(
-            ns("boxplot_variable"),
-            "Variable:",
-            choices = NULL,
-            selected = NULL
-          )
-        )
-      ),
+        # Timeline views
+        conditionalPanel(
+          condition = "input['viz-viz_type'] == 'outlier_timeline'",
+          plotly::plotlyOutput(ns("viz_outlier_timeline"), height = "500px")
+        ),
 
-      card(
-        card_header(icon("chart-simple"), "Distribution with Outliers"),
-        card_body(
-          uiOutput(ns("boxplot_info")),
-          plotly::plotlyOutput(ns("outlier_boxplot"), height = "600px")
-        )
-      )
-    ),
-
-    # Panel 8: Outlier Timeline
-    conditionalPanel(
-      condition = "input['viz-view_type'] == 'outlier_timeline'",
-
-      card(
-        card_header(icon("chart-line"), "Outlier Trends Across Visits"),
-        card_body(
-          uiOutput(ns("outlier_timeline_info")),
-          plotly::plotlyOutput(ns("outlier_timeline"), height = "500px")
+        conditionalPanel(
+          condition = "input['viz-viz_type'] == 'completion_timeline'",
+          plotly::plotlyOutput(ns("viz_completion_timeline"), height = "500px")
         )
       )
     )
-  )
+  )  # End tagList
 }
 
 
 #' Visualization Module Server
 #'
-#' Server logic for EDA/visualization tab
+#' Server logic for simplified patient-focused data quality dashboard
 #'
 #' @param id Module namespace ID
 #' @param cleaned_data Reactive value containing cleaned data
@@ -283,7 +180,7 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
   moduleServer(id, function(input, output, session) {
 
     # =========================================================================
-    # REACTIVE DATA ANALYSIS
+    # REACTIVE DATA SOURCES
     # =========================================================================
 
     # Analyze missingness when data is loaded
@@ -300,82 +197,15 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
       result
     })
 
-    # Instrument summary
+    # Instrument summary for overall metrics
     instrument_summary <- reactive({
       req(missingness_analysis())
       summarize_missingness_by_instrument(missingness_analysis())
     })
 
-    # Get available instruments for filter
-    observe({
-      req(instrument_summary())
-
-      instruments <- instrument_summary()$instrument
-      choices <- c("All Instruments" = "all", setNames(instruments, instruments))
-
-      updateSelectInput(session, "instrument_filter", choices = choices)
-    })
-
-    # Get available patients for filter
-    observe({
-      req(cleaned_data())
-
-      patients <- sort(unique(cleaned_data()$visits_data$id_client_id))
-      choices <- c("All Patients" = "all", setNames(patients, patients))
-
-      updateSelectInput(session, "patient_filter", choices = choices)
-    })
-
-    # Filtered missingness analysis based on instrument/section
-    filtered_missingness <- reactive({
-      req(missingness_analysis())
-
-      result <- missingness_analysis()
-
-      # Filter by instrument
-      if (input$instrument_filter != "all") {
-        result <- result[result$instrument == input$instrument_filter &
-                          !is.na(result$instrument), ]
-      }
-
-      # Filter by section
-      if (input$section_filter != "all") {
-        result <- result[result$section == input$section_filter &
-                          !is.na(result$section), ]
-      }
-
-      result
-    })
-
-    # Update heatmap variable choices based on filters
-    observe({
-      req(filtered_missingness())
-
-      vars <- filtered_missingness()$variable
-
-      updateSelectInput(
-        session,
-        "heatmap_vars",
-        choices = vars,
-        selected = head(vars, 20)  # Default to first 20
-      )
-    })
-
-    # Select first 20 variables button
-    observeEvent(input$select_all_vars, {
-      req(filtered_missingness())
-      vars <- filtered_missingness()$variable
-      updateSelectInput(session, "heatmap_vars", selected = head(vars, 20))
-    })
-
-    # Clear variable selection button
-    observeEvent(input$clear_vars, {
-      updateSelectInput(session, "heatmap_vars", selected = character(0))
-    })
-
 
     # =========================================================================
-    # OUTLIER DETECTION - REACTIVE EXPRESSIONS
+    # OUTLIER DETECTION
     # =========================================================================
 
     # Load valid ranges reference
@@ -392,7 +222,7 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
         read_csv(ranges_file, show_col_types = FALSE)
       } else {
         message("[OUTLIERS] Valid ranges file not found")
-        data.frame()  # Return empty dataframe
+        data.frame()
       }
     })
 
@@ -461,298 +291,459 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
       iqr <- iqr_outliers()
       zscore <- zscore_outliers()
 
-      # Add outlier_type column and combine
       result <- list()
 
       if (nrow(range) > 0) {
-        range$outlier_type <- "range"
-        range <- range %>% select(patient_id, visit_no, variable, value, outlier_type)
+        range <- range %>% mutate(outlier_type = "Range Violation")
         result[[length(result) + 1]] <- range
       }
 
       if (nrow(iqr) > 0) {
-        iqr$outlier_type <- "iqr"
-        iqr <- iqr %>% select(patient_id, visit_no, variable, value, outlier_type)
+        iqr <- iqr %>% mutate(outlier_type = "IQR Outlier")
         result[[length(result) + 1]] <- iqr
       }
 
       if (nrow(zscore) > 0) {
-        zscore$outlier_type <- "zscore"
-        zscore <- zscore %>% select(patient_id, visit_no, variable, value, outlier_type)
+        zscore <- zscore %>% mutate(outlier_type = "Z-Score Outlier")
         result[[length(result) + 1]] <- zscore
       }
 
       if (length(result) > 0) {
-        do.call(rbind, result)
+        bind_rows(result)
       } else {
         data.frame()
       }
     })
 
-    # Outlier summary by instrument
-    outlier_summary_instrument <- reactive({
+    # Patient-level summaries
+    patient_outliers_summary <- reactive({
       req(range_violations())
       req(iqr_outliers())
       req(zscore_outliers())
 
-      summarize_outliers_by_instrument(
+      summarize_patient_outliers(
         range_violations(),
         iqr_outliers(),
-        zscore_outliers(),
+        zscore_outliers()
+      )
+    })
+
+    patient_missingness_summary <- reactive({
+      req(cleaned_data())
+
+      summarize_patient_missingness(
+        cleaned_data()$visits_data,
         dict_data
       )
     })
 
-    # Outlier summary by variable
-    outlier_summary_variable <- reactive({
-      req(range_violations())
-      req(iqr_outliers())
-      req(zscore_outliers())
 
-      summarize_outliers_by_variable(
-        range_violations(),
-        iqr_outliers(),
-        zscore_outliers(),
-        dict_data
+    # =========================================================================
+    # UNIFIED PATIENT SUMMARY WITH PRIORITY SCORING
+    # =========================================================================
+
+    unified_patient_summary <- reactive({
+      req(patient_missingness_summary())
+      req(patient_outliers_summary())
+
+      create_unified_patient_summary(
+        patient_missingness_summary(),
+        patient_outliers_summary()
       )
     })
 
-    # Filtered outliers for details table
-    filtered_outliers <- reactive({
-      req(all_outliers())
+    # Filtered patient summary based on user selection
+    filtered_patient_summary <- reactive({
+      req(unified_patient_summary())
 
-      result <- all_outliers()
+      data <- unified_patient_summary()
 
-      # Filter by outlier type
-      if (input$outlier_type_filter != "all") {
-        result <- result[result$outlier_type == input$outlier_type_filter, ]
+      # Filter based on patient_filter_type input
+      filter_type <- input$patient_filter_type
+
+      if (filter_type == "high_missing") {
+        data <- data %>% filter(pct_missing > 30)
+      } else if (filter_type == "has_outliers") {
+        data <- data %>% filter(total_outliers > 0)
+      } else if (filter_type == "missing_and_outliers") {
+        data <- data %>% filter(pct_missing > 10 & total_outliers > 0)
       }
+      # "all" - no filter
 
-      # Filter by instrument
-      if (input$instrument_filter != "all") {
-        # Get variables for this instrument
-        inst_vars <- dict_data$new_name[dict_data$instrument == input$instrument_filter &
-                                         !is.na(dict_data$instrument)]
-        result <- result[result$variable %in% inst_vars, ]
-      }
-
-      # Filter by patient
-      if (input$patient_filter != "all") {
-        result <- result[result$patient_id == input$patient_filter, ]
-      }
-
-      result
+      data
     })
 
-    # Update boxplot variable choices
+    # Track selected patient for detail panel
+    selected_patient <- reactiveVal(NULL)
+
+    # Update selected patient when row is clicked
+    observeEvent(input$patients_table__reactable__selected, {
+      req(input$patients_table__reactable__selected)
+      req(filtered_patient_summary())
+
+      selected_row <- input$patients_table__reactable__selected
+      patient_id <- filtered_patient_summary()$patient_id[selected_row]
+
+      selected_patient(patient_id)
+      message("[MOD_VIZ] Selected patient: ", patient_id)
+    })
+
+
+    # =========================================================================
+    # UPDATE DROPDOWNS
+    # =========================================================================
+
+    # Update instrument choices for visualization filter
     observe({
-      req(numeric_variables())
+      req(instrument_summary())
 
-      updateSelectInput(
-        session,
-        "boxplot_variable",
-        choices = numeric_variables(),
-        selected = if (length(numeric_variables()) > 0) numeric_variables()[1] else NULL
-      )
+      instruments <- instrument_summary()$instrument
+      choices <- c("All Instruments" = "all", setNames(instruments, instruments))
+
+      updateSelectInput(session, "viz_instrument", choices = choices)
     })
 
 
     # =========================================================================
-    # OUTPUT: MISSINGNESS OVERVIEW
+    # SECTION 1: DATA QUALITY AT-A-GLANCE (VALUE BOXES)
     # =========================================================================
 
-    output$miss_summary_info <- renderUI({
-      req(instrument_summary())
-
-      n_instruments <- nrow(instrument_summary())
-
-      tagList(
-        p(
-          strong("Dataset: "),
-          nrow(cleaned_data()$visits_data), " observations, ",
-          length(unique(cleaned_data()$visits_data$id_client_id)), " patients"
-        ),
-        p(
-          strong("Instruments analyzed: "), n_instruments
-        )
-      )
+    output$vb_total_patients <- renderUI({
+      req(unified_patient_summary())
+      nrow(unified_patient_summary())
     })
 
-    output$miss_summary_table <- reactable::renderReactable({
-      req(instrument_summary())
+    output$vb_total_outliers <- renderUI({
+      req(all_outliers())
+      nrow(all_outliers())
+    })
+
+    output$vb_overall_completion <- renderUI({
+      req(missingness_analysis())
+
+      # Calculate overall completion percentage
+      total_cells <- sum(missingness_analysis()$n_total)
+      cells_with_data <- sum(missingness_analysis()$n_has_data)
+
+      pct_complete <- round((cells_with_data / total_cells) * 100, 1)
+
+      paste0(pct_complete, "%")
+    })
+
+
+    # =========================================================================
+    # SECTION 2: PATIENTS NEEDING ATTENTION (MAIN TABLE)
+    # =========================================================================
+
+    output$patients_table <- reactable::renderReactable({
+      req(filtered_patient_summary())
+
+      data <- filtered_patient_summary()
 
       reactable::reactable(
-        instrument_summary(),
-        columns = list(
-          instrument = reactable::colDef(name = "Instrument", minWidth = 150),
-          n_variables = reactable::colDef(name = "# Variables", width = 100),
-          avg_pct_data = reactable::colDef(
-            name = "Avg % Complete",
-            width = 120,
-            format = reactable::colFormat(suffix = "%"),
-            style = function(value) {
-              if (value >= 80) {
-                color <- "#2ecc71"  # Green
-              } else if (value >= 50) {
-                color <- "#f39c12"  # Yellow
-              } else {
-                color <- "#e74c3c"  # Red
-              }
-              list(fontWeight = "bold", color = color)
-            }
-          ),
-          avg_pct_missing = reactable::colDef(
-            name = "Avg % Missing",
-            width = 120,
-            format = reactable::colFormat(suffix = "%")
-          ),
-          min_completion = reactable::colDef(
-            name = "Min %",
-            width = 80,
-            format = reactable::colFormat(suffix = "%")
-          ),
-          max_completion = reactable::colDef(
-            name = "Max %",
-            width = 80,
-            format = reactable::colFormat(suffix = "%")
-          )
-        ),
+        data,
+        selection = "single",
+        onClick = "select",
+        defaultPageSize = 20,
         striped = TRUE,
         highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
-        defaultPageSize = 50,
-        showPageSizeOptions = TRUE,
-        pageSizeOptions = c(10, 20, 50, 100)
-      )
-    })
-
-    output$top_missing_table <- reactable::renderReactable({
-      req(filtered_missingness())
-
-      # Get top 20 most missing variables
-      top_missing <- filtered_missingness() %>%
-        arrange(pct_has_data) %>%
-        head(20) %>%
-        select(variable, instrument, pct_has_data, pct_missing)
-
-      reactable::reactable(
-        top_missing,
+        searchable = TRUE,
+        filterable = TRUE,
+        defaultSorted = list(priority_score = "asc", pct_missing = "desc"),
         columns = list(
-          variable = reactable::colDef(name = "Variable", minWidth = 200),
-          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
-          pct_has_data = reactable::colDef(
-            name = "% Complete",
+          priority = reactable::colDef(
+            name = "Priority",
             width = 100,
-            format = reactable::colFormat(suffix = "%"),
-            style = function(value) {
-              if (value >= 80) color <- "#2ecc71"
-              else if (value >= 50) color <- "#f39c12"
-              else color <- "#e74c3c"
-              list(fontWeight = "bold", color = color)
-            }
+            align = "center"
+          ),
+          patient_id = reactable::colDef(
+            name = "Patient ID",
+            minWidth = 120
           ),
           pct_missing = reactable::colDef(
             name = "% Missing",
+            width = 110,
+            format = reactable::colFormat(suffix = "%"),
+            style = function(value) {
+              color <- if (value > 30) "#dc3545"
+                       else if (value > 10) "#ffc107"
+                       else "#28a745"
+              list(fontWeight = "bold", color = color)
+            }
+          ),
+          total_outliers = reactable::colDef(
+            name = "# Outliers",
             width = 100,
-            format = reactable::colFormat(suffix = "%")
+            style = function(value) {
+              color <- if (value > 10) "#dc3545"
+                       else if (value > 3) "#ffc107"
+                       else "#28a745"
+              list(fontWeight = "bold", color = color)
+            }
+          ),
+          visits_with_missing = reactable::colDef(
+            name = "Visits w/ Missing",
+            minWidth = 150
+          ),
+          visits_with_outliers = reactable::colDef(
+            name = "Visits w/ Outliers",
+            minWidth = 150
+          ),
+          most_affected_instruments = reactable::colDef(
+            name = "Affected Instruments",
+            minWidth = 200
+          ),
+          # Hide internal columns
+          priority_score = reactable::colDef(show = FALSE),
+          total_variables = reactable::colDef(show = FALSE),
+          variables_with_data = reactable::colDef(show = FALSE),
+          variables_missing = reactable::colDef(show = FALSE),
+          n_visits_missing = reactable::colDef(show = FALSE),
+          range_violations = reactable::colDef(show = FALSE),
+          iqr_outliers = reactable::colDef(show = FALSE),
+          zscore_outliers = reactable::colDef(show = FALSE),
+          n_visits_outliers = reactable::colDef(show = FALSE)
+        )
+      )
+    })
+
+
+    # =========================================================================
+    # SECTION 3: PATIENT DETAIL PANEL (EXPANDABLE)
+    # =========================================================================
+
+    output$patient_detail_panel <- renderUI({
+      req(selected_patient())
+
+      patient_id <- selected_patient()
+
+      # Get patient data from unified summary
+      patient_row <- unified_patient_summary() %>%
+        filter(patient_id == !!patient_id)
+
+      if (nrow(patient_row) == 0) {
+        return(NULL)
+      }
+
+      # Get detailed missingness profile
+      miss_profile <- get_patient_missingness_profile(
+        cleaned_data()$visits_data,
+        patient_id,
+        dict_data
+      )
+
+      # Get detailed outlier profile
+      outlier_profile <- get_patient_outlier_profile(
+        patient_id,
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        dict_data
+      )
+
+      card(
+        card_header(
+          icon("user-circle"),
+          paste("Patient Detail:", patient_id)
+        ),
+        card_body(
+          h5("Summary"),
+          layout_columns(
+            col_widths = c(3, 3, 3, 3),
+            value_box(
+              title = "Priority",
+              value = patient_row$priority,
+              theme = if (patient_row$priority_score == 1) "danger"
+                      else if (patient_row$priority_score == 2) "warning"
+                      else "success",
+              showcase = icon("exclamation-triangle")
+            ),
+            value_box(
+              title = "% Missing",
+              value = paste0(patient_row$pct_missing, "%"),
+              theme = "info",
+              showcase = icon("database")
+            ),
+            value_box(
+              title = "# Outliers",
+              value = patient_row$total_outliers,
+              theme = "warning",
+              showcase = icon("triangle-exclamation")
+            ),
+            value_box(
+              title = "Visits",
+              value = if (!is.null(miss_profile)) miss_profile$n_visits else "N/A",
+              theme = "primary",
+              showcase = icon("calendar")
+            )
+          ),
+
+          hr(),
+
+          h5("Missingness Details"),
+          if (!is.null(miss_profile) && nrow(miss_profile$variable_details) > 0) {
+            reactable::reactableOutput(session$ns("patient_detail_missing_table"))
+          } else {
+            p(class = "text-muted", "No missing data for this patient")
+          },
+
+          hr(),
+
+          h5("Outlier Details"),
+          if (!is.null(outlier_profile) && nrow(outlier_profile) > 0) {
+            reactable::reactableOutput(session$ns("patient_detail_outlier_table"))
+          } else {
+            p(class = "text-muted", "No outliers for this patient")
+          },
+
+          hr(),
+
+          downloadButton(
+            session$ns("download_patient_report"),
+            "Download Patient Report (CSV)",
+            class = "btn-primary"
           )
+        )
+      )
+    })
+
+    # Patient detail missingness table
+    output$patient_detail_missing_table <- reactable::renderReactable({
+      req(selected_patient())
+
+      profile <- get_patient_missingness_profile(
+        cleaned_data()$visits_data,
+        selected_patient(),
+        dict_data
+      )
+
+      if (is.null(profile)) return(NULL)
+
+      # Show only missing variables
+      details <- profile$variable_details %>%
+        filter(status == "Missing") %>%
+        select(variable, instrument, visits_missing)
+
+      if (nrow(details) == 0) return(reactable::reactable(data.frame()))
+
+      reactable::reactable(
+        details,
+        columns = list(
+          variable = reactable::colDef(name = "Variable", minWidth = 200),
+          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
+          visits_missing = reactable::colDef(name = "Visits with NA", minWidth = 150)
+        ),
+        groupBy = "instrument",
+        striped = TRUE,
+        highlight = TRUE,
+        defaultPageSize = 20,
+        height = "400px"
+      )
+    })
+
+    # Patient detail outlier table
+    output$patient_detail_outlier_table <- reactable::renderReactable({
+      req(selected_patient())
+
+      profile <- get_patient_outlier_profile(
+        selected_patient(),
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        dict_data
+      )
+
+      if (is.null(profile) || nrow(profile) == 0) {
+        return(reactable::reactable(data.frame()))
+      }
+
+      reactable::reactable(
+        profile,
+        columns = list(
+          visit_no = reactable::colDef(name = "Visit", width = 80),
+          variable = reactable::colDef(name = "Variable", minWidth = 150),
+          variable_label = reactable::colDef(name = "Label", minWidth = 180),
+          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
+          value = reactable::colDef(name = "Value", width = 100),
+          outlier_type = reactable::colDef(
+            name = "Type",
+            width = 130,
+            cell = function(value) {
+              color <- if (value == "Range Violation") "#dc3545"
+                       else if (value == "IQR Outlier") "#ffc107"
+                       else "#17a2b8"
+              tags$span(style = paste0("color: ", color, "; font-weight: bold;"), value)
+            }
+          ),
+          detection_details = reactable::colDef(name = "Details", minWidth = 250)
         ),
         striped = TRUE,
         highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
         defaultPageSize = 20,
-        showPageSizeOptions = TRUE,
-        pageSizeOptions = c(10, 20, 50)
+        height = "400px"
       )
     })
 
 
     # =========================================================================
-    # OUTPUT: MISSINGNESS HEATMAP
+    # SECTION 4: VISUAL EXPLORATION (VISUALIZATIONS)
     # =========================================================================
 
-    output$heatmap_info <- renderUI({
-      req(input$heatmap_vars)
-
-      n_vars <- length(input$heatmap_vars)
-
-      if (n_vars == 0) {
-        p(
-          class = "text-muted",
-          icon("info-circle"),
-          " Select variables from the list above to display heatmap"
-        )
-      } else {
-        # Get patient filter info
-        patient_info <- if (input$patient_filter == "all") {
-          paste(length(unique(cleaned_data()$visits_data$id_client_id)), "patients")
-        } else {
-          paste("Patient:", input$patient_filter)
-        }
-
-        p(
-          strong("Displaying: "), n_vars, " variables × ", patient_info
-        )
-      }
-    })
-
-    output$miss_heatmap <- plotly::renderPlotly({
-      req(input$heatmap_vars)
-      req(length(input$heatmap_vars) > 0)
+    output$viz_heatmap <- plotly::renderPlotly({
+      req(input$viz_type == "miss_heatmap")
       req(cleaned_data())
+      req(missingness_analysis())
 
-      # Get patient filter
-      patient_ids <- if (input$patient_filter == "all") {
-        NULL  # All patients
+      # Get variables for selected instrument
+      if (input$viz_instrument == "all") {
+        # Use top 20 most missing variables overall
+        vars <- missingness_analysis() %>%
+          arrange(desc(pct_missing)) %>%
+          head(20) %>%
+          pull(variable)
       } else {
-        input$patient_filter
+        # Get variables for selected instrument
+        vars <- dict_data %>%
+          filter(instrument == input$viz_instrument) %>%
+          pull(new_name) %>%
+          head(30)  # Limit to 30 for readability
       }
 
-      message("[MOD_VIZ] Creating heatmap with ",
-              length(input$heatmap_vars), " variables")
+      if (length(vars) == 0) {
+        return(plotly::plot_ly() %>%
+                 plotly::layout(title = "No variables found for selected instrument"))
+      }
 
       create_missingness_heatmap(
         cleaned_data()$visits_data,
-        input$heatmap_vars,
-        patient_ids = patient_ids
+        vars,
+        patient_ids = NULL
       )
     })
 
+    output$viz_outlier_timeline <- plotly::renderPlotly({
+      req(input$viz_type == "outlier_timeline")
+      req(range_violations())
+      req(iqr_outliers())
+      req(zscore_outliers())
 
-    # =========================================================================
-    # OUTPUT: VISIT TIMELINE
-    # =========================================================================
-
-    output$timeline_info <- renderUI({
-      req(cleaned_data())
-
-      n_visits <- length(unique(cleaned_data()$visits_data$id_visit_no))
-
-      instrument_text <- if (input$instrument_filter == "all") {
-        "all instruments"
-      } else {
-        input$instrument_filter
-      }
-
-      p(
-        strong("Showing completion across "), n_visits, " visits for ",
-        instrument_text
+      create_outlier_timeline(
+        range_violations(),
+        iqr_outliers(),
+        zscore_outliers(),
+        visit_col = "visit_no"
       )
     })
 
-    output$miss_timeline <- plotly::renderPlotly({
+    output$viz_completion_timeline <- plotly::renderPlotly({
+      req(input$viz_type == "completion_timeline")
       req(cleaned_data())
 
-      instrument_filter <- if (input$instrument_filter == "all") {
+      instrument_filter <- if (input$viz_instrument == "all") {
         NULL
       } else {
-        input$instrument_filter
+        input$viz_instrument
       }
-
-      message("[MOD_VIZ] Creating timeline for instrument: ",
-              ifelse(is.null(instrument_filter), "all", instrument_filter))
 
       create_visit_completion_timeline(
         cleaned_data()$visits_data,
@@ -763,354 +754,78 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
 
 
     # =========================================================================
-    # OUTPUT: PATIENT PROFILE
+    # CSV DOWNLOAD HANDLERS
     # =========================================================================
 
-    output$patient_profile_summary <- renderUI({
-      req(input$patient_filter != "all")
-      req(cleaned_data())
-
-      profile <- get_patient_missingness_profile(
-        cleaned_data()$visits_data,
-        input$patient_filter,
-        dict_data
-      )
-
-      if (is.null(profile)) {
-        return(p("Error: Could not load patient profile"))
-      }
-
-      tagList(
-        h5(paste("Patient:", profile$patient_id)),
-        layout_columns(
-          col_widths = c(4, 4, 4),
-          value_box(
-            title = "Visits",
-            value = profile$n_visits,
-            theme = "primary"
-          ),
-          value_box(
-            title = "Variables with Data",
-            value = profile$n_with_data,
-            theme = "success"
-          ),
-          value_box(
-            title = "Missing (NA)",
-            value = profile$n_missing,
-            theme = "danger"
-          )
-        )
-      )
-    })
-
-    output$patient_profile_table <- reactable::renderReactable({
-      req(input$patient_filter != "all")
-      req(cleaned_data())
-
-      profile <- get_patient_missingness_profile(
-        cleaned_data()$visits_data,
-        input$patient_filter,
-        dict_data
-      )
-
-      if (is.null(profile)) {
-        return(NULL)
-      }
-
-      # Show variable details
-      details <- profile$variable_details %>%
-        select(variable, instrument, status) %>%
-        arrange(status, instrument, variable)
-
-      reactable::reactable(
-        details,
-        columns = list(
-          variable = reactable::colDef(name = "Variable", minWidth = 200),
-          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
-          status = reactable::colDef(
-            name = "Status",
-            width = 150,
-            style = function(value) {
-              if (value == "Has Data") {
-                color <- "#2ecc71"  # Green
-              } else if (value == "Missing") {
-                color <- "#e74c3c"  # Red
-              } else {
-                color <- "#7f8c8d"  # Gray (fallback)
-              }
-              list(fontWeight = "bold", color = color)
-            }
-          )
-        ),
-        groupBy = "instrument",
-        striped = TRUE,
-        highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
-        defaultPageSize = 50,
-        showPageSizeOptions = TRUE,
-        pageSizeOptions = c(20, 50, 100, 200)
-      )
-    })
-
-    # Show message when no patient selected
-    observe({
-      if (input$view_type == "patient_profile" && input$patient_filter == "all") {
-        showNotification(
-          "Please select a specific patient from the Patient filter",
-          type = "message",
-          duration = 3
-        )
-      }
-    })
-
-
-    # =========================================================================
-    # OUTPUT: OUTLIER SUMMARY
-    # =========================================================================
-
-    output$outlier_summary_info <- renderUI({
-      req(all_outliers())
-
-      n_total <- nrow(all_outliers())
-      n_patients <- length(unique(all_outliers()$patient_id))
-
-      tagList(
-        p(
-          strong("Total outliers detected: "), n_total,
-          " across ", n_patients, " patients"
-        )
-      )
-    })
-
-    output$outlier_instrument_table <- reactable::renderReactable({
-      req(outlier_summary_instrument())
-
-      reactable::reactable(
-        outlier_summary_instrument(),
-        columns = list(
-          instrument = reactable::colDef(name = "Instrument", minWidth = 150),
-          n_variables = reactable::colDef(name = "# Variables", width = 100),
-          n_range_violations = reactable::colDef(
-            name = "Range Violations",
-            width = 120,
-            style = function(value) {
-              if (value > 0) list(fontWeight = "bold", color = "#e74c3c")
-            }
-          ),
-          n_iqr_outliers = reactable::colDef(
-            name = "IQR Outliers",
-            width = 110,
-            style = function(value) {
-              if (value > 0) list(fontWeight = "bold", color = "#f39c12")
-            }
-          ),
-          n_zscore_outliers = reactable::colDef(
-            name = "Z-Score Outliers",
-            width = 130,
-            style = function(value) {
-              if (value > 0) list(fontWeight = "bold", color = "#9b59b6")
-            }
-          ),
-          n_total_outliers = reactable::colDef(
-            name = "Total Outliers",
-            width = 120,
-            style = function(value) {
-              color <- if (value > 50) "#e74c3c"
-                       else if (value > 20) "#f39c12"
-                       else "#3498db"
-              list(fontWeight = "bold", color = color)
-            }
-          )
-        ),
-        striped = TRUE,
-        highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
-        defaultPageSize = 20
-      )
-    })
-
-    output$outlier_variable_table <- reactable::renderReactable({
-      req(outlier_summary_variable())
-
-      # Show top 30 variables
-      top_vars <- outlier_summary_variable() %>% head(30)
-
-      reactable::reactable(
-        top_vars,
-        columns = list(
-          variable = reactable::colDef(name = "Variable", minWidth = 200),
-          instrument = reactable::colDef(name = "Instrument", minWidth = 120),
-          n_range_violations = reactable::colDef(name = "Range", width = 80),
-          n_iqr_outliers = reactable::colDef(name = "IQR", width = 70),
-          n_zscore_outliers = reactable::colDef(name = "Z-Score", width = 90),
-          n_total_outliers = reactable::colDef(
-            name = "Total",
-            width = 80,
-            style = function(value) {
-              list(fontWeight = "bold", color = "#e74c3c")
-            }
-          )
-        ),
-        striped = TRUE,
-        highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
-        defaultPageSize = 30
-      )
-    })
-
-
-    # =========================================================================
-    # OUTPUT: OUTLIER DETAILS
-    # =========================================================================
-
-    output$outlier_details_info <- renderUI({
-      req(filtered_outliers())
-
-      n_outliers <- nrow(filtered_outliers())
-      n_patients <- length(unique(filtered_outliers()$patient_id))
-      n_variables <- length(unique(filtered_outliers()$variable))
-
-      p(
-        strong("Showing: "), n_outliers, " outliers",
-        " (", n_patients, " patients, ", n_variables, " variables)"
-      )
-    })
-
-    output$outlier_details_table <- reactable::renderReactable({
-      req(filtered_outliers())
-
-      # Add instrument column
-      outliers_with_inst <- filtered_outliers()
-      outliers_with_inst$instrument <- sapply(outliers_with_inst$variable, function(var) {
-        dict_row <- dict_data[dict_data$new_name == var, ]
-        if (nrow(dict_row) > 0) dict_row$instrument[1] else NA
-      })
-
-      reactable::reactable(
-        outliers_with_inst,
-        columns = list(
-          patient_id = reactable::colDef(name = "Patient", width = 120),
-          visit_no = reactable::colDef(name = "Visit", width = 80),
-          variable = reactable::colDef(name = "Variable", minWidth = 180),
-          instrument = reactable::colDef(name = "Instrument", width = 130),
-          value = reactable::colDef(name = "Value", width = 100),
-          outlier_type = reactable::colDef(
-            name = "Type",
-            width = 100,
-            cell = function(value) {
-              label <- switch(value,
-                "range" = "Range Violation",
-                "iqr" = "IQR Outlier",
-                "zscore" = "Z-Score Outlier",
-                value
-              )
-              color <- switch(value,
-                "range" = "#e74c3c",
-                "iqr" = "#f39c12",
-                "zscore" = "#9b59b6",
-                "#95a5a6"
-              )
-              tags$span(style = paste0("color: ", color, "; font-weight: bold;"), label)
-            }
-          )
-        ),
-        filterable = TRUE,
-        searchable = TRUE,
-        striped = TRUE,
-        highlight = TRUE,
-        fullWidth = TRUE,
-        height = "auto",
-        defaultPageSize = 50,
-        showPageSizeOptions = TRUE,
-        pageSizeOptions = c(25, 50, 100, 200)
-      )
-    })
-
-    # Download outliers CSV
-    output$download_outliers <- downloadHandler(
+    # Download filtered patient list
+    output$download_patient_list <- downloadHandler(
       filename = function() {
-        paste0("outliers_", Sys.Date(), ".csv")
+        filter_name <- gsub(" ", "_", tolower(input$patient_filter_type))
+        paste0("patients_", filter_name, "_", format(Sys.Date(), "%Y%m%d"), ".csv")
       },
       content = function(file) {
-        write.csv(filtered_outliers(), file, row.names = FALSE)
+        req(filtered_patient_summary())
+        write_csv(filtered_patient_summary(), file)
       }
     )
 
+    # Download individual patient report
+    output$download_patient_report <- downloadHandler(
+      filename = function() {
+        req(selected_patient())
+        paste0("patient_", selected_patient(), "_report_", 
+               format(Sys.Date(), "%Y%m%d"), ".csv")
+      },
+      content = function(file) {
+        req(selected_patient())
 
-    # =========================================================================
-    # OUTPUT: OUTLIER BOXPLOTS
-    # =========================================================================
+        # Get patient summary row
+        patient_row <- unified_patient_summary() %>%
+          filter(patient_id == selected_patient())
 
-    output$boxplot_info <- renderUI({
-      req(input$boxplot_variable)
-
-      outliers_for_var <- all_outliers() %>%
-        filter(variable == input$boxplot_variable)
-
-      if (nrow(outliers_for_var) > 0) {
-        p(
-          strong("Outliers for this variable: "), nrow(outliers_for_var),
-          " (", length(unique(outliers_for_var$patient_id)), " patients)"
+        # Get missingness details
+        miss_profile <- get_patient_missingness_profile(
+          cleaned_data()$visits_data,
+          selected_patient(),
+          dict_data
         )
-      } else {
-        p(
-          icon("check-circle"),
-          " No outliers detected for this variable",
-          style = "color: #2ecc71;"
+
+        # Get outlier details
+        outlier_profile <- get_patient_outlier_profile(
+          selected_patient(),
+          range_violations(),
+          iqr_outliers(),
+          zscore_outliers(),
+          dict_data
         )
+
+        # Combine into report
+        report <- list(
+          summary = patient_row,
+          missing_variables = if (!is.null(miss_profile)) {
+            miss_profile$variable_details %>% filter(status == "Missing")
+          } else {
+            data.frame()
+          },
+          outliers = if (!is.null(outlier_profile)) outlier_profile else data.frame()
+        )
+
+        # Write summary section
+        write_csv(report$summary, file)
+
+        # Append missing variables
+        if (nrow(report$missing_variables) > 0) {
+          cat("\n\nMissing Variables:\n", file = file, append = TRUE)
+          write_csv(report$missing_variables, file, append = TRUE)
+        }
+
+        # Append outliers
+        if (nrow(report$outliers) > 0) {
+          cat("\n\nOutliers:\n", file = file, append = TRUE)
+          write_csv(report$outliers, file, append = TRUE)
+        }
       }
-    })
+    )
 
-    output$outlier_boxplot <- plotly::renderPlotly({
-      req(input$boxplot_variable)
-      req(cleaned_data())
-
-      message("[MOD_VIZ] Creating boxplot for ", input$boxplot_variable)
-
-      create_outlier_boxplot(
-        cleaned_data()$visits_data,
-        input$boxplot_variable,
-        all_outliers()
-      )
-    })
-
-
-    # =========================================================================
-    # OUTPUT: OUTLIER TIMELINE
-    # =========================================================================
-
-    output$outlier_timeline_info <- renderUI({
-      n_range <- nrow(range_violations())
-      n_iqr <- nrow(iqr_outliers())
-      n_zscore <- nrow(zscore_outliers())
-
-      tagList(
-        p(
-          strong("Outlier counts by type:"),
-          " Range violations: ", n_range, ", ",
-          "IQR outliers: ", n_iqr, ", ",
-          "Z-score outliers: ", n_zscore
-        )
-      )
-    })
-
-    output$outlier_timeline <- plotly::renderPlotly({
-      req(range_violations())
-      req(iqr_outliers())
-      req(zscore_outliers())
-
-      message("[MOD_VIZ] Creating outlier timeline")
-
-      create_outlier_timeline(
-        range_violations(),
-        iqr_outliers(),
-        zscore_outliers(),
-        visit_col = "visit_no"
-      )
-    })
-
-  })
+  })  # End moduleServer
 }

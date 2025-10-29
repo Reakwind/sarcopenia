@@ -105,8 +105,8 @@ ui <- page_sidebar(
                reactableOutput("ae_table")
              )),
 
-    # Missing Data Analysis Tab
-    nav_panel("Missing Data", mod_visualization_ui("viz"))
+    # Explore Data Tab (Missingness + Outliers)
+    nav_panel("Explore Data", mod_visualization_ui("viz"))
 
     # TODO: Add additional analysis tabs here when ready:
     # nav_panel("Analysis", mod_analysis_ui("analysis")),
