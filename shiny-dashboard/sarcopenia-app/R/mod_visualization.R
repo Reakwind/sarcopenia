@@ -210,13 +210,8 @@ mod_visualization_server <- function(id, cleaned_data, dict_data) {
 
     # Load valid ranges reference
     valid_ranges <- reactive({
-      ranges_file <- system.file("extdata", "instrument_valid_ranges.csv",
-                                 package = "sarcDash", mustWork = FALSE)
-
-      # If package not installed, try local path
-      if (ranges_file == "") {
-        ranges_file <- "inst/extdata/instrument_valid_ranges.csv"
-      }
+      # For Shiny app (not package), use direct path
+      ranges_file <- "inst/extdata/instrument_valid_ranges.csv"
 
       if (file.exists(ranges_file)) {
         read_csv(ranges_file, show_col_types = FALSE)

@@ -26,6 +26,7 @@ library(forcats)
 library(purrr)
 library(rlang)
 library(tibble)
+library(tidyselect)  # Used in mod_analysis.R and mod_instrument_analysis.R
 library(shinyjs)
 
 # ============================================================================

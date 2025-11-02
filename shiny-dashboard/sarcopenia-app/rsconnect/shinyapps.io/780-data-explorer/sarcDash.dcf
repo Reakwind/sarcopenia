@@ -5,9 +5,9 @@ account: 780-data-explorer
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 15806625
-bundleId: 11120049
+bundleId: 11120311
 url: https://780-data-explorer.shinyapps.io/sarcDash/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: data_dictionary_enhanced.csv|docs/ARCHITECTURE.md|docs/DATA_CLEANING_RULES.md|docs/DEVELOPER_SPEC.md|inst/extdata/instrument_valid_ranges.csv|README.md|test_instrument_fix.R|test_missingness_functions.R|test_new_functions.R|test_outlier_functions.R|test_output.csv|test_phase3_refactoring.R|tests/generate_synthetic_data_optimized.R|tests/generate_synthetic_data.R|tests/SCALE_TEST_REPORT.md|tests/synthetic_50patients_10visits.csv|tests/test_at_scale.R|UX_SESSION1_COMPLETE.md|UX_SESSION2_COMPLETE.md|UX_SESSION3_COMPLETE.md|UX_SESSION4_COMPLETE.md
+ignoredFiles: docs/ARCHITECTURE.md|docs/DATA_CLEANING_RULES.md|docs/DEVELOPER_SPEC.md|README.md|test_output.csv|UX_SESSION1_COMPLETE.md|UX_SESSION2_COMPLETE.md|UX_SESSION3_COMPLETE.md|UX_SESSION4_COMPLETE.md
