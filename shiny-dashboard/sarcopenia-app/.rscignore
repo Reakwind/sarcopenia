@@ -1,11 +1,5 @@
 # .rscignore - Control what rsconnect deploys to shinyapps.io
-# Deploy: app.R, R/ modules, data files, www/ assets
-
-# ============================================================================
-# EXCLUDE TEST FILES (contain absolute paths that break deployment)
-# ============================================================================
-test_*.R
-tests/
+# Only essential files are deployed: app.R, R/ modules, data files, www/ assets
 
 # ============================================================================
 # EXCLUDE DOCUMENTATION
@@ -13,46 +7,17 @@ tests/
 docs/
 *.md
 !README.md
-DEPLOYMENT_SUMMARY.md
-UX_IMPROVEMENTS_SUMMARY.md
-UX_SESSION*.md
-DIAGNOSTIC_INSTRUCTIONS.md
-CORE_PROTECTION.md
-
-# ============================================================================
-# EXCLUDE DATA DICTIONARY DEVELOPMENT FILES
-# ============================================================================
-enhance_data_dictionary.R
-fix_data_dictionary.R
-diagnostic_column_comparison.R
-data_dictionary_cleaned.csv
-data_dictionary_enhanced_BACKUP.csv
 
 # ============================================================================
 # EXCLUDE DEPLOYMENT ARTIFACTS
 # ============================================================================
 rsconnect/
-manifest.json
 
 # ============================================================================
 # EXCLUDE VERSION CONTROL
 # ============================================================================
 .git/
 .gitignore
-
-# ============================================================================
-# EXCLUDE R PACKAGE DEVELOPMENT FILES
-# ============================================================================
-# NOTE: We do NOT exclude R/ directory - it contains our modules!
-man/
-dev/
-DESCRIPTION
-NAMESPACE
-.Rprofile
-renv/
-renv.lock
-.Rbuildignore
-.here
 
 # ============================================================================
 # EXCLUDE HIDDEN FILES
@@ -62,10 +27,16 @@ renv.lock
 .RData
 
 # ============================================================================
-# FILES THAT SHOULD BE DEPLOYED:
-# - app.R (main app)
-# - R/*.R (all function and module files)
-# - data_dictionary_enhanced.csv (required data)
-# - inst/extdata/*.csv (instrument ranges)
-# - www/custom.css (styling)
+# FILES THAT WILL BE DEPLOYED:
+#
+# ✅ app.R (main application)
+# ✅ R/fct_*.R (all function files)
+# ✅ R/mod_*.R (all module files)
+# ✅ R/utils*.R (utility functions)
+# ✅ data_dictionary_enhanced.csv (required data)
+# ✅ inst/extdata/instrument_valid_ranges.csv (instrument ranges)
+# ✅ www/custom.css (custom styling)
+#
+# NOTE: All test files and development files have been moved to
+#       ../sarcopenia-tests-archive/ directory to prevent deployment issues
 # ============================================================================
