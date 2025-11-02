@@ -1,0 +1,532 @@
+/* ============================================================================
+   SARCOPENIA APP - CUSTOM UX STYLES
+   ============================================================================
+   Minimal, clean styles to enhance user journey and button states
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   BUTTON ENHANCEMENTS - STRONGER VISUAL STATES
+   ---------------------------------------------------------------------------- */
+
+/* Smooth transitions for all buttons */
+.btn {
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+/* Primary button (Process Data) - BRIGHT GREEN when enabled */
+.btn-primary:not(:disabled):not(.disabled) {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:not(:disabled):not(.disabled):hover {
+  background-color: #218838 !important;
+  border-color: #1e7e34 !important;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-primary:not(:disabled):not(.disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Disabled buttons - VERY OBVIOUS disabled state */
+.btn:disabled,
+.btn.disabled {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #adb5bd !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+/* Success buttons (Download) - strong green with glow */
+.btn-success:not(:disabled):not(.disabled) {
+  box-shadow: 0 2px 6px rgba(24, 188, 156, 0.25);
+}
+
+.btn-success:not(:disabled):not(.disabled):hover {
+  box-shadow: 0 4px 12px rgba(24, 188, 156, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-success:not(:disabled):not(.disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(24, 188, 156, 0.25);
+}
+
+/* ----------------------------------------------------------------------------
+   STEP HEADERS
+   ---------------------------------------------------------------------------- */
+
+/* Step headers with icons */
+.sidebar h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-bottom: 12px;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar h4:first-of-type {
+  margin-top: 0;
+}
+
+.sidebar h4 i {
+  color: #18BC9C;
+  font-size: 1.1rem;
+}
+
+/* ----------------------------------------------------------------------------
+   FILE UPLOAD ENHANCEMENTS - BRIGHT BLUE BROWSE BUTTON
+   ---------------------------------------------------------------------------- */
+
+/* File input container */
+.form-group {
+  margin-bottom: 8px;
+}
+
+/* BRIGHT BLUE BROWSE BUTTON */
+input[type="file"]::file-selector-button,
+input[type="file"]::-webkit-file-upload-button,
+input[type="file"]::-ms-browse {
+  background-color: #007bff !important;
+  color: white !important;
+  padding: 12px 28px !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+input[type="file"]::file-selector-button:hover,
+input[type="file"]::-webkit-file-upload-button:hover,
+input[type="file"]::-ms-browse:hover {
+  background-color: #0056b3 !important;
+  box-shadow: 0 5px 16px rgba(0, 123, 255, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* File input text styling */
+input[type="file"] {
+  font-size: 0.95rem;
+  color: #495057;
+  padding: 6px 0;
+}
+
+/* ----------------------------------------------------------------------------
+   PROGRESSIVE DISCLOSURE - STEP ANIMATIONS
+   ---------------------------------------------------------------------------- */
+
+/* Slide-in animation for revealing steps */
+.step-section {
+  animation: slideInFromTop 0.4s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   DOWNLOAD SECTION & RESET SECTION
+   ---------------------------------------------------------------------------- */
+
+/* Download and reset sections smooth reveal */
+#download_section,
+#reset_section {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reset button specific styling */
+#reset_btn {
+  transition: all 0.3s ease;
+}
+
+#reset_btn:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+  transform: translateY(-1px);
+}
+
+#reset_btn:active {
+  transform: translateY(0);
+}
+
+/* ----------------------------------------------------------------------------
+   LOADING SPINNER
+   ---------------------------------------------------------------------------- */
+
+/* Spinner animation for processing state */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ----------------------------------------------------------------------------
+   SIDEBAR SPACING
+   ---------------------------------------------------------------------------- */
+
+/* Better spacing between workflow steps */
+.sidebar hr {
+  margin: 20px 0;
+  opacity: 0.3;
+}
+
+/* Consistent spacing in sidebar divs */
+.sidebar > div {
+  margin-bottom: 0;
+}
+
+/* ----------------------------------------------------------------------------
+   ACCESSIBILITY
+   ---------------------------------------------------------------------------- */
+
+/* Focus states for keyboard navigation */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  outline: 2px solid #18BC9C;
+  outline-offset: 2px;
+}
+
+/* High contrast for disabled state */
+@media (prefers-contrast: high) {
+  .btn:disabled,
+  .btn.disabled {
+    opacity: 0.3;
+    border: 2px dashed #999;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   RESPONSIVE ADJUSTMENTS
+   ---------------------------------------------------------------------------- */
+
+/* ----------------------------------------------------------------------------
+   IMPROVED TABLE READABILITY & PERFORMANCE
+   ---------------------------------------------------------------------------- */
+
+/* Larger, more readable table fonts */
+.reactable table {
+  font-size: 14px;  /* Increased from default 12px */
+}
+
+.reactable th {
+  font-size: 15px !important;  /* Increased from 13px */
+  font-weight: 600;
+  padding: 12px 8px !important;  /* More vertical padding */
+  background-color: #f7f7f7;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.reactable td {
+  padding: 10px 8px;  /* More vertical padding for easier reading */
+}
+
+/* Smooth scrolling for tables */
+.reactable {
+  scroll-behavior: smooth;
+}
+
+/* Table section headers above tables */
+h5[style*="margin-top: 20px"] {
+  color: #2C3E50;
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
+  margin-bottom: 15px !important;
+}
+
+/* ----------------------------------------------------------------------------
+   VERTICAL DASHBOARD SECTIONS - ENHANCED SPACING & VISUAL HIERARCHY
+   ---------------------------------------------------------------------------- */
+
+/* Section containers with smooth entrance */
+#summary_section,
+#patient_section,
+#instrument_section {
+  animation: fadeIn 0.4s ease-out;
+  margin-bottom: 20px;
+  scroll-margin-top: 20px; /* Smooth scroll anchor offset */
+}
+
+/* ----------------------------------------------------------------------------
+   DASHBOARD PROGRESSIVE DISCLOSURE - EMPTY STATE & STAGGERED REVEAL
+   ---------------------------------------------------------------------------- */
+
+/* Empty state container - subtle entrance */
+#dashboard_empty_state {
+  animation: fadeInSoft 0.5s ease-out;
+}
+
+@keyframes fadeInSoft {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Dashboard sections reveal - staggered cascade effect */
+.dashboard-section {
+  animation: slideInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Stagger the animations for each section */
+#summary_section.dashboard-section {
+  animation-delay: 0s;
+}
+
+#patient_section.dashboard-section {
+  animation-delay: 0.1s;
+}
+
+#instrument_section.dashboard-section {
+  animation-delay: 0.2s;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth transition when sections are removed (on reset) */
+.dashboard-section {
+  transition: opacity 0.3s ease-out;
+}
+
+/* Summary section - teal accent (compact stats) */
+#summary_section .card {
+  border-left: 4px solid #18BC9C;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+#summary_section .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 188, 156, 0.15);
+}
+
+/* Patient section - blue accent (individual patient data) */
+#patient_section .card {
+  border-left: 4px solid #3498db;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+#patient_section .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+/* Instrument section - purple accent (cross-patient comparisons) */
+#instrument_section .card {
+  border-left: 4px solid #9b59b6;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+#instrument_section .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.15);
+}
+
+/* ----------------------------------------------------------------------------
+   CARD ENHANCEMENTS
+   ---------------------------------------------------------------------------- */
+
+/* Subtle shadow and border for all cards */
+.card {
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+  background-color: #ffffff;
+}
+
+/* Card header improvements */
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  font-weight: 600;
+  padding: 16px 20px;
+  font-size: 1.1rem;
+}
+
+.card-header i {
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+/* Smooth fade-in for cards */
+.bslib-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   LEGEND BOX ENHANCEMENTS - COLLAPSIBLE SECTIONS
+   ---------------------------------------------------------------------------- */
+
+/* Collapsible legend header - clickable with hover effect */
+div[id$="legend_header"] {
+  transition: all 0.2s ease;
+}
+
+div[id$="legend_header"]:hover {
+  background-color: #e9ecef !important;
+  border-color: #ced4da !important;
+}
+
+/* Chevron icon rotation animation when expanded/collapsed */
+div[id$="legend_header"]:active {
+  transform: scale(0.98);
+}
+
+/* Legend content - smooth height transitions handled by jQuery slideToggle */
+div[id$="legend_content"] {
+  overflow: hidden;
+}
+
+/* Color indicator boxes in legend */
+div[id$="legend_content"] span[style*="width: 20px"] {
+  flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------------------
+   NOTIFICATION STYLING
+   ---------------------------------------------------------------------------- */
+
+/* Improve notification appearance */
+.shiny-notification {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  width: 300px;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   RESPONSIVE ADJUSTMENTS - MOBILE & TABLET OPTIMIZATION
+   ---------------------------------------------------------------------------- */
+
+/* Tablet and below (landscape tablets, phones) */
+@media (max-width: 992px) {
+  /* Reduce section spacing on smaller screens */
+  #summary_section,
+  #patient_section,
+  #instrument_section {
+    margin-bottom: 15px;
+  }
+
+  /* Make cards less elevated on mobile (touch interfaces) */
+  .card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Reduce table heights for mobile viewing */
+  .reactable {
+    height: 500px !important;
+  }
+}
+
+/* Mobile phones and small tablets */
+@media (max-width: 768px) {
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+  }
+
+  .sidebar h4 {
+    font-size: 1rem;
+  }
+
+  .shiny-notification {
+    width: calc(100% - 40px);
+    right: 20px;
+    left: 20px;
+  }
+
+  /* Stack legend items vertically on very small screens */
+  div[id$="legend_content"] > div {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* Reduce card header font size */
+  .card-header {
+    font-size: 1rem;
+    padding: 12px 15px;
+  }
+
+  /* Make Browse button even more prominent on mobile */
+  input[type="file"]::file-selector-button,
+  input[type="file"]::-webkit-file-upload-button {
+    padding: 14px 30px !important;
+    font-size: 1.2rem !important;
+  }
+}

@@ -1,46 +1,46 @@
 # ============================================================================
-# PATIENT SURVEILLANCE TAB - SIMPLIFIED SHINY MODULE
+# INSTRUMENT ANALYSIS TAB - SHINY MODULE
 # ============================================================================
 #
-# Shiny module for simplified patient surveillance
-# - Patient selector with Client Name + summary info
-# - Visit-level data table with color-coded missing data and outliers
-# - Visual legend for color coding
+# Shiny module for cross-patient instrument analysis
+# - Instrument selector (cognitive + physical assessments)
+# - Patient-level comparison table (rows = patients, columns = variables)
+# - First visit data only
 #
 # SAFE TO MODIFY - Module pattern keeps code organized
 # ============================================================================
 
-#' Analysis Module UI
+#' Instrument Analysis Module UI
 #'
-#' Creates the simplified UI for patient surveillance
+#' Creates the UI for cross-patient instrument comparison
 #'
 #' @param id Module namespace ID
 #' @return Shiny UI
 #' @export
-mod_analysis_ui <- function(id) {
+mod_instrument_analysis_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
     # ========================================================================
-    # PATIENT SELECTOR WITH LEGEND
+    # INSTRUMENT SELECTOR WITH LEGEND
     # ========================================================================
     card_body(
       p(class = "text-muted",
-        "Select a patient to view their visit-level data across all visits."
+        "Select a questionnaire or test to view first-visit data across all patients."
       ),
 
-      # Patient selector
+      # Instrument selector (grouped dropdown)
       tags$div(
-        title = "Select a patient to see all their visits in one table",
+        title = "Choose a cognitive or physical test to compare all patients at their first visit",
         selectInput(
-          ns("selected_patient"),
-          "Choose a patient to review their visit history:",
+          ns("selected_instrument"),
+          "Select a test or assessment:",
           choices = NULL,
           width = "100%"
         )
       ),
       helpText(class = "text-muted", style = "margin-top: -10px; margin-bottom: 15px; font-size: 0.85em;",
-              "Compare test scores across visits and identify missing or unusual values"),
+              "Compare patients on the same test at their baseline visit"),
 
       # COLLAPSIBLE COLOR LEGEND
       hr(),
@@ -106,96 +106,65 @@ mod_analysis_ui <- function(id) {
       # ========================================================================
       # DATA TABLE SECTION
       # ========================================================================
-      tags$h5(icon("table"), " Patient Data", style = "margin-top: 20px; margin-bottom: 10px;"),
+      tags$h5(icon("table"), " Patient Comparison", style = "margin-top: 20px; margin-bottom: 10px;"),
       p(class = "text-muted",
-        "Scroll horizontally to see all variables. Visit and date columns stay visible."
+        "Rows = patients, columns = variables. Scroll horizontally to see all variables."
       ),
 
-      fluidRow(
-        column(12,
-          downloadButton(ns("download_patient_data"),
-                        "Download Patient Data (CSV)",
-                        class = "btn-success",
-                        style = "margin-bottom: 15px;")
-        )
-      ),
-
-      reactable::reactableOutput(ns("patient_data_table"), height = "700px")
+      reactable::reactableOutput(ns("instrument_data_table"), height = "700px")
     )
   )
 }
 
 
-#' Analysis Module Server
+#' Instrument Analysis Module Server
 #'
-#' Server logic for simplified patient surveillance
+#' Server logic for cross-patient instrument comparison
 #'
 #' @param id Module namespace ID
 #' @param cleaned_data Reactive value containing cleaned data
 #' @param data_dict Data dictionary dataframe
 #' @export
-mod_analysis_server <- function(id, cleaned_data, data_dict = NULL) {
+mod_instrument_analysis_server <- function(id, cleaned_data, data_dict) {
   moduleServer(id, function(input, output, session) {
 
-    # Reactive value to store current patient data table
-    current_patient_data <- reactiveVal(NULL)
-
     # ======================================================================
-    # POPULATE PATIENT DROPDOWN
+    # POPULATE INSTRUMENT DROPDOWN
     # ======================================================================
     observe({
       if (is.null(cleaned_data())) {
         # Empty state - no data loaded
-        updateSelectInput(session, "selected_patient",
+        updateSelectInput(session, "selected_instrument",
                          choices = c("(Upload and process data first)" = ""))
         return()
       }
 
-      visits_data <- cleaned_data()$visits_data
+      req(data_dict)
 
-      # Get formatted patient labels (now uses Client Name if available)
-      labels <- get_patient_dropdown_labels(visits_data)
+      # Get instrument list (grouped by cognitive/physical)
+      # Pattern: Call pure function, update UI with result
+      instrument_list <- get_instrument_list(data_dict)
 
-      if (is.null(labels) || length(labels) == 0) {
-        updateSelectInput(session, "selected_patient",
-                         choices = c("(No patients found in data)" = ""))
+      if (length(instrument_list) == 0) {
+        updateSelectInput(session, "selected_instrument",
+                         choices = c("(No instruments found in data dictionary)" = ""))
         return()
       }
 
-      # Update dropdown (use labels as display, names as values)
-      updateSelectInput(session, "selected_patient",
-                       choices = setNames(names(labels), labels),
-                       selected = names(labels)[1])
+      # Update dropdown with grouped choices
+      updateSelectInput(session, "selected_instrument",
+                       choices = instrument_list)
     })
 
     # ======================================================================
-    # GENERATE PATIENT DATA TABLE
+    # RENDER INSTRUMENT DATA TABLE
     # ======================================================================
-    observe({
-      req(input$selected_patient)
-      req(cleaned_data())
-
-      visits_data <- cleaned_data()$visits_data
-
-      # Get patient data table
-      patient_table <- get_patient_data_table(
-        data = visits_data,
-        patient_id = input$selected_patient,
-        dict = data_dict
-      )
-
-      current_patient_data(patient_table)
-    })
-
-    # ======================================================================
-    # RENDER PATIENT DATA TABLE WITH FIXED COLOR CODING
-    # ======================================================================
-    output$patient_data_table <- reactable::renderReactable({
-      if (is.null(current_patient_data())) {
+    output$instrument_data_table <- reactable::renderReactable({
+      if (is.null(cleaned_data()) || is.null(input$selected_instrument) || input$selected_instrument == "") {
         # Empty state
         return(reactable::reactable(
           data.frame(
-            Message = "Select a patient from the dropdown above to view their visit data"
+            Message = "Select an instrument from the dropdown above to view patient comparison data"
           ),
           defaultColDef = reactable::colDef(
             style = list(textAlign = "center", color = "#6c757d", fontSize = "1.1em")
@@ -203,25 +172,52 @@ mod_analysis_server <- function(id, cleaned_data, data_dict = NULL) {
         ))
       }
 
-      data_table <- current_patient_data()
+      # Extract tibble from reactive list
+      # Pattern: Use [[]] to access list element
+      visits_data <- cleaned_data()[["visits_data"]]
+
+      # Get instrument data table
+      # Pattern: Pass tibble to pure function
+      instrument_table <- get_instrument_table(
+        data = visits_data,
+        instrument_name = input$selected_instrument,
+        dict = data_dict
+      )
+
+      if (is.null(instrument_table) || nrow(instrument_table) == 0) {
+        return(reactable::reactable(
+          data.frame(Message = "No data available for this instrument"),
+          defaultColDef = reactable::colDef(
+            style = list(textAlign = "center", color = "#6c757d", fontSize = "1.1em")
+          )
+        ))
+      }
 
       # Identify data columns (excluding metadata columns)
-      data_cols <- names(data_table)[!grepl("_is_missing$|_outlier_type$", names(data_table))]
+      data_cols <- names(instrument_table)[!grepl("_is_missing$|_outlier_type$", names(instrument_table))]
 
-      # Create column definitions with color coding
+      # Identify instrument-specific columns (exclude ID columns)
+      id_cols <- c("id_client_id", "id_client_name", "id_visit_date")
+      instrument_data_cols <- data_cols[!data_cols %in% id_cols]
+
+      # Create column definitions
       columns_list <- list(
-        visit_number = reactable::colDef(
-          name = "Visit",
-          minWidth = 80,
+        id_client_id = reactable::colDef(
+          name = "Patient ID",
+          minWidth = 120,
           sticky = "left",
           style = list(fontWeight = "bold", backgroundColor = "#f9f9f9")
         ),
-        visit_date = reactable::colDef(
+        id_client_name = reactable::colDef(
+          name = "Patient Name",
+          minWidth = 150,
+          sticky = "left",
+          style = list(backgroundColor = "#f9f9f9")
+        ),
+        id_visit_date = reactable::colDef(
           name = "Visit Date",
           minWidth = 120,
-          sticky = "left",
-          format = reactable::colFormat(date = TRUE, locales = "en-US"),
-          style = list(backgroundColor = "#f9f9f9")
+          format = reactable::colFormat(date = TRUE, locales = "en-US")
         )
       )
 
@@ -280,18 +276,18 @@ mod_analysis_server <- function(id, cleaned_data, data_dict = NULL) {
         )
       }
 
-      # Add color-coded columns for each variable using factory function
-      for (col in data_cols) {
-        if (col %in% c("visit_number", "visit_date")) next
-
+      # Add color-coded columns for each instrument variable using factory function
+      # Use actual column names from data (resolved with suffixes)
+      for (col in instrument_data_cols) {
         # Call factory function - creates fresh closure for THIS column
-        columns_list[[col]] <- create_styled_column(col, data_table)
+        columns_list[[col]] <- create_styled_column(col, instrument_table)
       }
 
       # Filter to only display data columns (hide metadata)
-      display_data <- data_table %>%
+      display_data <- instrument_table %>%
         dplyr::select(tidyselect::all_of(data_cols))
 
+      # Render table with color-coded columns
       reactable::reactable(
         display_data,
         columns = columns_list,
@@ -313,25 +309,6 @@ mod_analysis_server <- function(id, cleaned_data, data_dict = NULL) {
         )
       )
     })
-
-    # ======================================================================
-    # DOWNLOAD HANDLER
-    # ======================================================================
-    output$download_patient_data <- downloadHandler(
-      filename = function() {
-        patient_id <- input$selected_patient
-        paste0("patient_", patient_id, "_data_", format(Sys.Date(), "%Y%m%d"), ".csv")
-      },
-      content = function(file) {
-        req(current_patient_data())
-
-        # Export data without metadata columns
-        data_table <- current_patient_data() %>%
-          dplyr::select(-dplyr::ends_with("_is_missing"), -dplyr::ends_with("_outlier_type"))
-
-        readr::write_csv(data_table, file)
-      }
-    )
 
   })
 }
