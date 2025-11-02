@@ -1,29 +1,50 @@
 # .rscignore - Control what rsconnect deploys to shinyapps.io
-# Only deploy: app.R and data_dictionary_enhanced.csv
+# Deploy: app.R, R/ modules, data files, www/ assets
 
-# Exclude test files
-test_new_functions.R
-test_output.csv
+# ============================================================================
+# EXCLUDE TEST FILES (contain absolute paths that break deployment)
+# ============================================================================
+test_*.R
+tests/
 
-# Exclude documentation
+# ============================================================================
+# EXCLUDE DOCUMENTATION
+# ============================================================================
 docs/
+*.md
+!README.md
 DEPLOYMENT_SUMMARY.md
+UX_IMPROVEMENTS_SUMMARY.md
+UX_SESSION*.md
+DIAGNOSTIC_INSTRUCTIONS.md
+CORE_PROTECTION.md
 
-# Exclude data dictionary development files
+# ============================================================================
+# EXCLUDE DATA DICTIONARY DEVELOPMENT FILES
+# ============================================================================
 enhance_data_dictionary.R
+fix_data_dictionary.R
+diagnostic_column_comparison.R
 data_dictionary_cleaned.csv
+data_dictionary_enhanced_BACKUP.csv
 
-# Exclude deployment config (rsconnect manages this)
+# ============================================================================
+# EXCLUDE DEPLOYMENT ARTIFACTS
+# ============================================================================
 rsconnect/
+manifest.json
 
-# Exclude version control
+# ============================================================================
+# EXCLUDE VERSION CONTROL
+# ============================================================================
 .git/
 .gitignore
 
-# Exclude any R package development files (if they exist)
-R/
+# ============================================================================
+# EXCLUDE R PACKAGE DEVELOPMENT FILES
+# ============================================================================
+# NOTE: We do NOT exclude R/ directory - it contains our modules!
 man/
-tests/
 dev/
 DESCRIPTION
 NAMESPACE
@@ -33,7 +54,18 @@ renv.lock
 .Rbuildignore
 .here
 
-# Exclude hidden files
+# ============================================================================
+# EXCLUDE HIDDEN FILES
+# ============================================================================
 .DS_Store
 .Rhistory
 .RData
+
+# ============================================================================
+# FILES THAT SHOULD BE DEPLOYED:
+# - app.R (main app)
+# - R/*.R (all function and module files)
+# - data_dictionary_enhanced.csv (required data)
+# - inst/extdata/*.csv (instrument ranges)
+# - www/custom.css (styling)
+# ============================================================================
