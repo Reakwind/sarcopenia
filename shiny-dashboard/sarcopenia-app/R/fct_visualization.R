@@ -87,7 +87,9 @@ analyze_missingness <- function(data, dict) {
 #' @return plotly heatmap object
 #' @export
 create_missingness_heatmap <- function(data, variables, patient_ids = NULL) {
-  require(plotly)
+  if (!requireNamespace("plotly", quietly = TRUE)) {
+    stop("Package 'plotly' is required for this function. Please install it with: install.packages('plotly')")
+  }
 
   message("[HEATMAP] Creating missingness heatmap...")
 
@@ -306,7 +308,9 @@ get_patient_missingness_profile <- function(data, patient_id, dict) {
 #' @return plotly line plot
 #' @export
 create_visit_completion_timeline <- function(data, dict, instrument_filter = NULL) {
-  require(plotly)
+  if (!requireNamespace("plotly", quietly = TRUE)) {
+    stop("Package 'plotly' is required for this function. Please install it with: install.packages('plotly')")
+  }
 
   message("[TIMELINE] Creating completion timeline...")
 

@@ -282,33 +282,49 @@ mod_visualization_server("viz", cleaned_data)
 
 ```r
 #' Generate Analysis Report
-generate_analysis_report <- function(data, output_file) {
-  require(rmarkdown)
+generate_analysis_report <- function(data, output_format = "pdf", include_sections = c("descriptive", "comparative")) {
+  # Check if rmarkdown package is available
+  if (!requireNamespace("rmarkdown", quietly = TRUE)) {
+    warning("Package 'rmarkdown' is required for report generation. Please install it with: install.packages('rmarkdown')")
+    return(NULL)
+  }
 
-  # Create temp Rmd
-  rmd_content <- '
----
-title: "Sarcopenia Data Analysis"
-output: pdf_document
----
+  message("Generating ", output_format, " report...")
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-data <- params$data
-```
+  tryCatch({
+    # Create temporary R Markdown file
+    temp_rmd <- tempfile(fileext = ".Rmd")
 
-## Summary Statistics
-```{r}
-summary(data)
-```
-'
+    # Generate R Markdown content
+    rmd_content <- paste0(
+      "---\n",
+      "title: 'Sarcopenia Data Analysis Report'\n",
+      "date: '", format(Sys.Date(), "%B %d, %Y"), "'\n",
+      "output: ", output_format, "_document\n",
+      "---\n\n",
+      "```{r setup, include=FALSE}\n",
+      "knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)\n",
+      "library(dplyr)\n",
+      "library(knitr)\n",
+      "```\n\n"
+    )
 
-  temp_rmd <- tempfile(fileext = ".Rmd")
-  writeLines(rmd_content, temp_rmd)
+    # Write and render document
+    writeLines(rmd_content, temp_rmd)
+    output_file <- tempfile(fileext = paste0(".", output_format))
+    rmarkdown::render(temp_rmd, output_file = output_file, quiet = TRUE)
 
-  render(temp_rmd, output_file = output_file, params = list(data = data))
+    message("Report generated successfully: ", output_file)
+    return(output_file)
+
+  }, error = function(e) {
+    warning("Failed to generate report: ", e$message)
+    return(NULL)
+  })
 }
 ```
+
+**Note:** This function uses `requireNamespace()` for optional dependencies (rmarkdown, knitr) with graceful degradation if not installed.
 
 **Step 2:** Add download handler in app.R
 

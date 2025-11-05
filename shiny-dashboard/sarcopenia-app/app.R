@@ -12,11 +12,17 @@
 # ============================================================================
 # LOAD REQUIRED LIBRARIES
 # ============================================================================
+#
+# Note: Core packages are loaded here with library() (fails if missing).
+# Optional feature packages (writexl, rmarkdown, knitr) are checked with
+# requireNamespace() in their respective functions (fct_reports.R) with
+# graceful degradation if not installed.
+# ============================================================================
 
 library(shiny)
 library(bslib)
 library(reactable)
-library(plotly)
+library(plotly)      # Required for visualization functions in fct_visualization.R
 library(dplyr)
 library(tidyr)
 library(readr)
